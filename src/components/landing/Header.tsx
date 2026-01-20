@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import logo from "@/assets/studyflow-logo.png";
 
 const Header = () => {
@@ -25,7 +26,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
           <a href="/" className="flex items-center gap-2">
-            <img src={logo} alt="Studio Flow" className="h-10 lg:h-12 w-auto" />
+            <img src={logo} alt="Studio Flow" className="h-10 lg:h-12 w-auto rounded-lg" />
           </a>
 
           {/* Desktop Navigation */}
@@ -34,7 +35,11 @@ const Header = () => {
               <a
                 key={item.label}
                 href={item.href}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.querySelector(item.href)?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
               >
                 {item.label}
               </a>
@@ -43,10 +48,10 @@ const Header = () => {
 
           {/* Desktop CTA */}
           <div className="hidden lg:flex items-center gap-3">
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" onClick={() => toast.info("Página de login em breve!")}>
               Entrar
             </Button>
-            <Button variant="hero" size="sm">
+            <Button variant="hero" size="sm" onClick={() => toast.success("Cadastro em breve! Fique ligado.")}>
               Começar Grátis
             </Button>
           </div>
@@ -73,17 +78,21 @@ const Header = () => {
                 <a
                   key={item.label}
                   href={item.href}
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
-                  onClick={() => setIsMenuOpen(false)}
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2 cursor-pointer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setIsMenuOpen(false);
+                    document.querySelector(item.href)?.scrollIntoView({ behavior: "smooth" });
+                  }}
                 >
                   {item.label}
                 </a>
               ))}
               <div className="flex flex-col gap-2 pt-4">
-                <Button variant="ghost" size="sm" className="justify-start">
+                <Button variant="ghost" size="sm" className="justify-start" onClick={() => toast.info("Página de login em breve!")}>
                   Entrar
                 </Button>
-                <Button variant="hero" size="sm">
+                <Button variant="hero" size="sm" onClick={() => toast.success("Cadastro em breve! Fique ligado.")}>
                   Começar Grátis
                 </Button>
               </div>
