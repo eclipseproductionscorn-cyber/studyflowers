@@ -48,12 +48,16 @@ const Header = () => {
 
           {/* Desktop CTA */}
           <div className="hidden lg:flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => toast.info("Página de login em breve!")}>
-              Entrar
-            </Button>
-            <Button variant="hero" size="sm" onClick={() => toast.success("Cadastro em breve! Fique ligado.")}>
-              Começar Grátis
-            </Button>
+            <a href="/auth">
+              <Button variant="ghost" size="sm">
+                Entrar
+              </Button>
+            </a>
+            <a href="/auth">
+              <Button variant="hero" size="sm">
+                Começar Grátis
+              </Button>
+            </a>
           </div>
 
           {/* Mobile Menu Button */}
@@ -89,12 +93,16 @@ const Header = () => {
                 </a>
               ))}
               <div className="flex flex-col gap-2 pt-4">
-                <Button variant="ghost" size="sm" className="justify-start" onClick={() => toast.info("Página de login em breve!")}>
-                  Entrar
-                </Button>
-                <Button variant="hero" size="sm" onClick={() => toast.success("Cadastro em breve! Fique ligado.")}>
-                  Começar Grátis
-                </Button>
+                <a href="/auth">
+                  <Button variant="ghost" size="sm" className="justify-start w-full">
+                    Entrar
+                  </Button>
+                </a>
+                <a href="/auth">
+                  <Button variant="hero" size="sm" className="w-full">
+                    Começar Grátis
+                  </Button>
+                </a>
               </div>
             </nav>
           </motion.div>
