@@ -6,6 +6,14 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import Activities from "./pages/Activities";
+import Streak from "./pages/Streak";
+import Tools from "./pages/Tools";
+import Pomodoro from "./pages/Pomodoro";
+import Tutor from "./pages/Tutor";
+import RewardsPage from "./pages/RewardsPage";
+import RankingsPage from "./pages/RankingsPage";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,7 +28,14 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/activities" element={<Activities />} />
+          <Route path="/streak" element={<Streak />} />
+          <Route path="/tools" element={<Tools />} />
+          <Route path="/pomodoro" element={<Pomodoro />} />
+          <Route path="/tutor" element={<Tutor />} />
+          <Route path="/rewards" element={<RewardsPage />} />
+          <Route path="/rankings" element={<RankingsPage />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
