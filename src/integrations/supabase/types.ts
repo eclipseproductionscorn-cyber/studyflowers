@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      daily_activities: {
+        Row: {
+          activity_type: string
+          coin_reward: number
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          expires_at: string
+          id: string
+          is_completed: boolean
+          title: string
+          user_id: string
+          xp_reward: number
+        }
+        Insert: {
+          activity_type?: string
+          coin_reward?: number
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          expires_at?: string
+          id?: string
+          is_completed?: boolean
+          title: string
+          user_id: string
+          xp_reward?: number
+        }
+        Update: {
+          activity_type?: string
+          coin_reward?: number
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          expires_at?: string
+          id?: string
+          is_completed?: boolean
+          title?: string
+          user_id?: string
+          xp_reward?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -56,6 +98,78 @@ export type Database = {
           updated_at?: string
           user_id?: string
           xp?: number
+        }
+        Relationships: []
+      }
+      study_sessions: {
+        Row: {
+          coins_earned: number
+          created_at: string
+          duration_minutes: number
+          ended_at: string | null
+          id: string
+          notes: string | null
+          started_at: string
+          subject: string | null
+          user_id: string
+          xp_earned: number
+        }
+        Insert: {
+          coins_earned?: number
+          created_at?: string
+          duration_minutes?: number
+          ended_at?: string | null
+          id?: string
+          notes?: string | null
+          started_at?: string
+          subject?: string | null
+          user_id: string
+          xp_earned?: number
+        }
+        Update: {
+          coins_earned?: number
+          created_at?: string
+          duration_minutes?: number
+          ended_at?: string | null
+          id?: string
+          notes?: string | null
+          started_at?: string
+          subject?: string | null
+          user_id?: string
+          xp_earned?: number
+        }
+        Relationships: []
+      }
+      user_streaks: {
+        Row: {
+          created_at: string
+          current_streak: number
+          id: string
+          last_activity_date: string | null
+          longest_streak: number
+          streak_protected_until: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_activity_date?: string | null
+          longest_streak?: number
+          streak_protected_until?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_activity_date?: string | null
+          longest_streak?: number
+          streak_protected_until?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
