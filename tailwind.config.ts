@@ -71,6 +71,9 @@ export default {
           platinum: "hsl(var(--rank-platinum))",
           diamond: "hsl(var(--rank-diamond))",
           onyx: "hsl(var(--rank-onyx))",
+          ruby: "hsl(var(--rank-ruby))",
+          master: "hsl(var(--rank-master))",
+          mythic: "hsl(var(--rank-mythic))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",

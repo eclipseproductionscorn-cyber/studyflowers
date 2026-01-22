@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
+import { getRankFromXP, getRankString } from "@/lib/ranks";
 
 interface Profile {
   id: string;
@@ -60,6 +61,18 @@ export const useAuth = () => {
     if (error) {
       console.error("Error fetching profile:", error);
     } else if (data) {
+      // Auto-update rank based on XP
+      const { rankId, level } = getRankFromXP(data.xp);
+      const newRank = getRankString(rankId, level);
+      
+      if (newRank !== data.current_rank) {
+        await supabase
+          .from("profiles")
+          .update({ current_rank: newRank })
+          .eq("user_id", userId);
+        data.current_rank = newRank;
+      }
+      
       setProfile(data);
     }
     setLoading(false);
@@ -81,6 +94,16 @@ export const useAuth = () => {
 
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!user) return;
+
+    // If XP is being updated, also update the rank
+    if (updates.xp !== undefined) {
+      const { rankId, level } = getRankFromXP(updates.xp);
+      updates.current_rank = getRankString(rankId, level);
+      
+      // Calculate level from XP
+      const xpPerLevel = 100;
+      updates.level = Math.floor(updates.xp / xpPerLevel) + 1;
+    }
 
     const { error } = await supabase
       .from("profiles")
@@ -104,9 +127,24 @@ export const useAuth = () => {
   const addXP = async (amount: number) => {
     if (!profile) return false;
     const newXP = profile.xp + amount;
-    const xpPerLevel = 100;
-    const newLevel = Math.floor(newXP / xpPerLevel) + 1;
-    return updateProfile({ xp: newXP, level: newLevel });
+    return updateProfile({ xp: newXP });
+  };
+
+  const updateStreak = async (updates: Partial<UserStreak>) => {
+    if (!user) return false;
+
+    const { error } = await supabase
+      .from("user_streaks")
+      .update(updates)
+      .eq("user_id", user.id);
+
+    if (error) {
+      console.error("Error updating streak:", error);
+      return false;
+    }
+
+    setStreak((prev) => (prev ? { ...prev, ...updates } : null));
+    return true;
   };
 
   return {
@@ -117,6 +155,7 @@ export const useAuth = () => {
     updateProfile,
     addCoins,
     addXP,
+    updateStreak,
     refetchProfile: () => user && fetchProfile(user.id),
     refetchStreak: () => user && fetchStreak(user.id),
   };
