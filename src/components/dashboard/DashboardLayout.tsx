@@ -5,7 +5,7 @@ import {
   Home,
   BookOpen,
   Flame,
-  Gift,
+  ShoppingBag,
   Trophy,
   Bot,
   Settings,
@@ -13,11 +13,14 @@ import {
   Coins,
   Menu,
   X,
+  Target,
+  Wrench,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import logo from "@/assets/studyflow-logo.png";
+import { getRankData } from "@/lib/ranks";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -25,15 +28,19 @@ interface DashboardLayoutProps {
     public_name: string;
     coins: number;
     current_rank: string;
+    xp?: number;
+    level?: number;
   } | null;
 }
 
 const menuItems = [
   { icon: Home, label: "Início", path: "/dashboard" },
   { icon: BookOpen, label: "Atividades", path: "/activities" },
+  { icon: Target, label: "Metas Semanais", path: "/weekly-goals" },
   { icon: Flame, label: "Ofensiva", path: "/streak" },
-  { icon: Gift, label: "Recompensas", path: "/rewards" },
-  { icon: Trophy, label: "Rankings", path: "/rankings" },
+  { icon: Trophy, label: "Patentes", path: "/rankings" },
+  { icon: ShoppingBag, label: "Loja", path: "/shop" },
+  { icon: Wrench, label: "Ferramentas", path: "/tools" },
   { icon: Bot, label: "IA Tutora", path: "/tutor" },
   { icon: Settings, label: "Configurações", path: "/settings" },
 ];
@@ -53,6 +60,8 @@ const DashboardLayout = ({ children, profile }: DashboardLayoutProps) => {
     }
   };
 
+  const rankData = getRankData(profile?.current_rank || "bronze_1");
+
   return (
     <div className="min-h-screen bg-background flex">
       {/* Mobile Overlay */}
@@ -68,103 +77,41 @@ const DashboardLayout = ({ children, profile }: DashboardLayoutProps) => {
         )}
       </AnimatePresence>
 
-      {/* Sidebar */}
-      <motion.aside
-        initial={false}
-        animate={{
-          x: sidebarOpen ? 0 : "-100%",
-        }}
-        className="fixed left-0 top-0 bottom-0 w-64 bg-sidebar-background border-r border-sidebar-border z-50 lg:relative lg:translate-x-0 lg:z-auto"
-        style={{ transform: "none" }}
-      >
-        <div className="h-full flex flex-col">
-          {/* Logo */}
-          <div className="p-4 border-b border-sidebar-border">
-            <Link to="/" className="flex items-center gap-2">
-              <img src={logo} alt="Studio Flow" className="h-10 w-auto rounded-lg" />
-            </Link>
-          </div>
-
-          {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-            {menuItems.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
-                    isActive
-                      ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                      : "text-sidebar-foreground hover:bg-sidebar-accent"
-                  }`}
-                >
-                  <item.icon size={20} />
-                  <span className="font-medium">{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* Logout */}
-          <div className="p-4 border-t border-sidebar-border">
-            <Button
-              variant="ghost"
-              className="w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent"
-              onClick={handleLogout}
-            >
-              <LogOut size={20} />
-              <span>Sair</span>
-            </Button>
-          </div>
-        </div>
-      </motion.aside>
+      {/* Mobile Sidebar */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.aside
+            initial={{ x: "-100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="fixed left-0 top-0 bottom-0 w-72 bg-sidebar-background border-r border-sidebar-border z-50 lg:hidden"
+          >
+            <SidebarContent
+              menuItems={menuItems}
+              location={location}
+              onItemClick={() => setSidebarOpen(false)}
+              onLogout={handleLogout}
+              profile={profile}
+              rankData={rankData}
+            />
+          </motion.aside>
+        )}
+      </AnimatePresence>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-64 bg-sidebar-background border-r border-sidebar-border z-30 flex-col">
-        <div className="h-full flex flex-col">
-          <div className="p-4 border-b border-sidebar-border">
-            <Link to="/" className="flex items-center gap-2">
-              <img src={logo} alt="Studio Flow" className="h-10 w-auto rounded-lg" />
-            </Link>
-          </div>
-
-          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-            {menuItems.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
-                    isActive
-                      ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                      : "text-sidebar-foreground hover:bg-sidebar-accent"
-                  }`}
-                >
-                  <item.icon size={20} />
-                  <span className="font-medium">{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-
-          <div className="p-4 border-t border-sidebar-border">
-            <Button
-              variant="ghost"
-              className="w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent"
-              onClick={handleLogout}
-            >
-              <LogOut size={20} />
-              <span>Sair</span>
-            </Button>
-          </div>
-        </div>
+      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-72 bg-sidebar-background border-r border-sidebar-border z-30 flex-col">
+        <SidebarContent
+          menuItems={menuItems}
+          location={location}
+          onLogout={handleLogout}
+          profile={profile}
+          rankData={rankData}
+        />
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 lg:ml-64">
+      <div className="flex-1 lg:ml-72">
         {/* Header */}
         <header className="sticky top-0 z-20 bg-background/80 backdrop-blur-lg border-b border-border/50">
           <div className="flex items-center justify-between px-4 h-16">
@@ -178,16 +125,34 @@ const DashboardLayout = ({ children, profile }: DashboardLayoutProps) => {
             </Button>
 
             <div className="flex items-center gap-4 ml-auto">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-rank-gold/10 rounded-full">
+              {/* Coins */}
+              <Link 
+                to="/shop"
+                className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-rank-gold/20 to-amber-500/20 border border-rank-gold/30 rounded-full hover:scale-105 transition-transform"
+              >
                 <Coins size={18} className="text-rank-gold" />
-                <span className="font-semibold text-sm">
+                <span className="font-bold text-sm">
                   {profile?.coins?.toLocaleString() || 0}
                 </span>
-              </div>
+              </Link>
 
+              {/* Rank Badge */}
+              {rankData && (
+                <Link 
+                  to="/rankings"
+                  className={`hidden md:flex items-center gap-2 px-3 py-1.5 ${rankData.rank.bgColor}/20 border ${rankData.rank.borderColor}/30 rounded-full hover:scale-105 transition-transform`}
+                >
+                  <Trophy size={16} className={rankData.rank.color} />
+                  <span className={`font-medium text-sm ${rankData.rank.color}`}>
+                    {rankData.rank.name} {["I", "II", "III"][rankData.level - 1]}
+                  </span>
+                </Link>
+              )}
+
+              {/* User Avatar */}
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-sm font-medium text-primary">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                  <span className="text-sm font-bold text-white">
                     {profile?.public_name?.charAt(0).toUpperCase() || "U"}
                   </span>
                 </div>
@@ -198,6 +163,106 @@ const DashboardLayout = ({ children, profile }: DashboardLayoutProps) => {
 
         {/* Page Content */}
         <main className="p-4 md:p-6 lg:p-8">{children}</main>
+      </div>
+    </div>
+  );
+};
+
+interface SidebarContentProps {
+  menuItems: typeof menuItems;
+  location: ReturnType<typeof useLocation>;
+  onItemClick?: () => void;
+  onLogout: () => void;
+  profile: DashboardLayoutProps["profile"];
+  rankData: ReturnType<typeof getRankData>;
+}
+
+const SidebarContent = ({
+  menuItems,
+  location,
+  onItemClick,
+  onLogout,
+  profile,
+  rankData,
+}: SidebarContentProps) => {
+  return (
+    <div className="h-full flex flex-col">
+      {/* Logo */}
+      <div className="p-4 border-b border-sidebar-border">
+        <Link to="/" className="flex items-center gap-2">
+          <img src={logo} alt="Studio Flow" className="h-10 w-auto rounded-lg" />
+        </Link>
+      </div>
+
+      {/* User Info */}
+      <div className="p-4 border-b border-sidebar-border">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+            <span className="text-lg font-bold text-white">
+              {profile?.public_name?.charAt(0).toUpperCase() || "U"}
+            </span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-sidebar-foreground truncate">
+              {profile?.public_name || "Estudante"}
+            </p>
+            {rankData && (
+              <p className={`text-sm ${rankData.rank.color} font-medium`}>
+                {rankData.rank.name} {["I", "II", "III"][rankData.level - 1]}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 gap-2 mt-3">
+          <div className="flex items-center gap-2 p-2 bg-sidebar-accent rounded-lg">
+            <Coins size={14} className="text-rank-gold" />
+            <span className="text-xs font-medium text-sidebar-foreground">
+              {profile?.coins?.toLocaleString() || 0}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 p-2 bg-sidebar-accent rounded-lg">
+            <Target size={14} className="text-primary" />
+            <span className="text-xs font-medium text-sidebar-foreground">
+              Nv. {profile?.level || 1}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+        {menuItems.map((item) => {
+          const isActive = location.pathname === item.path;
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              onClick={onItemClick}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
+                isActive
+                  ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-md"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent"
+              }`}
+            >
+              <item.icon size={20} />
+              <span className="font-medium">{item.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Logout */}
+      <div className="p-3 border-t border-sidebar-border">
+        <Button
+          variant="ghost"
+          className="w-full justify-start gap-3 text-sidebar-foreground hover:bg-destructive/10 hover:text-destructive"
+          onClick={onLogout}
+        >
+          <LogOut size={20} />
+          <span>Sair</span>
+        </Button>
       </div>
     </div>
   );

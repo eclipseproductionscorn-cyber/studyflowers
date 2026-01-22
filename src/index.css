@@ -56,6 +56,9 @@
     --rank-platinum: 195 40% 60%;
     --rank-diamond: 200 80% 65%;
     --rank-onyx: 260 30% 25%;
+    --rank-ruby: 350 75% 55%;
+    --rank-master: 280 70% 50%;
+    --rank-mythic: 45 100% 50%;
 
     /* Borders & Inputs */
     --border: 220 15% 90%;

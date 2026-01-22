@@ -5,111 +5,32 @@ import {
   Crown,
   Flame,
   Star,
-  ChevronRight,
-  User,
+  Gem,
+  Sparkles,
+  TrendingUp,
+  Gift,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { useAuth } from "@/hooks/useAuth";
+import { ranks, getRankData, getRankProgress, parseRankString } from "@/lib/ranks";
 
-const ranks = [
-  {
-    name: "Bronze",
-    levels: ["I", "II", "III"],
-    color: "text-rank-bronze",
-    bgColor: "bg-rank-bronze",
-    borderColor: "border-rank-bronze",
-    xpRequired: [0, 100, 250],
-  },
-  {
-    name: "Prata",
-    levels: ["I", "II", "III"],
-    color: "text-rank-silver",
-    bgColor: "bg-rank-silver",
-    borderColor: "border-rank-silver",
-    xpRequired: [500, 800, 1200],
-  },
-  {
-    name: "Ouro",
-    levels: ["I", "II", "III"],
-    color: "text-rank-gold",
-    bgColor: "bg-rank-gold",
-    borderColor: "border-rank-gold",
-    xpRequired: [1800, 2500, 3500],
-  },
-  {
-    name: "Platina",
-    levels: ["I", "II", "III"],
-    color: "text-rank-platinum",
-    bgColor: "bg-rank-platinum",
-    borderColor: "border-rank-platinum",
-    xpRequired: [5000, 7000, 10000],
-  },
-  {
-    name: "Diamante",
-    levels: ["I", "II", "III"],
-    color: "text-rank-diamond",
-    bgColor: "bg-rank-diamond",
-    borderColor: "border-rank-diamond",
-    xpRequired: [15000, 22000, 30000],
-  },
-  {
-    name: "Ônix",
-    levels: ["I", "II", "III"],
-    color: "text-rank-onyx",
-    bgColor: "bg-rank-onyx",
-    borderColor: "border-rank-onyx",
-    xpRequired: [40000, 55000, 75000],
-  },
-];
-
-const getRankFromString = (rankStr: string) => {
-  const [name, level] = rankStr.split("_");
-  const rankName = name.charAt(0).toUpperCase() + name.slice(1);
-  const levelNum = parseInt(level) || 1;
-  return { name: rankName, level: levelNum };
+const iconMap = {
+  medal: Medal,
+  star: Star,
+  crown: Crown,
+  gem: Gem,
+  flame: Flame,
 };
 
 const RankingsPage = () => {
   const { profile } = useAuth();
 
-  const currentRank = getRankFromString(profile?.current_rank || "bronze_1");
-  const currentRankData = ranks.find(
-    (r) => r.name.toLowerCase() === currentRank.name.toLowerCase()
-  );
-
+  const currentRankData = getRankData(profile?.current_rank || "bronze_1");
   const totalXP = profile?.xp || 0;
+  const { current: currentXPRequired, next: nextXPRequired, progress: xpProgress } = getRankProgress(totalXP);
 
-  // Calculate progress to next rank
-  const getCurrentRankIndex = () => {
-    let flatIndex = 0;
-    for (const rank of ranks) {
-      for (let i = 0; i < rank.levels.length; i++) {
-        if (
-          rank.name.toLowerCase() === currentRank.name.toLowerCase() &&
-          i + 1 === currentRank.level
-        ) {
-          return { rank, levelIndex: i, flatIndex };
-        }
-        flatIndex++;
-      }
-    }
-    return { rank: ranks[0], levelIndex: 0, flatIndex: 0 };
-  };
-
-  const { rank: currentRankInfo, levelIndex, flatIndex } = getCurrentRankIndex();
-  const currentXPRequired = currentRankInfo.xpRequired[levelIndex];
-  
-  // Find next rank
-  let nextXPRequired = currentRankInfo.xpRequired[levelIndex + 1];
-  if (!nextXPRequired && ranks.indexOf(currentRankInfo) < ranks.length - 1) {
-    const nextRank = ranks[ranks.indexOf(currentRankInfo) + 1];
-    nextXPRequired = nextRank.xpRequired[0];
-  }
-
-  const xpProgress = nextXPRequired
-    ? Math.min(((totalXP - currentXPRequired) / (nextXPRequired - currentXPRequired)) * 100, 100)
-    : 100;
+  const { rankId: currentRankId, level: currentLevel } = parseRankString(profile?.current_rank || "bronze_1");
 
   return (
     <DashboardLayout profile={profile}>
@@ -121,114 +42,161 @@ const RankingsPage = () => {
       >
         {/* Header */}
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-            Sistema de Rankings
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
+            <Trophy className="text-rank-gold" />
+            Sistema de Patentes
           </h1>
           <p className="text-muted-foreground mt-1">
-            Suba de patente completando atividades
+            Suba de patente ganhando XP em suas atividades
           </p>
         </div>
 
         {/* Current Rank Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className={`bg-gradient-to-br ${currentRankData?.bgColor}/10 to-transparent border ${currentRankData?.borderColor}/30 rounded-2xl p-6`}
-        >
-          <div className="flex items-center gap-4 mb-4">
-            <div
-              className={`w-16 h-16 rounded-2xl ${currentRankData?.bgColor}/20 flex items-center justify-center`}
-            >
-              <Trophy className={currentRankData?.color} size={32} />
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Sua Patente Atual</p>
-              <h2 className={`text-3xl font-bold ${currentRankData?.color}`}>
-                {currentRank.name} {["I", "II", "III"][currentRank.level - 1]}
-              </h2>
-            </div>
-          </div>
+        {currentRankData && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className={`relative overflow-hidden bg-gradient-to-br ${currentRankData.rank.bgColor}/20 to-transparent border-2 ${currentRankData.rank.borderColor}/50 rounded-2xl p-6`}
+          >
+            {/* Decorative Elements */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/5 to-transparent rounded-bl-full" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-white/5 to-transparent rounded-tr-full" />
 
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">
-                {totalXP.toLocaleString()} XP
-              </span>
-              <span className="text-muted-foreground">
-                {nextXPRequired ? `${nextXPRequired.toLocaleString()} XP` : "Máximo!"}
-              </span>
+            <div className="relative flex flex-col md:flex-row md:items-center gap-6">
+              <motion.div
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className={`w-24 h-24 rounded-2xl ${currentRankData.rank.bgColor}/30 flex items-center justify-center border-2 ${currentRankData.rank.borderColor}/50`}
+              >
+                {(() => {
+                  const Icon = iconMap[currentRankData.rank.icon];
+                  return <Icon className={currentRankData.rank.color} size={48} />;
+                })()}
+              </motion.div>
+
+              <div className="flex-1">
+                <p className="text-sm text-muted-foreground mb-1">Sua Patente Atual</p>
+                <h2 className={`text-4xl font-bold ${currentRankData.rank.color}`}>
+                  {currentRankData.rank.name} {["I", "II", "III"][currentRankData.level - 1]}
+                </h2>
+                <p className="text-lg text-muted-foreground mt-1">
+                  {totalXP.toLocaleString()} XP total
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 px-4 py-2 bg-card/50 rounded-xl border border-border/50">
+                <TrendingUp className="text-success" size={20} />
+                <div>
+                  <p className="text-xs text-muted-foreground">Nível</p>
+                  <p className="text-xl font-bold text-foreground">{profile?.level || 1}</p>
+                </div>
+              </div>
             </div>
-            <Progress value={xpProgress} className="h-3" />
-            {nextXPRequired && (
-              <p className="text-xs text-muted-foreground text-center">
-                Faltam {(nextXPRequired - totalXP).toLocaleString()} XP para a próxima patente
-              </p>
-            )}
-          </div>
-        </motion.div>
+
+            {/* Progress to Next Rank */}
+            <div className="relative mt-6 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Progresso para próxima patente</span>
+                <span className={currentRankData.rank.color}>
+                  {nextXPRequired ? `${(nextXPRequired - totalXP).toLocaleString()} XP restantes` : "Máximo atingido!"}
+                </span>
+              </div>
+              <div className="relative">
+                <Progress value={xpProgress} className="h-4" />
+                <div 
+                  className="absolute top-0 left-0 h-4 rounded-full bg-gradient-to-r from-white/20 to-transparent"
+                  style={{ width: `${xpProgress}%` }}
+                />
+              </div>
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>{currentXPRequired.toLocaleString()} XP</span>
+                <span>{nextXPRequired ? `${nextXPRequired.toLocaleString()} XP` : "∞"}</span>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Mythic Rewards Banner */}
+        {currentRankId === "mythic" && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-gradient-to-r from-yellow-500/20 via-amber-500/20 to-orange-500/20 border border-amber-500/30 rounded-xl p-5"
+          >
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500">
+                <Gift className="text-white" size={28} />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-lg text-foreground">Recompensas Míticas</h3>
+                <p className="text-sm text-muted-foreground">
+                  Como jogador Mítico, você ganha <span className="text-amber-500 font-medium">50 moedas diárias</span> e acesso a itens exclusivos na loja!
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* All Ranks */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-foreground">Todas as Patentes</h3>
-          
+          <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+            <Sparkles className="text-primary" size={18} />
+            Todas as Patentes
+          </h3>
+
           <div className="grid gap-3">
             {ranks.map((rank, rankIndex) => {
-              const isCurrentRank =
-                rank.name.toLowerCase() === currentRank.name.toLowerCase();
+              const isCurrentRank = rank.id === currentRankId;
+              const isPassed = ranks.findIndex((r) => r.id === currentRankId) > rankIndex;
+              const Icon = iconMap[rank.icon];
 
               return (
                 <motion.div
-                  key={rank.name}
+                  key={rank.id}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 + rankIndex * 0.1 }}
-                  className={`bg-card/50 backdrop-blur-sm border rounded-xl p-4 ${
+                  transition={{ delay: 0.15 + rankIndex * 0.05 }}
+                  className={`bg-card/50 backdrop-blur-sm border rounded-xl p-4 transition-all ${
                     isCurrentRank
-                      ? `${rank.borderColor}/50 bg-gradient-to-r ${rank.bgColor}/5 to-transparent`
-                      : "border-border/50"
+                      ? `${rank.borderColor}/50 bg-gradient-to-r ${rank.bgColor}/10 to-transparent border-2`
+                      : isPassed
+                      ? "border-success/30 bg-success/5"
+                      : "border-border/50 opacity-70"
                   }`}
                 >
                   <div className="flex items-center gap-4">
                     <div
-                      className={`w-12 h-12 rounded-xl ${rank.bgColor}/20 flex items-center justify-center`}
+                      className={`w-14 h-14 rounded-xl ${rank.bgColor}/20 flex items-center justify-center border ${rank.borderColor}/30`}
                     >
-                      {rankIndex === ranks.length - 1 ? (
-                        <Crown className={rank.color} size={24} />
-                      ) : rankIndex >= 4 ? (
-                        <Star className={rank.color} size={24} />
-                      ) : (
-                        <Medal className={rank.color} size={24} />
-                      )}
+                      <Icon className={rank.color} size={28} />
                     </div>
 
                     <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className={`font-semibold ${rank.color}`}>
-                          {rank.name}
-                        </h4>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className={`font-bold text-lg ${rank.color}`}>{rank.name}</h4>
                         {isCurrentRank && (
-                          <span className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded-full">
+                          <span className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded-full font-medium">
                             Atual
                           </span>
                         )}
+                        {isPassed && (
+                          <span className="text-xs px-2 py-0.5 bg-success/10 text-success rounded-full">
+                            ✓ Conquistado
+                          </span>
+                        )}
                       </div>
-                      <div className="flex items-center gap-2 mt-1">
+
+                      <div className="flex items-center gap-2 mt-2">
                         {rank.levels.map((level, levelIdx) => {
-                          const isAchieved =
-                            rankIndex < ranks.findIndex(
-                              (r) =>
-                                r.name.toLowerCase() ===
-                                currentRank.name.toLowerCase()
-                            ) ||
-                            (isCurrentRank && levelIdx + 1 <= currentRank.level);
+                          const isAchieved = isPassed || (isCurrentRank && levelIdx + 1 <= currentLevel);
 
                           return (
                             <span
                               key={level}
-                              className={`text-xs px-2 py-0.5 rounded ${
+                              className={`text-xs px-3 py-1 rounded-lg font-medium transition-all ${
                                 isAchieved
-                                  ? `${rank.bgColor}/20 ${rank.color}`
+                                  ? `${rank.bgColor}/30 ${rank.color} border ${rank.borderColor}/50`
                                   : "bg-muted/30 text-muted-foreground"
                               }`}
                             >
@@ -239,8 +207,13 @@ const RankingsPage = () => {
                       </div>
                     </div>
 
-                    <div className="text-right text-sm text-muted-foreground">
-                      <span>{rank.xpRequired[0].toLocaleString()}+ XP</span>
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-muted-foreground">
+                        {rank.xpRequired[0].toLocaleString()}+ XP
+                      </p>
+                      {rank.id === "mythic" && (
+                        <p className="text-xs text-amber-500 mt-1">Máximo</p>
+                      )}
                     </div>
                   </div>
                 </motion.div>
@@ -254,49 +227,38 @@ const RankingsPage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
-          className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-5"
+          className="bg-gradient-to-br from-primary/10 to-accent/10 border border-border/50 rounded-xl p-5"
         >
-          <h3 className="font-semibold text-foreground mb-3">
+          <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+            <TrendingUp className="text-primary" size={18} />
             Como subir de patente
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Star size={18} className="text-primary" />
+            <div className="flex items-start gap-3 p-3 bg-card/50 rounded-lg">
+              <div className="p-2 rounded-lg bg-green-500/10">
+                <Star size={18} className="text-green-500" />
               </div>
               <div>
-                <p className="font-medium text-foreground text-sm">
-                  Complete Atividades
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Missões diárias dão XP
-                </p>
+                <p className="font-medium text-foreground text-sm">Complete Atividades</p>
+                <p className="text-xs text-muted-foreground">Missões diárias dão XP</p>
               </div>
             </div>
-            <div className="flex items-start gap-3">
+            <div className="flex items-start gap-3 p-3 bg-card/50 rounded-lg">
               <div className="p-2 rounded-lg bg-orange-500/10">
                 <Flame size={18} className="text-orange-500" />
               </div>
               <div>
-                <p className="font-medium text-foreground text-sm">
-                  Mantenha Ofensiva
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Bônus por dias seguidos
-                </p>
+                <p className="font-medium text-foreground text-sm">Mantenha Ofensiva</p>
+                <p className="text-xs text-muted-foreground">Bônus por dias seguidos</p>
               </div>
             </div>
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-accent/10">
-                <User size={18} className="text-accent" />
+            <div className="flex items-start gap-3 p-3 bg-card/50 rounded-lg">
+              <div className="p-2 rounded-lg bg-purple-500/10">
+                <Trophy size={18} className="text-purple-500" />
               </div>
               <div>
-                <p className="font-medium text-foreground text-sm">
-                  Use o Pomodoro
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Ganhe XP estudando
-                </p>
+                <p className="font-medium text-foreground text-sm">Metas Semanais</p>
+                <p className="text-xs text-muted-foreground">XP extra toda semana</p>
               </div>
             </div>
           </div>
