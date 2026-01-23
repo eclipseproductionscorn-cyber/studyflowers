@@ -15,6 +15,10 @@ interface Profile {
   xp: number;
   current_rank: string;
   streak_days: number;
+  school_year: string | null;
+  subjects: string[];
+  birth_year: number | null;
+  onboarding_completed: boolean;
 }
 
 interface UserStreak {
