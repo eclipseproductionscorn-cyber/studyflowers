@@ -14,6 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_activities: {
+        Row: {
+          coin_reward: number
+          completed_at: string | null
+          content_text: string
+          correct_answer: string
+          created_at: string
+          day_of_week: number
+          difficulty: string
+          explanation: string
+          id: string
+          is_completed: boolean | null
+          is_correct: boolean | null
+          options: Json | null
+          question: string
+          question_type: string
+          subject: string
+          title: string
+          user_answer: string | null
+          user_id: string
+          week_number: number
+          xp_reward: number
+        }
+        Insert: {
+          coin_reward?: number
+          completed_at?: string | null
+          content_text: string
+          correct_answer: string
+          created_at?: string
+          day_of_week: number
+          difficulty?: string
+          explanation: string
+          id?: string
+          is_completed?: boolean | null
+          is_correct?: boolean | null
+          options?: Json | null
+          question: string
+          question_type?: string
+          subject: string
+          title: string
+          user_answer?: string | null
+          user_id: string
+          week_number: number
+          xp_reward?: number
+        }
+        Update: {
+          coin_reward?: number
+          completed_at?: string | null
+          content_text?: string
+          correct_answer?: string
+          created_at?: string
+          day_of_week?: number
+          difficulty?: string
+          explanation?: string
+          id?: string
+          is_completed?: boolean | null
+          is_correct?: boolean | null
+          options?: Json | null
+          question?: string
+          question_type?: string
+          subject?: string
+          title?: string
+          user_answer?: string | null
+          user_id?: string
+          week_number?: number
+          xp_reward?: number
+        }
+        Relationships: []
+      }
       daily_activities: {
         Row: {
           activity_type: string
@@ -59,42 +128,54 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          birth_year: number | null
           coins: number
           created_at: string
           current_rank: string
           full_name: string
           id: string
           level: number
+          onboarding_completed: boolean | null
           public_name: string
+          school_year: string | null
           streak_days: number
+          subjects: string[] | null
           updated_at: string
           user_id: string
           xp: number
         }
         Insert: {
           avatar_url?: string | null
+          birth_year?: number | null
           coins?: number
           created_at?: string
           current_rank?: string
           full_name: string
           id?: string
           level?: number
+          onboarding_completed?: boolean | null
           public_name: string
+          school_year?: string | null
           streak_days?: number
+          subjects?: string[] | null
           updated_at?: string
           user_id: string
           xp?: number
         }
         Update: {
           avatar_url?: string | null
+          birth_year?: number | null
           coins?: number
           created_at?: string
           current_rank?: string
           full_name?: string
           id?: string
           level?: number
+          onboarding_completed?: boolean | null
           public_name?: string
+          school_year?: string | null
           streak_days?: number
+          subjects?: string[] | null
           updated_at?: string
           user_id?: string
           xp?: number
@@ -140,6 +221,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_inventory: {
+        Row: {
+          acquired_at: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          item_id: string
+          item_type: string
+          quantity: number
+          user_id: string
+        }
+        Insert: {
+          acquired_at?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          item_id: string
+          item_type: string
+          quantity?: number
+          user_id: string
+        }
+        Update: {
+          acquired_at?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          item_id?: string
+          item_type?: string
+          quantity?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_streaks: {
         Row: {
           created_at: string
@@ -170,6 +287,54 @@ export type Database = {
           streak_protected_until?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      weekly_goals: {
+        Row: {
+          coin_reward: number
+          created_at: string
+          current: number
+          description: string
+          goal_type: string
+          id: string
+          is_claimed: boolean | null
+          is_completed: boolean | null
+          target: number
+          title: string
+          user_id: string
+          week_start: string
+          xp_reward: number
+        }
+        Insert: {
+          coin_reward?: number
+          created_at?: string
+          current?: number
+          description: string
+          goal_type: string
+          id?: string
+          is_claimed?: boolean | null
+          is_completed?: boolean | null
+          target: number
+          title: string
+          user_id: string
+          week_start: string
+          xp_reward?: number
+        }
+        Update: {
+          coin_reward?: number
+          created_at?: string
+          current?: number
+          description?: string
+          goal_type?: string
+          id?: string
+          is_claimed?: boolean | null
+          is_completed?: boolean | null
+          target?: number
+          title?: string
+          user_id?: string
+          week_start?: string
+          xp_reward?: number
         }
         Relationships: []
       }
