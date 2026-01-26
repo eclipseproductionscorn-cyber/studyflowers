@@ -16,6 +16,12 @@ import RankingsPage from "./pages/RankingsPage";
 import WeeklyGoals from "./pages/WeeklyGoals";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import Onboarding from "./pages/Onboarding";
+import Inventory from "./pages/Inventory";
+import TeacherNick from "./pages/TeacherNick";
+import QuantumX from "./pages/QuantumX";
+import AiTutora from "./pages/AiTutora";
+import Flashcards from "./pages/Flashcards";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +34,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/activities" element={<Activities />} />
           <Route path="/streak" element={<Streak />} />
@@ -39,6 +46,11 @@ const App = () => (
           <Route path="/rankings" element={<RankingsPage />} />
           <Route path="/weekly-goals" element={<WeeklyGoals />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/inventory" element={<Inventory />} />
+          <Route path="/teacher-nick" element={<TeacherNick />} />
+          <Route path="/quantum-x" element={<QuantumX />} />
+          <Route path="/ai-tutora" element={<AiTutora />} />
+          <Route path="/flashcards" element={<Flashcards />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
