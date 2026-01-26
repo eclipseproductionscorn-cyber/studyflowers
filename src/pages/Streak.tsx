@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Flame, Trophy, Calendar, Shield, Zap, Gift } from "lucide-react";
+import { Flame, Trophy, Calendar, Shield, Zap, Gift, Lock, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import { FloatingElements } from "@/components/FloatingElements";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -19,19 +21,42 @@ const streakMilestones = [
 
 const Streak = () => {
   const { profile, user, streak, addCoins, refetchStreak } = useAuth();
-  const [canClaimToday, setCanClaimToday] = useState(false);
+  const [todayActivitiesCount, setTodayActivitiesCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (streak) {
-      const today = new Date().toISOString().split("T")[0];
-      const lastActivity = streak.last_activity_date;
-      setCanClaimToday(lastActivity !== today);
+    if (user) {
+      fetchTodayActivities();
     }
-  }, [streak]);
+  }, [user]);
+
+  const fetchTodayActivities = async () => {
+    if (!user) return;
+
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const firstDayOfYear = new Date(today.getFullYear(), 0, 1);
+    const pastDaysOfYear = (today.getTime() - firstDayOfYear.getTime()) / 86400000;
+    const weekNumber = Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+
+    const { data, error } = await supabase
+      .from("ai_activities")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("day_of_week", dayOfWeek)
+      .eq("week_number", weekNumber)
+      .eq("is_completed", true);
+
+    if (!error && data) {
+      setTodayActivitiesCount(data.length);
+    }
+  };
+
+  const canClaimStreak = todayActivitiesCount >= 5;
+  const alreadyClaimedToday = streak?.last_activity_date === new Date().toISOString().split("T")[0];
 
   const claimDailyStreak = async () => {
-    if (!user || !streak || loading) return;
+    if (!user || !streak || loading || !canClaimStreak || alreadyClaimedToday) return;
     setLoading(true);
 
     const today = new Date().toISOString().split("T")[0];
@@ -72,7 +97,7 @@ const Streak = () => {
       .eq("user_id", user.id);
 
     // Give daily coins
-    await addCoins(10);
+    await addCoins(20);
 
     // Check milestones
     const milestone = streakMilestones.find((m) => m.days === newStreak);
@@ -80,16 +105,16 @@ const Streak = () => {
       await addCoins(milestone.reward);
       toast.success(`🎉 Marco atingido: ${milestone.title}! +${milestone.reward} moedas!`);
     } else {
-      toast.success(`🔥 Ofensiva: ${newStreak} dias! +10 moedas`);
+      toast.success(`🔥 Ofensiva: ${newStreak} dias! +20 moedas`);
     }
 
     refetchStreak();
-    setCanClaimToday(false);
     setLoading(false);
   };
 
   const currentStreak = streak?.current_streak || 0;
   const longestStreak = streak?.longest_streak || 0;
+  const activitiesProgress = Math.min((todayActivitiesCount / 5) * 100, 100);
 
   // Generate last 7 days
   const last7Days = Array.from({ length: 7 }, (_, i) => {
@@ -104,19 +129,20 @@ const Streak = () => {
 
   return (
     <DashboardLayout profile={profile}>
+      <FloatingElements />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="space-y-6"
+        className="space-y-6 relative z-10"
       >
         {/* Header */}
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
             Ofensiva
           </h1>
           <p className="text-muted-foreground mt-1">
-            Mantenha sua sequência de estudos ativa
+            Complete 5 atividades para registrar sua ofensiva diária
           </p>
         </div>
 
@@ -125,13 +151,13 @@ const Streak = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-gradient-to-br from-orange-500/10 to-red-500/10 border border-orange-500/20 rounded-2xl p-6 md:p-8"
+          className="bg-gradient-to-br from-orange-500/10 via-red-500/10 to-amber-500/10 border border-orange-500/20 rounded-2xl p-6 md:p-8"
         >
           <div className="text-center">
             <motion.div
               animate={{ scale: [1, 1.1, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
-              className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-orange-500 to-red-500 mb-4"
+              className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-orange-500 to-red-500 mb-4 shadow-lg shadow-orange-500/30"
             >
               <Flame className="text-white" size={48} />
             </motion.div>
@@ -143,34 +169,48 @@ const Streak = () => {
               {currentStreak === 1 ? "dia de ofensiva" : "dias de ofensiva"}
             </p>
 
-            {canClaimToday && (
-              <Button
-                onClick={claimDailyStreak}
-                disabled={loading}
-                size="lg"
-                className="mt-6 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
-              >
-                {loading ? (
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
-                  />
-                ) : (
-                  <>
-                    <Flame className="mr-2" size={20} />
-                    Registrar Ofensiva de Hoje
-                  </>
-                )}
-              </Button>
-            )}
-
-            {!canClaimToday && (
-              <div className="mt-6 flex items-center justify-center gap-2 text-success">
-                <Shield size={20} />
-                <span className="font-medium">Ofensiva de hoje registrada!</span>
+            {/* Activities Progress */}
+            <div className="mt-6 bg-background/50 rounded-xl p-4 max-w-sm mx-auto">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-muted-foreground">Atividades de hoje</span>
+                <span className="text-sm font-semibold text-foreground">
+                  {todayActivitiesCount}/5
+                </span>
               </div>
-            )}
+              <Progress value={activitiesProgress} className="h-2 mb-3" />
+              
+              {alreadyClaimedToday ? (
+                <div className="flex items-center justify-center gap-2 text-success">
+                  <CheckCircle2 size={20} />
+                  <span className="font-medium">Ofensiva de hoje registrada!</span>
+                </div>
+              ) : canClaimStreak ? (
+                <Button
+                  onClick={claimDailyStreak}
+                  disabled={loading}
+                  size="lg"
+                  className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:opacity-90 animate-pulse"
+                >
+                  {loading ? (
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                    />
+                  ) : (
+                    <>
+                      <Flame className="mr-2" size={20} />
+                      Marcar Ofensiva!
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                  <Lock size={18} />
+                  <span className="text-sm">Complete {5 - todayActivitiesCount} atividades para liberar</span>
+                </div>
+              )}
+            </div>
           </div>
         </motion.div>
 
@@ -183,7 +223,7 @@ const Streak = () => {
             className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-5"
           >
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-rank-gold/10">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-rank-gold/20 to-amber-500/20">
                 <Trophy className="text-rank-gold" size={24} />
               </div>
               <div>
@@ -202,7 +242,7 @@ const Streak = () => {
             className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-5"
           >
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20">
                 <Zap className="text-primary" size={24} />
               </div>
               <div>
@@ -230,7 +270,7 @@ const Streak = () => {
           <div className="grid grid-cols-7 gap-2">
             {last7Days.map((day, index) => {
               const isActive = streak?.last_activity_date === day.date;
-              const isPast = new Date(day.date) <= new Date();
+              const isPast = new Date(day.date) < new Date(new Date().toISOString().split("T")[0]);
 
               return (
                 <motion.div
@@ -240,9 +280,9 @@ const Streak = () => {
                   transition={{ delay: 0.4 + index * 0.05 }}
                   className={`flex flex-col items-center p-2 rounded-lg transition-colors ${
                     day.isToday
-                      ? "bg-primary/10 border border-primary/30"
+                      ? "bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/30"
                       : isActive
-                      ? "bg-success/10"
+                      ? "bg-success/10 border border-success/30"
                       : "bg-muted/30"
                   }`}
                 >
@@ -252,7 +292,7 @@ const Streak = () => {
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center ${
                       isActive
-                        ? "bg-success text-success-foreground"
+                        ? "bg-gradient-to-br from-orange-500 to-red-500 text-white"
                         : isPast
                         ? "bg-muted text-muted-foreground"
                         : "bg-muted/50 text-muted-foreground"
@@ -307,6 +347,9 @@ const Streak = () => {
                   <p className="text-xs text-muted-foreground">
                     +{milestone.reward} moedas
                   </p>
+                  {isAchieved && (
+                    <CheckCircle2 className="mx-auto mt-1 text-success" size={16} />
+                  )}
                 </motion.div>
               );
             })}
