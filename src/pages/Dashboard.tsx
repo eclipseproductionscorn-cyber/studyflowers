@@ -6,16 +6,23 @@ import {
   Coins,
   Target,
   BookOpen,
-  Clock,
   Sparkles,
   ArrowRight,
   Gift,
   ShoppingBag,
   TrendingUp,
+  Brain,
+  Gamepad2,
+  Zap,
+  Award,
+  Star,
+  Crown,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import { FloatingElements } from "@/components/FloatingElements";
 import { useAuth } from "@/hooks/useAuth";
 import { getRankData, getRankProgress } from "@/lib/ranks";
 
@@ -39,141 +46,133 @@ const Dashboard = () => {
 
   const quickActions = [
     {
-      title: "Atividades",
-      description: "Complete missões diárias",
-      icon: BookOpen,
+      title: "Missões Diárias",
+      description: "Complete desafios e ganhe XP",
+      icon: Target,
       path: "/activities",
       color: "from-green-500 to-emerald-500",
+      badge: "5+ XP",
     },
     {
-      title: "Metas Semanais",
-      description: "Acompanhe seu progresso",
-      icon: Target,
-      path: "/weekly-goals",
+      title: "Flashcards",
+      description: "Memorize com IA",
+      icon: Brain,
+      path: "/flashcards",
       color: "from-purple-500 to-pink-500",
+      badge: "Novo",
     },
     {
-      title: "Pomodoro",
-      description: "Foque nos estudos",
-      icon: Clock,
-      path: "/pomodoro",
-      color: "from-red-500 to-orange-500",
+      title: "Teacher Samuk",
+      description: "Seu mentor IA",
+      icon: Gamepad2,
+      path: "/teacher-samuk",
+      color: "from-emerald-500 to-cyan-500",
+      badge: "IA",
     },
     {
       title: "Loja",
       description: "Gaste suas moedas",
       icon: ShoppingBag,
       path: "/shop",
-      color: "from-yellow-500 to-amber-500",
+      color: "from-amber-500 to-orange-500",
+    },
+  ];
+
+  const stats = [
+    {
+      label: "Moedas",
+      value: profile?.coins?.toLocaleString() || "0",
+      icon: Coins,
+      color: "text-rank-gold",
+      bg: "bg-rank-gold/20",
+    },
+    {
+      label: "Nível",
+      value: profile?.level || 1,
+      icon: TrendingUp,
+      color: "text-primary",
+      bg: "bg-primary/20",
+    },
+    {
+      label: "XP Total",
+      value: profile?.xp?.toLocaleString() || "0",
+      icon: Sparkles,
+      color: "text-accent",
+      bg: "bg-accent/20",
+    },
+    {
+      label: "Ofensiva",
+      value: `${streak?.current_streak || 0}🔥`,
+      icon: Flame,
+      color: "text-orange-500",
+      bg: "bg-orange-500/20",
     },
   ];
 
   return (
     <DashboardLayout profile={profile}>
+      <FloatingElements />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="space-y-6"
+        className="space-y-6 relative z-10"
       >
-        {/* Welcome Section */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-              Olá, {profile?.public_name || "Estudante"}! 👋
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Continue sua jornada de estudos
-            </p>
-          </div>
-
-          <Link to="/streak">
+        {/* Welcome Section with Teacher Samuk */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-cyan-500/10 border border-emerald-500/30 rounded-2xl p-6"
+        >
+          <div className="flex flex-col md:flex-row md:items-center gap-4">
             <motion.div
-              whileHover={{ scale: 1.05 }}
-              className="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30 rounded-xl cursor-pointer"
+              animate={{ scale: [1, 1.05, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 w-fit"
             >
-              <Flame className="text-orange-500" size={24} />
-              <div>
-                <p className="text-sm text-muted-foreground">Ofensiva</p>
-                <p className="text-lg font-bold text-foreground">
-                  {streak?.current_streak || 0} dias 🔥
-                </p>
+              <Gamepad2 className="text-white" size={32} />
+            </motion.div>
+            <div className="flex-1">
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+                E aí, {profile?.public_name || "Estudante"}! 🎮
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                <span className="text-emerald-500 font-medium">Teacher Samuk:</span>{" "}
+                {streak?.current_streak && streak.current_streak > 0
+                  ? `Mano, ${streak.current_streak} dias de ofensiva! Você tá on fire! 🔥`
+                  : "Bora começar o dia com tudo? Sua primeira missão te espera!"}
+              </p>
+            </div>
+            <Link to="/teacher-samuk">
+              <Button className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:opacity-90">
+                Falar com Samuk
+                <ArrowRight className="ml-2" size={18} />
+              </Button>
+            </Link>
+          </div>
+        </motion.div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {stats.map((stat, index) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 + index * 0.05 }}
+              className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:border-primary/30 transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${stat.bg}`}>
+                  <stat.icon size={20} className={stat.color} />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">{stat.label}</p>
+                  <p className="text-xl font-bold">{stat.value}</p>
+                </div>
               </div>
             </motion.div>
-          </Link>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-4"
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-rank-gold/20">
-                <Coins size={20} className="text-rank-gold" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Moedas</p>
-                <p className="text-xl font-bold">{profile?.coins?.toLocaleString() || 0}</p>
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-4"
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/20">
-                <TrendingUp size={20} className="text-primary" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Nível</p>
-                <p className="text-xl font-bold">{profile?.level || 1}</p>
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-4"
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-accent/20">
-                <Sparkles size={20} className="text-accent" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">XP Total</p>
-                <p className="text-xl font-bold">{profile?.xp?.toLocaleString() || 0}</p>
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
-            className={`bg-card/50 backdrop-blur-sm border rounded-xl p-4 ${rankData ? rankData.rank.borderColor + "/30" : "border-border/50"}`}
-          >
-            <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-lg ${rankData ? rankData.rank.bgColor + "/20" : "bg-muted"}`}>
-                <Trophy size={20} className={rankData ? rankData.rank.color : "text-muted-foreground"} />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Patente</p>
-                <p className={`text-lg font-bold ${rankData ? rankData.rank.color : ""}`}>
-                  {rankData ? `${rankData.rank.name} ${["I", "II", "III"][rankData.level - 1]}` : "Bronze I"}
-                </p>
-              </div>
-            </div>
-          </motion.div>
+          ))}
         </div>
 
         {/* Rank Progress */}
@@ -186,20 +185,30 @@ const Dashboard = () => {
           >
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
-                <Trophy className={rankData.rank.color} size={24} />
+                <div className={`p-2 rounded-lg ${rankData.rank.bgColor}/20`}>
+                  <Trophy className={rankData.rank.color} size={24} />
+                </div>
                 <div>
-                  <h3 className="font-semibold text-foreground">Progresso da Patente</h3>
-                  <p className={`text-sm ${rankData.rank.color}`}>
+                  <h3 className="font-semibold text-foreground">Patente Atual</h3>
+                  <p className={`text-sm ${rankData.rank.color} font-medium`}>
                     {rankData.rank.name} {["I", "II", "III"][rankData.level - 1]}
                   </p>
                 </div>
               </div>
-              <Link to="/rankings">
-                <Button variant="ghost" size="sm">
-                  Ver todas
-                  <ArrowRight size={16} className="ml-1" />
-                </Button>
-              </Link>
+              <div className="flex gap-2">
+                <Link to="/rankings">
+                  <Button variant="ghost" size="sm">
+                    Patentes
+                    <ArrowRight size={16} className="ml-1" />
+                  </Button>
+                </Link>
+                <Link to="/global-ranking">
+                  <Button variant="outline" size="sm">
+                    <Crown size={16} className="mr-1" />
+                    Ranking
+                  </Button>
+                </Link>
+              </div>
             </div>
             
             <Progress value={xpProgress} className="h-3 mb-2" />
@@ -213,7 +222,10 @@ const Dashboard = () => {
 
         {/* Quick Actions */}
         <div>
-          <h3 className="text-lg font-semibold text-foreground mb-4">Ações Rápidas</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+            <Zap className="text-primary" size={20} />
+            Ações Rápidas
+          </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {quickActions.map((action, index) => (
               <motion.div
@@ -224,8 +236,13 @@ const Dashboard = () => {
               >
                 <Link
                   to={action.path}
-                  className="block bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:border-primary/30 transition-all group"
+                  className="block bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:border-primary/30 transition-all group relative overflow-hidden"
                 >
+                  {action.badge && (
+                    <Badge className="absolute top-2 right-2 text-xs bg-primary/20 text-primary">
+                      {action.badge}
+                    </Badge>
+                  )}
                   <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
                     <action.icon className="text-white" size={24} />
                   </div>
@@ -239,6 +256,61 @@ const Dashboard = () => {
               </motion.div>
             ))}
           </div>
+        </div>
+
+        {/* Achievement & Ranking Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Achievements Teaser */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <Link to="/achievements">
+              <div className="bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-yellow-500/10 border border-amber-500/30 rounded-xl p-5 hover:border-amber-500/50 transition-all group">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500">
+                      <Award className="text-white" size={24} />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-foreground">Conquistas</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Desbloqueie badges épicos
+                      </p>
+                    </div>
+                  </div>
+                  <ArrowRight className="text-muted-foreground group-hover:text-amber-500 transition-colors" size={20} />
+                </div>
+              </div>
+            </Link>
+          </motion.div>
+
+          {/* Global Ranking Teaser */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.55 }}
+          >
+            <Link to="/global-ranking">
+              <div className="bg-gradient-to-br from-purple-500/10 via-pink-500/5 to-indigo-500/10 border border-purple-500/30 rounded-xl p-5 hover:border-purple-500/50 transition-all group">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500">
+                      <Crown className="text-white" size={24} />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-foreground">Ranking Global</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Compete com todos os jogadores
+                      </p>
+                    </div>
+                  </div>
+                  <ArrowRight className="text-muted-foreground group-hover:text-purple-500 transition-colors" size={20} />
+                </div>
+              </div>
+            </Link>
+          </motion.div>
         </div>
 
         {/* Promo Banner */}
