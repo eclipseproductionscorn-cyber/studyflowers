@@ -22,6 +22,9 @@ import TeacherNick from "./pages/TeacherNick";
 import QuantumX from "./pages/QuantumX";
 import AiTutora from "./pages/AiTutora";
 import Flashcards from "./pages/Flashcards";
+import TeacherSamuk from "./pages/TeacherSamuk";
+import Achievements from "./pages/Achievements";
+import GlobalRanking from "./pages/GlobalRanking";
 
 const queryClient = new QueryClient();
 
@@ -44,10 +47,13 @@ const App = () => (
           <Route path="/shop" element={<Shop />} />
           <Route path="/rewards" element={<Shop />} />
           <Route path="/rankings" element={<RankingsPage />} />
+          <Route path="/global-ranking" element={<GlobalRanking />} />
+          <Route path="/achievements" element={<Achievements />} />
           <Route path="/weekly-goals" element={<WeeklyGoals />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/inventory" element={<Inventory />} />
           <Route path="/teacher-nick" element={<TeacherNick />} />
+          <Route path="/teacher-samuk" element={<TeacherSamuk />} />
           <Route path="/quantum-x" element={<QuantumX />} />
           <Route path="/ai-tutora" element={<AiTutora />} />
           <Route path="/flashcards" element={<Flashcards />} />

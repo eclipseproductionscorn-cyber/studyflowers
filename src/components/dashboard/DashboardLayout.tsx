@@ -38,10 +38,10 @@ const menuItems = [
   { icon: BookOpen, label: "Atividades", path: "/activities" },
   { icon: Target, label: "Metas Semanais", path: "/weekly-goals" },
   { icon: Flame, label: "Ofensiva", path: "/streak" },
-  { icon: Trophy, label: "Patentes", path: "/rankings" },
+  { icon: Trophy, label: "Ranking", path: "/global-ranking" },
   { icon: ShoppingBag, label: "Loja", path: "/shop" },
   { icon: Wrench, label: "Ferramentas", path: "/tools" },
-  { icon: Bot, label: "IA Tutora", path: "/tutor" },
+  { icon: Bot, label: "Teacher Samuk", path: "/teacher-samuk" },
   { icon: Settings, label: "Configurações", path: "/settings" },
 ];
 

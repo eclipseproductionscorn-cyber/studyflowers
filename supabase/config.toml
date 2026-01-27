@@ -2,3 +2,18 @@ project_id = "ljavuiafiqidnvqsvntl"
 
 [functions.ai-tutor]
 verify_jwt = false
+
+[functions.generate-activity]
+verify_jwt = false
+
+[functions.teacher-nick]
+verify_jwt = false
+
+[functions.quantum-x]
+verify_jwt = false
+
+[functions.teacher-samuk]
+verify_jwt = false
+
+[functions.generate-flashcards]
+verify_jwt = false
