@@ -11,12 +11,24 @@ import {
   Crown,
   Check,
   Gift,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import { FloatingElements } from "@/components/FloatingElements";
 import { useAuth } from "@/hooks/useAuth";
-import { shopItems, getItemsByCategory, getRarityColor, getRarityLabel, type ShopItem } from "@/lib/shopItems";
+import { useTheme } from "@/hooks/useTheme";
+import {
+  shopItems,
+  getItemsByCategory,
+  getRarityColor,
+  getRarityLabel,
+  type ShopItem,
+} from "@/lib/shopItems";
+import { appThemes, getRarityColor as getThemeRarityColor, getRarityLabel as getThemeRarityLabel } from "@/lib/themes";
 import { parseRankString, ranks } from "@/lib/ranks";
 import { toast } from "sonner";
 
@@ -25,6 +37,7 @@ const categoryIcons = {
   boosts: Zap,
   cosmetics: Palette,
   special: Crown,
+  themes: Palette,
 };
 
 const categoryLabels = {
@@ -32,13 +45,19 @@ const categoryLabels = {
   boosts: "Boosts",
   cosmetics: "Cosméticos",
   special: "Especiais",
+  themes: "Temas",
 };
 
 const Shop = () => {
   const { profile, updateProfile } = useAuth();
+  const { currentTheme, setTheme, ownedThemes, purchaseTheme, isDark, toggleDarkMode } = useTheme();
   const [purchasedItems, setPurchasedItems] = useState<string[]>([]);
   const [isOpening, setIsOpening] = useState<string | null>(null);
-  const [lastReward, setLastReward] = useState<{ type: string; amount?: number; name?: string } | null>(null);
+  const [lastReward, setLastReward] = useState<{
+    type: string;
+    amount?: number;
+    name?: string;
+  } | null>(null);
 
   const canAfford = (price: number) => (profile?.coins || 0) >= price;
 
@@ -46,8 +65,11 @@ const Shop = () => {
     if (!requiredRank) return true;
     if (!profile?.current_rank) return false;
 
-    const { rankId: currentRankId, level: currentLevel } = parseRankString(profile.current_rank);
-    const { rankId: requiredRankId, level: requiredLevel } = parseRankString(requiredRank);
+    const { rankId: currentRankId, level: currentLevel } = parseRankString(
+      profile.current_rank
+    );
+    const { rankId: requiredRankId, level: requiredLevel } =
+      parseRankString(requiredRank);
 
     const currentRankIndex = ranks.findIndex((r) => r.id === currentRankId);
     const requiredRankIndex = ranks.findIndex((r) => r.id === requiredRankId);
@@ -69,19 +91,47 @@ const Shop = () => {
       return;
     }
 
-    // Deduct coins
     await updateProfile({ coins: (profile?.coins || 0) - item.price });
 
-    // Handle box opening
     if (item.category === "boxes") {
       setIsOpening(item.id);
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      // Generate reward based on rarity
       const rewards = [
-        { type: "coins", amount: item.rarity === "legendary" ? 500 : item.rarity === "epic" ? 250 : item.rarity === "rare" ? 150 : 50, weight: 40 },
-        { type: "xp", amount: item.rarity === "legendary" ? 300 : item.rarity === "epic" ? 150 : item.rarity === "rare" ? 100 : 50, weight: 35 },
-        { type: "item", name: item.rarity === "legendary" ? "Avatar Lendário" : item.rarity === "epic" ? "Emblema Épico" : "Emblema Raro", weight: 25 },
+        {
+          type: "coins",
+          amount:
+            item.rarity === "legendary"
+              ? 500
+              : item.rarity === "epic"
+              ? 250
+              : item.rarity === "rare"
+              ? 150
+              : 50,
+          weight: 40,
+        },
+        {
+          type: "xp",
+          amount:
+            item.rarity === "legendary"
+              ? 300
+              : item.rarity === "epic"
+              ? 150
+              : item.rarity === "rare"
+              ? 100
+              : 50,
+          weight: 35,
+        },
+        {
+          type: "item",
+          name:
+            item.rarity === "legendary"
+              ? "Avatar Lendário"
+              : item.rarity === "epic"
+              ? "Emblema Épico"
+              : "Emblema Raro",
+          weight: 25,
+        },
       ];
 
       const totalWeight = rewards.reduce((sum, r) => sum + r.weight, 0);
@@ -99,7 +149,9 @@ const Shop = () => {
       setLastReward(selectedReward);
 
       if (selectedReward.type === "coins" && selectedReward.amount) {
-        await updateProfile({ coins: (profile?.coins || 0) - item.price + selectedReward.amount });
+        await updateProfile({
+          coins: (profile?.coins || 0) - item.price + selectedReward.amount,
+        });
         toast.success(`💰 Você ganhou ${selectedReward.amount} moedas!`);
       } else if (selectedReward.type === "xp" && selectedReward.amount) {
         await updateProfile({ xp: (profile?.xp || 0) + selectedReward.amount });
@@ -115,11 +167,28 @@ const Shop = () => {
     }
   };
 
+  const purchaseAndApplyTheme = async (themeId: string, price: number, requiredRank?: string) => {
+    if (!canAfford(price)) {
+      toast.error("Moedas insuficientes!");
+      return;
+    }
+    if (!meetsRankRequirement(requiredRank)) {
+      toast.error("Rank insuficiente!");
+      return;
+    }
+
+    await updateProfile({ coins: (profile?.coins || 0) - price });
+    purchaseTheme(themeId);
+    setTheme(themeId);
+    toast.success("🎨 Tema aplicado com sucesso!");
+  };
+
   const renderItem = (item: ShopItem) => {
     const affordable = canAfford(item.price);
     const meetsRank = meetsRankRequirement(item.requiredRank);
     const isLocked = !meetsRank;
-    const isPurchased = purchasedItems.includes(item.id) && item.category !== "boxes";
+    const isPurchased =
+      purchasedItems.includes(item.id) && item.category !== "boxes";
     const isCurrentlyOpening = isOpening === item.id;
 
     return (
@@ -133,22 +202,33 @@ const Shop = () => {
             ? "opacity-50 border-border/30"
             : isPurchased
             ? "border-success/50 bg-success/5"
-            : `border-border/50 hover:border-primary/30 ${getRarityColor(item.rarity)}`
+            : `border-border/50 hover:border-primary/30 ${getRarityColor(
+                item.rarity
+              )}`
         }`}
       >
-        {/* Rarity Badge */}
         <div className="absolute top-3 right-3">
-          <span className={`text-xs px-2 py-0.5 rounded-full border ${getRarityColor(item.rarity)} bg-background/50`}>
+          <span
+            className={`text-xs px-2 py-0.5 rounded-full border ${getRarityColor(
+              item.rarity
+            )} bg-background/50`}
+          >
             {getRarityLabel(item.rarity)}
           </span>
         </div>
 
         <div className="flex flex-col gap-4">
-          {/* Icon */}
           <div className="relative">
             <motion.div
-              animate={isCurrentlyOpening ? { rotate: [0, 10, -10, 10, -10, 0], scale: [1, 1.1, 1] } : {}}
-              transition={{ duration: 0.5, repeat: isCurrentlyOpening ? Infinity : 0 }}
+              animate={
+                isCurrentlyOpening
+                  ? { rotate: [0, 10, -10, 10, -10, 0], scale: [1, 1.1, 1] }
+                  : {}
+              }
+              transition={{
+                duration: 0.5,
+                repeat: isCurrentlyOpening ? Infinity : 0,
+              }}
               className={`w-16 h-16 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center mx-auto`}
             >
               <item.icon className="text-white" size={32} />
@@ -162,13 +242,13 @@ const Shop = () => {
             )}
           </div>
 
-          {/* Info */}
           <div className="text-center">
             <h3 className="font-semibold text-foreground">{item.name}</h3>
-            <p className="text-xs text-muted-foreground mt-1">{item.description}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {item.description}
+            </p>
           </div>
 
-          {/* Lock Reason */}
           {isLocked && item.requiredRank && (
             <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
               <Lock size={12} />
@@ -176,11 +256,12 @@ const Shop = () => {
             </div>
           )}
 
-          {/* Price & Action */}
           <div className="mt-auto">
             <div className="flex items-center justify-center gap-1 mb-3">
               <Coins size={18} className="text-rank-gold" />
-              <span className="text-lg font-bold">{item.price.toLocaleString()}</span>
+              <span className="text-lg font-bold">
+                {item.price.toLocaleString()}
+              </span>
             </div>
 
             {isPurchased ? (
@@ -224,11 +305,12 @@ const Shop = () => {
 
   return (
     <DashboardLayout profile={profile}>
+      <FloatingElements />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="space-y-6"
+        className="space-y-6 relative z-10"
       >
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -242,9 +324,20 @@ const Shop = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-rank-gold/20 to-amber-500/20 border border-rank-gold/30 rounded-full">
-            <Coins className="text-rank-gold" size={22} />
-            <span className="font-bold text-lg">{profile?.coins?.toLocaleString() || 0}</span>
+          <div className="flex items-center gap-4">
+            {/* Dark Mode Toggle */}
+            <div className="flex items-center gap-2 px-3 py-2 bg-card/50 border border-border/50 rounded-full">
+              <Sun size={16} className="text-muted-foreground" />
+              <Switch checked={isDark} onCheckedChange={toggleDarkMode} />
+              <Moon size={16} className="text-muted-foreground" />
+            </div>
+
+            <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-rank-gold/20 to-amber-500/20 border border-rank-gold/30 rounded-full">
+              <Coins className="text-rank-gold" size={22} />
+              <span className="font-bold text-lg">
+                {profile?.coins?.toLocaleString() || 0}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -259,7 +352,9 @@ const Shop = () => {
             >
               <div className="flex items-center justify-center gap-2 mb-2">
                 <Gift className="text-purple-500" size={20} />
-                <span className="font-semibold text-foreground">Última Recompensa</span>
+                <span className="font-semibold text-foreground">
+                  Última Recompensa
+                </span>
               </div>
               <p className="text-lg font-bold text-purple-400">
                 {lastReward.type === "coins" && `💰 ${lastReward.amount} moedas`}
@@ -271,45 +366,187 @@ const Shop = () => {
         </AnimatePresence>
 
         {/* Shop Tabs */}
-        <Tabs defaultValue="boxes" className="w-full">
-          <TabsList className="grid grid-cols-4 w-full bg-card/50 border border-border/50">
-            {(["boxes", "boosts", "cosmetics", "special"] as const).map((category) => {
-              const Icon = categoryIcons[category];
-              return (
-                <TabsTrigger key={category} value={category} className="gap-2">
-                  <Icon size={16} />
-                  <span className="hidden md:inline">{categoryLabels[category]}</span>
-                </TabsTrigger>
-              );
-            })}
+        <Tabs defaultValue="themes" className="w-full">
+          <TabsList className="grid grid-cols-5 w-full bg-card/50 border border-border/50">
+            {(["themes", "boxes", "boosts", "cosmetics", "special"] as const).map(
+              (category) => {
+                const Icon = categoryIcons[category];
+                return (
+                  <TabsTrigger key={category} value={category} className="gap-2">
+                    <Icon size={16} />
+                    <span className="hidden md:inline">
+                      {categoryLabels[category]}
+                    </span>
+                  </TabsTrigger>
+                );
+              }
+            )}
           </TabsList>
 
-          {(["boxes", "boosts", "cosmetics", "special"] as const).map((category) => (
-            <TabsContent key={category} value={category}>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-4">
-                {getItemsByCategory(category).map(renderItem)}
-              </div>
+          {/* Themes Tab */}
+          <TabsContent value="themes">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-4">
+              {appThemes.map((theme) => {
+                const isOwned = ownedThemes.includes(theme.id);
+                const isActive = currentTheme.id === theme.id;
+                const affordable = canAfford(theme.price);
+                const meetsRank = meetsRankRequirement(theme.requiredRank);
+                const isLocked = !meetsRank;
 
-              {category === "special" && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                  className="mt-6 bg-gradient-to-br from-yellow-500/10 via-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-5 text-center"
-                >
-                  <Crown className="mx-auto text-amber-500 mb-2" size={32} />
-                  <h3 className="font-bold text-lg text-foreground mb-1">
-                    Itens Especiais
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    Esses itens exclusivos só estão disponíveis para jogadores de rank{" "}
-                    <span className="text-rank-mythic font-medium">Mítico</span>.
-                    Continue evoluindo para desbloquear!
-                  </p>
-                </motion.div>
-              )}
-            </TabsContent>
-          ))}
+                return (
+                  <motion.div
+                    key={theme.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    whileHover={!isLocked ? { scale: 1.02 } : {}}
+                    className={`relative bg-card/50 backdrop-blur-sm border rounded-xl p-5 transition-all ${
+                      isActive
+                        ? "border-primary ring-2 ring-primary/20"
+                        : isLocked
+                        ? "opacity-50 border-border/30"
+                        : `border-border/50 hover:border-primary/30`
+                    }`}
+                  >
+                    {/* Rarity Badge */}
+                    <div className="absolute top-3 right-3">
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded-full border ${getThemeRarityColor(
+                          theme.rarity
+                        )} bg-background/50`}
+                      >
+                        {getThemeRarityLabel(theme.rarity)}
+                      </span>
+                    </div>
+
+                    {/* Active Badge */}
+                    {isActive && (
+                      <div className="absolute top-3 left-3">
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-primary text-primary-foreground">
+                          Ativo
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="flex flex-col gap-4">
+                      {/* Preview */}
+                      <div
+                        className={`w-full h-20 rounded-xl bg-gradient-to-r ${theme.preview} flex items-center justify-center`}
+                      >
+                        <theme.icon className="text-white drop-shadow-lg" size={32} />
+                      </div>
+
+                      {/* Info */}
+                      <div className="text-center">
+                        <h3 className="font-semibold text-foreground">
+                          {theme.name}
+                        </h3>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {theme.description}
+                        </p>
+                      </div>
+
+                      {/* Lock Reason */}
+                      {isLocked && theme.requiredRank && (
+                        <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
+                          <Lock size={12} />
+                          <span>
+                            Requer {getRequiredRankName(theme.requiredRank)}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Action */}
+                      <div className="mt-auto">
+                        {!isOwned && (
+                          <div className="flex items-center justify-center gap-1 mb-3">
+                            <Coins size={18} className="text-rank-gold" />
+                            <span className="text-lg font-bold">
+                              {theme.price.toLocaleString()}
+                            </span>
+                          </div>
+                        )}
+
+                        {isOwned ? (
+                          isActive ? (
+                            <div className="flex items-center justify-center gap-2 text-primary">
+                              <Check size={18} />
+                              <span className="font-medium">Em Uso</span>
+                            </div>
+                          ) : (
+                            <Button
+                              onClick={() => setTheme(theme.id)}
+                              className="w-full"
+                              variant="outline"
+                            >
+                              <Palette size={16} className="mr-1" />
+                              Aplicar
+                            </Button>
+                          )
+                        ) : (
+                          <Button
+                            onClick={() =>
+                              purchaseAndApplyTheme(
+                                theme.id,
+                                theme.price,
+                                theme.requiredRank
+                              )
+                            }
+                            disabled={!affordable || isLocked}
+                            className="w-full"
+                            variant={affordable && !isLocked ? "default" : "secondary"}
+                          >
+                            {isLocked ? (
+                              <>
+                                <Lock size={16} className="mr-1" />
+                                Bloqueado
+                              </>
+                            ) : !affordable ? (
+                              "Moedas insuficientes"
+                            ) : (
+                              <>
+                                <ShoppingBag size={16} className="mr-1" />
+                                Comprar e Aplicar
+                              </>
+                            )}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </TabsContent>
+
+          {(["boxes", "boosts", "cosmetics", "special"] as const).map(
+            (category) => (
+              <TabsContent key={category} value={category}>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-4">
+                  {getItemsByCategory(category).map(renderItem)}
+                </div>
+
+                {category === "special" && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                    className="mt-6 bg-gradient-to-br from-yellow-500/10 via-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-5 text-center"
+                  >
+                    <Crown className="mx-auto text-amber-500 mb-2" size={32} />
+                    <h3 className="font-bold text-lg text-foreground mb-1">
+                      Itens Especiais
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Esses itens exclusivos só estão disponíveis para jogadores de
+                      rank{" "}
+                      <span className="text-rank-mythic font-medium">Mítico</span>.
+                      Continue evoluindo para desbloquear!
+                    </p>
+                  </motion.div>
+                )}
+              </TabsContent>
+            )
+          )}
         </Tabs>
 
         {/* Earning Info */}

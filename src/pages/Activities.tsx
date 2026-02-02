@@ -15,6 +15,9 @@ import {
   Loader2,
   Plus,
   Trophy,
+  Gamepad2,
+  Target,
+  Wand2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -23,8 +26,11 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { FloatingElements } from "@/components/FloatingElements";
+import DailyMissions from "@/components/DailyMissions";
+import CustomActivityCreator from "@/components/CustomActivityCreator";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { getSubjectLabel, getSubjectIcon } from "@/lib/subjects";
 import { toast } from "sonner";
 
 interface AIActivity {
@@ -57,20 +63,6 @@ const difficultyLabels: Record<string, string> = {
   easy: "Fácil",
   normal: "Normal",
   hard: "Difícil",
-};
-
-const subjectIcons: Record<string, React.ElementType> = {
-  "Matemática": Brain,
-  "Português": BookOpen,
-  "História": GraduationCap,
-  "Geografia": GraduationCap,
-  "Ciências": Lightbulb,
-  "Física": Brain,
-  "Química": Lightbulb,
-  "Biologia": Lightbulb,
-  "Inglês": BookOpen,
-  "Filosofia": GraduationCap,
-  "Sociologia": GraduationCap,
 };
 
 const Activities = () => {
@@ -115,10 +107,9 @@ const Activities = () => {
       console.error("Error fetching activities:", error);
       toast.error("Erro ao carregar atividades");
     } else {
-      // Transform options from Json to string array
-      const transformedData = (data || []).map(activity => ({
+      const transformedData = (data || []).map((activity) => ({
         ...activity,
-        options: activity.options ? (activity.options as string[]) : null
+        options: activity.options ? (activity.options as string[]) : null,
       }));
       setActivities(transformedData);
     }
@@ -133,15 +124,16 @@ const Activities = () => {
 
     setGenerating(true);
 
-    // Pick a random subject from user's subjects
-    const randomSubject = profile.subjects[Math.floor(Math.random() * profile.subjects.length)];
+    const randomSubject =
+      profile.subjects[Math.floor(Math.random() * profile.subjects.length)];
     const difficulties = ["easy", "normal", "hard"];
-    const randomDifficulty = difficulties[Math.floor(Math.random() * difficulties.length)];
+    const randomDifficulty =
+      difficulties[Math.floor(Math.random() * difficulties.length)];
 
     try {
       const response = await supabase.functions.invoke("generate-activity", {
         body: {
-          subject: randomSubject,
+          subject: getSubjectLabel(randomSubject),
           difficulty: randomDifficulty,
           schoolYear: profile.school_year,
           questionType: Math.random() > 0.7 ? "essay" : "multiple_choice",
@@ -152,7 +144,6 @@ const Activities = () => {
 
       const activity = response.data.activity;
 
-      // Save to database
       const { data, error } = await supabase
         .from("ai_activities")
         .insert({
@@ -168,8 +159,18 @@ const Activities = () => {
           explanation: activity.explanation,
           day_of_week: dayOfWeek,
           week_number: weekNumber,
-          xp_reward: randomDifficulty === "hard" ? 50 : randomDifficulty === "normal" ? 30 : 20,
-          coin_reward: randomDifficulty === "hard" ? 30 : randomDifficulty === "normal" ? 20 : 10,
+          xp_reward:
+            randomDifficulty === "hard"
+              ? 50
+              : randomDifficulty === "normal"
+              ? 30
+              : 20,
+          coin_reward:
+            randomDifficulty === "hard"
+              ? 30
+              : randomDifficulty === "normal"
+              ? 20
+              : 10,
         })
         .select()
         .single();
@@ -178,7 +179,7 @@ const Activities = () => {
 
       const newActivity = {
         ...data,
-        options: data.options ? (data.options as string[]) : null
+        options: data.options ? (data.options as string[]) : null,
       };
       setActivities((prev) => [...prev, newActivity]);
       toast.success("Nova atividade gerada! 🎉");
@@ -193,7 +194,8 @@ const Activities = () => {
   const submitAnswer = async () => {
     if (!selectedActivity || submitting) return;
 
-    const answer = selectedActivity.question_type === "essay" ? essayAnswer : selectedAnswer;
+    const answer =
+      selectedActivity.question_type === "essay" ? essayAnswer : selectedAnswer;
     if (!answer) {
       toast.error("Selecione ou escreva uma resposta!");
       return;
@@ -203,9 +205,10 @@ const Activities = () => {
 
     let isCorrect = false;
     if (selectedActivity.question_type === "multiple_choice") {
-      isCorrect = answer.charAt(0).toUpperCase() === selectedActivity.correct_answer.charAt(0).toUpperCase();
+      isCorrect =
+        answer.charAt(0).toUpperCase() ===
+        selectedActivity.correct_answer.charAt(0).toUpperCase();
     } else {
-      // For essay, always mark as correct (teacher would review)
       isCorrect = true;
     }
 
@@ -226,14 +229,19 @@ const Activities = () => {
       return;
     }
 
-    // Award XP and coins
     if (isCorrect) {
       await addXP(selectedActivity.xp_reward);
       await addCoins(selectedActivity.coin_reward);
-      toast.success(`Correto! +${selectedActivity.xp_reward} XP e +${selectedActivity.coin_reward} moedas! 🎉`);
+      toast.success(
+        `Correto! +${selectedActivity.xp_reward} XP e +${selectedActivity.coin_reward} moedas! 🎉`
+      );
     } else {
       await addXP(Math.floor(selectedActivity.xp_reward / 3));
-      toast.info(`Resposta incorreta. +${Math.floor(selectedActivity.xp_reward / 3)} XP pelo esforço!`);
+      toast.info(
+        `Resposta incorreta. +${Math.floor(
+          selectedActivity.xp_reward / 3
+        )} XP pelo esforço!`
+      );
     }
 
     setActivities((prev) =>
@@ -270,8 +278,7 @@ const Activities = () => {
     if (!canClaimStreak || !user) return;
 
     const today = new Date().toISOString().split("T")[0];
-    
-    // Check if already claimed today
+
     const { data: streakData } = await supabase
       .from("user_streaks")
       .select("last_activity_date, current_streak, longest_streak")
@@ -283,9 +290,11 @@ const Activities = () => {
       return;
     }
 
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
+    const yesterday = new Date(Date.now() - 86400000)
+      .toISOString()
+      .split("T")[0];
     let newStreak = 1;
-    
+
     if (streakData?.last_activity_date === yesterday) {
       newStreak = (streakData.current_streak || 0) + 1;
     }
@@ -308,7 +317,7 @@ const Activities = () => {
 
     await addCoins(20);
     refetchStreak();
-    
+
     toast.success(`🔥 Ofensiva de ${newStreak} dias! +20 moedas bônus!`);
   };
 
@@ -326,6 +335,192 @@ const Activities = () => {
     );
   }
 
+  // Activity Detail Modal
+  if (selectedActivity) {
+    return (
+      <DashboardLayout profile={profile}>
+        <FloatingElements />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-3xl mx-auto relative z-10"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
+            <Button variant="ghost" onClick={closeActivity}>
+              ← Voltar
+            </Button>
+            <div className="flex items-center gap-2">
+              <Badge className={difficultyColors[selectedActivity.difficulty]}>
+                {difficultyLabels[selectedActivity.difficulty]}
+              </Badge>
+              <Badge variant="outline">
+                {getSubjectIcon(selectedActivity.subject)}{" "}
+                {getSubjectLabel(selectedActivity.subject)}
+              </Badge>
+            </div>
+          </div>
+
+          {/* Content Card */}
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-xl">{selectedActivity.title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="prose prose-sm dark:prose-invert max-w-none">
+                <p className="text-muted-foreground whitespace-pre-wrap">
+                  {selectedActivity.content_text}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Question Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Brain className="text-primary" size={20} />
+                Questão
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="font-medium text-foreground">
+                {selectedActivity.question}
+              </p>
+
+              {/* Answer Options */}
+              {!showResult && selectedActivity.question_type === "multiple_choice" && (
+                <div className="space-y-2">
+                  {selectedActivity.options?.map((option, index) => (
+                    <motion.button
+                      key={index}
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
+                      onClick={() => setSelectedAnswer(option)}
+                      className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
+                        selectedAnswer === option
+                          ? "border-primary bg-primary/10"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <span className="font-medium">{option}</span>
+                    </motion.button>
+                  ))}
+                </div>
+              )}
+
+              {/* Essay Answer */}
+              {!showResult && selectedActivity.question_type === "essay" && (
+                <Textarea
+                  value={essayAnswer}
+                  onChange={(e) => setEssayAnswer(e.target.value)}
+                  placeholder="Digite sua resposta aqui..."
+                  className="min-h-[150px]"
+                />
+              )}
+
+              {/* Submit Button */}
+              {!showResult && (
+                <Button
+                  onClick={submitAnswer}
+                  disabled={
+                    submitting ||
+                    (selectedActivity.question_type === "multiple_choice"
+                      ? !selectedAnswer
+                      : !essayAnswer.trim())
+                  }
+                  className="w-full bg-gradient-to-r from-primary to-accent"
+                >
+                  {submitting ? (
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  ) : (
+                    <ChevronRight className="mr-2" size={18} />
+                  )}
+                  Enviar Resposta
+                </Button>
+              )}
+
+              {/* Result */}
+              {showResult && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-4"
+                >
+                  <div
+                    className={`p-4 rounded-xl ${
+                      selectedActivity.is_correct
+                        ? "bg-success/10 border border-success/30"
+                        : "bg-destructive/10 border border-destructive/30"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      {selectedActivity.is_correct ? (
+                        <>
+                          <CheckCircle2 className="text-success" size={24} />
+                          <span className="font-semibold text-success">
+                            Resposta Correta! 🎉
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <XCircle className="text-destructive" size={24} />
+                          <span className="font-semibold text-destructive">
+                            Resposta Incorreta
+                          </span>
+                        </>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Resposta correta: {selectedActivity.correct_answer}
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Lightbulb className="text-primary" size={20} />
+                      <span className="font-semibold text-foreground">
+                        Explicação
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {selectedActivity.explanation}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-center gap-4 pt-4">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full">
+                      <Sparkles className="text-primary" size={18} />
+                      <span className="font-medium">
+                        +
+                        {selectedActivity.is_correct
+                          ? selectedActivity.xp_reward
+                          : Math.floor(selectedActivity.xp_reward / 3)}{" "}
+                        XP
+                      </span>
+                    </div>
+                    {selectedActivity.is_correct && (
+                      <div className="flex items-center gap-2 px-4 py-2 bg-rank-gold/10 rounded-full">
+                        <Coins className="text-rank-gold" size={18} />
+                        <span className="font-medium">
+                          +{selectedActivity.coin_reward}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  <Button onClick={closeActivity} className="w-full" variant="outline">
+                    Continuar Estudando
+                  </Button>
+                </motion.div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout profile={profile}>
       <FloatingElements />
@@ -338,11 +533,12 @@ const Activities = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Atividades do Dia
+            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent flex items-center gap-2">
+              <Gamepad2 className="text-primary" />
+              Modo Jogo
             </h1>
             <p className="text-muted-foreground mt-1">
-              Complete 5 atividades para registrar sua ofensiva diária
+              Complete atividades, ganhe XP e suba de nível!
             </p>
           </div>
           <Button
@@ -355,9 +551,12 @@ const Activities = () => {
             ) : (
               <Plus className="mr-2 h-4 w-4" />
             )}
-            Gerar Nova Atividade
+            Gerar Atividade
           </Button>
         </div>
+
+        {/* Daily Missions */}
+        <DailyMissions />
 
         {/* Progress & Streak Card */}
         <motion.div
@@ -374,11 +573,11 @@ const Activities = () => {
               <div>
                 <h3 className="font-semibold text-foreground">Progresso Diário</h3>
                 <p className="text-sm text-muted-foreground">
-                  {completedCount} de 5 atividades completas
+                  {completedCount} de 5 atividades para ofensiva
                 </p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3">
               <Button
                 onClick={claimStreak}
@@ -390,24 +589,31 @@ const Activities = () => {
                 }`}
               >
                 <Flame className="mr-2 h-4 w-4" />
-                {canClaimStreak ? "Marcar Ofensiva!" : `${5 - completedCount} restantes`}
+                {canClaimStreak
+                  ? "Marcar Ofensiva!"
+                  : `${5 - completedCount} restantes`}
               </Button>
             </div>
           </div>
-          
+
           <Progress value={progress} className="h-3" />
-          
+
           <div className="flex justify-between mt-2 text-xs text-muted-foreground">
             {[1, 2, 3, 4, 5].map((num) => (
               <span
                 key={num}
-                className={`${completedCount >= num ? "text-primary font-semibold" : ""}`}
+                className={`${
+                  completedCount >= num ? "text-primary font-semibold" : ""
+                }`}
               >
                 {num}
               </span>
             ))}
           </div>
         </motion.div>
+
+        {/* Custom Activity Creator */}
+        <CustomActivityCreator onActivityCreated={fetchTodayActivities} />
 
         {/* No subjects warning */}
         {(!profile?.subjects || profile.subjects.length === 0) && (
@@ -419,9 +625,12 @@ const Activities = () => {
             <div className="flex items-center gap-3">
               <Lightbulb className="text-warning" size={24} />
               <div>
-                <h3 className="font-semibold text-foreground">Configure seu perfil</h3>
+                <h3 className="font-semibold text-foreground">
+                  Configure seu perfil
+                </h3>
                 <p className="text-sm text-muted-foreground">
-                  Adicione seu ano escolar e matérias para receber atividades personalizadas.
+                  Adicione seu ano escolar e matérias para receber atividades
+                  personalizadas.
                 </p>
               </div>
             </div>
@@ -442,245 +651,83 @@ const Activities = () => {
               Nenhuma atividade ainda
             </h3>
             <p className="text-muted-foreground mb-4">
-              Clique em "Gerar Nova Atividade" para começar a estudar!
+              Clique em "Gerar Atividade" ou use o criador personalizado!
             </p>
           </motion.div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {activities.map((activity, index) => {
-              const Icon = subjectIcons[activity.subject] || BookOpen;
-
-              return (
-                <motion.div
-                  key={activity.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 + index * 0.05 }}
+            {activities.map((activity, index) => (
+              <motion.div
+                key={activity.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 + index * 0.05 }}
+              >
+                <Card
+                  className={`cursor-pointer transition-all duration-300 hover:shadow-lg hover:border-primary/30 ${
+                    activity.is_completed ? "opacity-80" : ""
+                  }`}
+                  onClick={() =>
+                    !selectedActivity && setSelectedActivity(activity)
+                  }
                 >
-                  <Card
-                    className={`cursor-pointer transition-all duration-300 hover:shadow-lg hover:border-primary/30 ${
-                      activity.is_completed ? "opacity-80" : ""
-                    }`}
-                    onClick={() => !selectedActivity && setSelectedActivity(activity)}
-                  >
-                    <CardHeader className="pb-2">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="p-2 rounded-lg bg-primary/10">
-                            <Icon className="text-primary" size={18} />
-                          </div>
-                          <Badge variant="outline" className="text-xs">
-                            {activity.subject}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge className={difficultyColors[activity.difficulty]}>
-                            {difficultyLabels[activity.difficulty]}
-                          </Badge>
-                          {activity.is_completed && (
-                            activity.is_correct ? (
-                              <CheckCircle2 className="text-success" size={20} />
-                            ) : (
-                              <XCircle className="text-destructive" size={20} />
-                            )
-                          )}
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <CardTitle className="text-lg mb-2 line-clamp-2">
-                        {activity.title}
-                      </CardTitle>
-                      <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                        {activity.content_text.substring(0, 120)}...
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3 text-sm">
-                          <span className="flex items-center gap-1 text-primary">
-                            <Sparkles size={14} />
-                            +{activity.xp_reward} XP
-                          </span>
-                          <span className="flex items-center gap-1 text-rank-gold">
-                            <Coins size={14} />
-                            +{activity.coin_reward}
+                  <CardHeader className="pb-2">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="p-2 rounded-lg bg-primary/10">
+                          <span className="text-lg">
+                            {getSubjectIcon(activity.subject)}
                           </span>
                         </div>
-                        <ChevronRight className="text-muted-foreground" size={18} />
+                        <Badge variant="outline" className="text-xs">
+                          {getSubjectLabel(activity.subject)}
+                        </Badge>
                       </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })}
+                      <div className="flex items-center gap-2">
+                        <Badge className={difficultyColors[activity.difficulty]}>
+                          {difficultyLabels[activity.difficulty]}
+                        </Badge>
+                        {activity.is_completed &&
+                          (activity.is_correct ? (
+                            <CheckCircle2 className="text-success" size={20} />
+                          ) : (
+                            <XCircle className="text-destructive" size={20} />
+                          ))}
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <CardTitle className="text-lg mb-2 line-clamp-2">
+                      {activity.title}
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                      {activity.content_text.substring(0, 120)}...
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3 text-sm">
+                        <span className="flex items-center gap-1 text-primary">
+                          <Sparkles size={14} />
+                          {activity.xp_reward} XP
+                        </span>
+                        <span className="flex items-center gap-1 text-rank-gold">
+                          <Coins size={14} />
+                          {activity.coin_reward}
+                        </span>
+                      </div>
+                      {!activity.is_completed && (
+                        <Button size="sm" variant="ghost" className="text-primary">
+                          Jogar
+                          <ChevronRight size={16} className="ml-1" />
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
           </div>
         )}
       </motion.div>
-
-      {/* Activity Modal */}
-      <AnimatePresence>
-        {selectedActivity && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={closeActivity}
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-card border border-border rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Header */}
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge variant="outline">{selectedActivity.subject}</Badge>
-                    <Badge className={difficultyColors[selectedActivity.difficulty]}>
-                      {difficultyLabels[selectedActivity.difficulty]}
-                    </Badge>
-                  </div>
-                  <h2 className="text-xl font-bold text-foreground">
-                    {selectedActivity.title}
-                  </h2>
-                </div>
-                <Button variant="ghost" size="icon" onClick={closeActivity}>
-                  <XCircle size={20} />
-                </Button>
-              </div>
-
-              {/* Content Text */}
-              <div className="bg-muted/30 rounded-xl p-4 mb-6">
-                <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
-                  <BookOpen size={18} className="text-primary" />
-                  Texto Base
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
-                  {selectedActivity.content_text}
-                </p>
-              </div>
-
-              {/* Question */}
-              <div className="mb-6">
-                <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-                  <Brain size={18} className="text-accent" />
-                  Questão
-                </h3>
-                <p className="text-foreground mb-4">{selectedActivity.question}</p>
-
-                {!showResult ? (
-                  <>
-                    {selectedActivity.question_type === "multiple_choice" && selectedActivity.options ? (
-                      <div className="space-y-2">
-                        {selectedActivity.options.map((option, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => setSelectedAnswer(option)}
-                            disabled={selectedActivity.is_completed}
-                            className={`w-full text-left p-3 rounded-lg border transition-all ${
-                              selectedAnswer === option
-                                ? "border-primary bg-primary/10"
-                                : "border-border hover:border-primary/50"
-                            } ${selectedActivity.is_completed ? "opacity-50 cursor-not-allowed" : ""}`}
-                          >
-                            <span className="text-sm">{option}</span>
-                          </button>
-                        ))}
-                      </div>
-                    ) : (
-                      <Textarea
-                        value={essayAnswer}
-                        onChange={(e) => setEssayAnswer(e.target.value)}
-                        placeholder="Escreva sua resposta aqui..."
-                        className="min-h-32"
-                        disabled={selectedActivity.is_completed}
-                      />
-                    )}
-
-                    {!selectedActivity.is_completed && (
-                      <Button
-                        onClick={submitAnswer}
-                        disabled={submitting || (!selectedAnswer && !essayAnswer)}
-                        className="w-full mt-4 bg-gradient-to-r from-primary to-accent"
-                      >
-                        {submitting ? (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <CheckCircle2 className="mr-2 h-4 w-4" />
-                        )}
-                        Enviar Resposta
-                      </Button>
-                    )}
-                  </>
-                ) : (
-                  /* Result */
-                  <div className="space-y-4">
-                    <div
-                      className={`p-4 rounded-xl ${
-                        selectedActivity.is_correct
-                          ? "bg-success/10 border border-success/30"
-                          : "bg-destructive/10 border border-destructive/30"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 mb-2">
-                        {selectedActivity.is_correct ? (
-                          <CheckCircle2 className="text-success" size={24} />
-                        ) : (
-                          <XCircle className="text-destructive" size={24} />
-                        )}
-                        <span className="font-semibold text-foreground">
-                          {selectedActivity.is_correct ? "Correto!" : "Resposta Incorreta"}
-                        </span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Sua resposta: {selectedActivity.user_answer}
-                      </p>
-                      {!selectedActivity.is_correct && (
-                        <p className="text-sm text-foreground mt-1">
-                          Resposta correta: {selectedActivity.correct_answer}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Explanation */}
-                    <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
-                      <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2">
-                        <Lightbulb className="text-primary" size={18} />
-                        Explicação
-                      </h4>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {selectedActivity.explanation}
-                      </p>
-                    </div>
-
-                    {/* Rewards */}
-                    <div className="flex items-center justify-center gap-4 py-4">
-                      <div className="flex items-center gap-2 text-primary">
-                        <Sparkles size={20} />
-                        <span className="font-semibold">
-                          +{selectedActivity.is_correct ? selectedActivity.xp_reward : Math.floor(selectedActivity.xp_reward / 3)} XP
-                        </span>
-                      </div>
-                      {selectedActivity.is_correct && (
-                        <div className="flex items-center gap-2 text-rank-gold">
-                          <Coins size={20} />
-                          <span className="font-semibold">+{selectedActivity.coin_reward}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <Button onClick={closeActivity} variant="outline" className="w-full">
-                      Fechar
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </DashboardLayout>
   );
 };

@@ -17,12 +17,15 @@ import {
   Award,
   Star,
   Crown,
+  Swords,
+  Rocket,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { FloatingElements } from "@/components/FloatingElements";
+import DailyMissions from "@/components/DailyMissions";
 import { useAuth } from "@/hooks/useAuth";
 import { getRankData, getRankProgress } from "@/lib/ranks";
 
@@ -46,35 +49,36 @@ const Dashboard = () => {
 
   const quickActions = [
     {
-      title: "Missões Diárias",
-      description: "Complete desafios e ganhe XP",
-      icon: Target,
+      title: "Modo Jogo",
+      description: "Atividades e quizzes",
+      icon: Gamepad2,
       path: "/activities",
       color: "from-green-500 to-emerald-500",
-      badge: "5+ XP",
+      badge: "XP",
     },
     {
-      title: "Flashcards",
+      title: "Flashcards IA",
       description: "Memorize com IA",
       icon: Brain,
       path: "/flashcards",
       color: "from-purple-500 to-pink-500",
-      badge: "Novo",
-    },
-    {
-      title: "Teacher Samuk",
-      description: "Seu mentor IA",
-      icon: Gamepad2,
-      path: "/teacher-samuk",
-      color: "from-emerald-500 to-cyan-500",
       badge: "IA",
     },
     {
-      title: "Loja",
-      description: "Gaste suas moedas",
+      title: "Teacher Samuk",
+      description: "Seu mentor virtual",
+      icon: Swords,
+      path: "/teacher-samuk",
+      color: "from-emerald-500 to-cyan-500",
+      badge: "Chat",
+    },
+    {
+      title: "Loja & Temas",
+      description: "Personalize seu app",
       icon: ShoppingBag,
       path: "/shop",
       color: "from-amber-500 to-orange-500",
+      badge: "Novo",
     },
   ];
 
@@ -109,6 +113,25 @@ const Dashboard = () => {
     },
   ];
 
+  const getSamukMessage = () => {
+    const streakCount = streak?.current_streak || 0;
+    const hour = new Date().getHours();
+
+    if (streakCount >= 30) {
+      return "30 dias de ofensiva?! Você é uma LENDA! 🏆👑";
+    } else if (streakCount >= 7) {
+      return `${streakCount} dias seguidos! Você tá VOANDO! 🚀🔥`;
+    } else if (streakCount > 0) {
+      return `${streakCount} dias de ofensiva! Bora manter esse ritmo! 💪`;
+    } else if (hour < 12) {
+      return "Bom dia! Que tal começar o dia com uma atividade? ☀️";
+    } else if (hour < 18) {
+      return "Boa tarde! Hora de estudar e ganhar XP! 📚";
+    } else {
+      return "Boa noite! Ainda dá tempo de evoluir hoje! 🌙";
+    }
+  };
+
   return (
     <DashboardLayout profile={profile}>
       <FloatingElements />
@@ -130,7 +153,7 @@ const Dashboard = () => {
               transition={{ duration: 2, repeat: Infinity }}
               className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 w-fit"
             >
-              <Gamepad2 className="text-white" size={32} />
+              <Rocket className="text-white" size={32} />
             </motion.div>
             <div className="flex-1">
               <h1 className="text-2xl md:text-3xl font-bold text-foreground">
@@ -138,15 +161,13 @@ const Dashboard = () => {
               </h1>
               <p className="text-muted-foreground mt-1">
                 <span className="text-emerald-500 font-medium">Teacher Samuk:</span>{" "}
-                {streak?.current_streak && streak.current_streak > 0
-                  ? `Mano, ${streak.current_streak} dias de ofensiva! Você tá on fire! 🔥`
-                  : "Bora começar o dia com tudo? Sua primeira missão te espera!"}
+                {getSamukMessage()}
               </p>
             </div>
-            <Link to="/teacher-samuk">
+            <Link to="/activities">
               <Button className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:opacity-90">
-                Falar com Samuk
-                <ArrowRight className="ml-2" size={18} />
+                <Gamepad2 className="mr-2" size={18} />
+                Jogar Agora
               </Button>
             </Link>
           </div>
@@ -160,7 +181,8 @@ const Dashboard = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 + index * 0.05 }}
-              className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:border-primary/30 transition-all"
+              whileHover={{ scale: 1.02 }}
+              className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:border-primary/30 transition-all cursor-pointer"
             >
               <div className="flex items-center gap-3">
                 <div className={`p-2 rounded-lg ${stat.bg}`}>
@@ -185,9 +207,13 @@ const Dashboard = () => {
           >
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${rankData.rank.bgColor}/20`}>
+                <motion.div
+                  animate={{ rotate: [0, 5, -5, 0] }}
+                  transition={{ duration: 3, repeat: Infinity }}
+                  className={`p-2 rounded-lg ${rankData.rank.bgColor}/20`}
+                >
                   <Trophy className={rankData.rank.color} size={24} />
-                </div>
+                </motion.div>
                 <div>
                   <h3 className="font-semibold text-foreground">Patente Atual</h3>
                   <p className={`text-sm ${rankData.rank.color} font-medium`}>
@@ -233,6 +259,7 @@ const Dashboard = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.35 + index * 0.05 }}
+                whileHover={{ scale: 1.03, y: -2 }}
               >
                 <Link
                   to={action.path}
@@ -243,9 +270,13 @@ const Dashboard = () => {
                       {action.badge}
                     </Badge>
                   )}
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
+                  <motion.div
+                    whileHover={{ rotate: [0, -10, 10, 0] }}
+                    transition={{ duration: 0.5 }}
+                    className={`w-12 h-12 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center mb-3`}
+                  >
                     <action.icon className="text-white" size={24} />
-                  </div>
+                  </motion.div>
                   <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
                     {action.title}
                   </h4>
@@ -258,6 +289,9 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* Daily Missions Component */}
+        <DailyMissions />
+
         {/* Achievement & Ranking Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Achievements Teaser */}
@@ -265,14 +299,19 @@ const Dashboard = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
+            whileHover={{ scale: 1.01 }}
           >
             <Link to="/achievements">
               <div className="bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-yellow-500/10 border border-amber-500/30 rounded-xl p-5 hover:border-amber-500/50 transition-all group">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500">
+                    <motion.div
+                      animate={{ rotate: [0, 360] }}
+                      transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                      className="p-3 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500"
+                    >
                       <Award className="text-white" size={24} />
-                    </div>
+                    </motion.div>
                     <div>
                       <h3 className="font-semibold text-foreground">Conquistas</h3>
                       <p className="text-sm text-muted-foreground">
@@ -280,7 +319,7 @@ const Dashboard = () => {
                       </p>
                     </div>
                   </div>
-                  <ArrowRight className="text-muted-foreground group-hover:text-amber-500 transition-colors" size={20} />
+                  <ArrowRight className="text-muted-foreground group-hover:text-amber-500 group-hover:translate-x-1 transition-all" size={20} />
                 </div>
               </div>
             </Link>
@@ -291,14 +330,19 @@ const Dashboard = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.55 }}
+            whileHover={{ scale: 1.01 }}
           >
             <Link to="/global-ranking">
               <div className="bg-gradient-to-br from-purple-500/10 via-pink-500/5 to-indigo-500/10 border border-purple-500/30 rounded-xl p-5 hover:border-purple-500/50 transition-all group">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500">
+                    <motion.div
+                      animate={{ y: [0, -3, 0] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      className="p-3 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500"
+                    >
                       <Crown className="text-white" size={24} />
-                    </div>
+                    </motion.div>
                     <div>
                       <h3 className="font-semibold text-foreground">Ranking Global</h3>
                       <p className="text-sm text-muted-foreground">
@@ -306,7 +350,7 @@ const Dashboard = () => {
                       </p>
                     </div>
                   </div>
-                  <ArrowRight className="text-muted-foreground group-hover:text-purple-500 transition-colors" size={20} />
+                  <ArrowRight className="text-muted-foreground group-hover:text-purple-500 group-hover:translate-x-1 transition-all" size={20} />
                 </div>
               </div>
             </Link>
@@ -318,24 +362,29 @@ const Dashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
+          whileHover={{ scale: 1.01 }}
           className="bg-gradient-to-br from-purple-500/20 via-pink-500/20 to-orange-500/20 border border-purple-500/30 rounded-2xl p-6"
         >
           <div className="flex flex-col md:flex-row items-center gap-6">
-            <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500">
+            <motion.div
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 4, repeat: Infinity }}
+              className="p-4 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500"
+            >
               <Gift className="text-white" size={40} />
-            </div>
+            </motion.div>
             <div className="flex-1 text-center md:text-left">
               <h3 className="text-xl font-bold text-foreground mb-1">
-                Caixas Misteriosas na Loja!
+                🎨 Novos Temas na Loja!
               </h3>
               <p className="text-muted-foreground">
-                Abra caixas para ganhar moedas, XP, avatares exclusivos e muito mais!
+                Personalize seu app com temas exclusivos! Aurora Boreal, Neon Cyber, Realeza e muito mais!
               </p>
             </div>
             <Link to="/shop">
               <Button size="lg" className="bg-gradient-to-r from-purple-500 to-pink-500 hover:opacity-90">
                 <ShoppingBag className="mr-2" size={18} />
-                Ir para Loja
+                Ver Temas
               </Button>
             </Link>
           </div>
