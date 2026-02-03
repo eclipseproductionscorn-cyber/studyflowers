@@ -26,6 +26,7 @@ import Flashcards from "./pages/Flashcards";
 import TeacherSamuk from "./pages/TeacherSamuk";
 import Achievements from "./pages/Achievements";
 import GlobalRanking from "./pages/GlobalRanking";
+import LevelingQuiz from "./pages/LevelingQuiz";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/leveling-quiz" element={<LevelingQuiz />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/activities" element={<Activities />} />
             <Route path="/streak" element={<Streak />} />

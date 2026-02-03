@@ -15,12 +15,17 @@ import {
   X,
   Target,
   Wrench,
+  Award,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import logo from "@/assets/studyflow-logo.png";
 import { getRankData } from "@/lib/ranks";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { getLevelFromXP, getLevelProgress } from "@/lib/levelSystem";
+import { Progress } from "@/components/ui/progress";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -36,8 +41,10 @@ interface DashboardLayoutProps {
 const menuItems = [
   { icon: Home, label: "Início", path: "/dashboard" },
   { icon: BookOpen, label: "Atividades", path: "/activities" },
+  { icon: Sparkles, label: "Flashcards", path: "/flashcards" },
   { icon: Target, label: "Metas Semanais", path: "/weekly-goals" },
   { icon: Flame, label: "Ofensiva", path: "/streak" },
+  { icon: Award, label: "Conquistas", path: "/achievements" },
   { icon: Trophy, label: "Ranking", path: "/global-ranking" },
   { icon: ShoppingBag, label: "Loja", path: "/shop" },
   { icon: Wrench, label: "Ferramentas", path: "/tools" },
@@ -124,7 +131,10 @@ const DashboardLayout = ({ children, profile }: DashboardLayoutProps) => {
               {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
             </Button>
 
-            <div className="flex items-center gap-4 ml-auto">
+            <div className="flex items-center gap-3 ml-auto">
+              {/* Theme Toggle */}
+              <ThemeToggle />
+
               {/* Coins */}
               <Link 
                 to="/shop"
@@ -136,11 +146,19 @@ const DashboardLayout = ({ children, profile }: DashboardLayoutProps) => {
                 </span>
               </Link>
 
+              {/* Level Badge */}
+              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-primary/20 to-accent/20 border border-primary/30 rounded-full">
+                <Sparkles size={16} className="text-primary" />
+                <span className="font-medium text-sm text-primary">
+                  Nv. {profile?.level || 1}
+                </span>
+              </div>
+
               {/* Rank Badge */}
               {rankData && (
                 <Link 
                   to="/rankings"
-                  className={`hidden md:flex items-center gap-2 px-3 py-1.5 ${rankData.rank.bgColor}/20 border ${rankData.rank.borderColor}/30 rounded-full hover:scale-105 transition-transform`}
+                  className={`hidden lg:flex items-center gap-2 px-3 py-1.5 ${rankData.rank.bgColor}/20 border ${rankData.rank.borderColor}/30 rounded-full hover:scale-105 transition-transform`}
                 >
                   <Trophy size={16} className={rankData.rank.color} />
                   <span className={`font-medium text-sm ${rankData.rank.color}`}>
