@@ -41,8 +41,8 @@ const Onboarding = () => {
     } as any);
 
     if (success) {
-      toast.success("Perfil configurado! Vamos começar! 🚀");
-      navigate("/dashboard");
+      toast.success("Perfil configurado! Agora vamos medir seu nível! 🧠");
+      navigate("/leveling-quiz");
     } else {
       toast.error("Erro ao salvar. Tente novamente.");
     }

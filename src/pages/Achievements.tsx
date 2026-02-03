@@ -7,6 +7,8 @@ import {
   Check,
   Gift,
   Star,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -15,12 +17,15 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { FloatingElements } from "@/components/FloatingElements";
 import { useAuth } from "@/hooks/useAuth";
 import { achievements, getRarityColor, getRarityLabel, getAchievementProgress, type Achievement } from "@/lib/achievements";
+import { secretAchievements, getRarityColor as getSecretRarityColor, getRarityLabel as getSecretRarityLabel, type SecretAchievement } from "@/lib/secretAchievements";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const Achievements = () => {
   const { profile, user, addXP, addCoins } = useAuth();
   const [unlockedIds, setUnlockedIds] = useState<string[]>([]);
+  const [unlockedSecretIds, setUnlockedSecretIds] = useState<string[]>([]);
+  const [revealedSecrets, setRevealedSecrets] = useState<string[]>([]);
   const [stats, setStats] = useState({
     lessonsCompleted: 0,
     flashcardsCorrect: 0,
@@ -41,14 +46,12 @@ const Achievements = () => {
   const fetchStats = async () => {
     if (!user) return;
 
-    // Fetch completed activities count
     const { data: activities } = await supabase
       .from("ai_activities")
       .select("id")
       .eq("user_id", user.id)
       .eq("is_completed", true);
 
-    // Fetch streak data
     const { data: streak } = await supabase
       .from("user_streaks")
       .select("current_streak")
@@ -57,9 +60,9 @@ const Achievements = () => {
 
     setStats({
       lessonsCompleted: activities?.length || 0,
-      flashcardsCorrect: Math.floor((activities?.length || 0) * 2.5), // Estimate based on activities
+      flashcardsCorrect: Math.floor((activities?.length || 0) * 2.5),
       currentStreak: streak?.current_streak || 0,
-      rankPosition: 50, // Would need leaderboard query
+      rankPosition: 50,
       totalXP: profile?.xp || 0,
       totalCoins: profile?.coins || 0,
     });
@@ -67,21 +70,22 @@ const Achievements = () => {
 
   const loadUnlockedAchievements = () => {
     const saved = localStorage.getItem(`achievements-${user?.id}`);
-    if (saved) {
-      setUnlockedIds(JSON.parse(saved));
-    }
+    if (saved) setUnlockedIds(JSON.parse(saved));
+
+    const savedSecrets = localStorage.getItem(`secret-achievements-${user?.id}`);
+    if (savedSecrets) setUnlockedSecretIds(JSON.parse(savedSecrets));
+
+    const revealed = localStorage.getItem(`revealed-secrets-${user?.id}`);
+    if (revealed) setRevealedSecrets(JSON.parse(revealed));
   };
 
   const claimAchievement = async (achievement: Achievement) => {
     if (claimingId) return;
     
     setClaimingId(achievement.id);
-    
-    // Add rewards
     await addXP(achievement.xpReward);
     await addCoins(achievement.coinReward);
     
-    // Save as claimed
     const newUnlocked = [...unlockedIds, achievement.id];
     setUnlockedIds(newUnlocked);
     localStorage.setItem(`achievements-${user?.id}`, JSON.stringify(newUnlocked));
@@ -91,6 +95,35 @@ const Achievements = () => {
     );
     
     setClaimingId(null);
+  };
+
+  const claimSecretAchievement = async (achievement: SecretAchievement) => {
+    if (claimingId) return;
+    
+    setClaimingId(achievement.id);
+    await addXP(achievement.xpReward);
+    await addCoins(achievement.coinReward);
+    
+    const newUnlocked = [...unlockedSecretIds, achievement.id];
+    setUnlockedSecretIds(newUnlocked);
+    localStorage.setItem(`secret-achievements-${user?.id}`, JSON.stringify(newUnlocked));
+    
+    toast.success(
+      `🔮 Conquista SECRETA: ${achievement.name}! +${achievement.xpReward} XP e +${achievement.coinReward} moedas!`
+    );
+    
+    setClaimingId(null);
+  };
+
+  const toggleRevealSecret = (id: string) => {
+    let newRevealed: string[];
+    if (revealedSecrets.includes(id)) {
+      newRevealed = revealedSecrets.filter(r => r !== id);
+    } else {
+      newRevealed = [...revealedSecrets, id];
+    }
+    setRevealedSecrets(newRevealed);
+    localStorage.setItem(`revealed-secrets-${user?.id}`, JSON.stringify(newRevealed));
   };
 
   const renderAchievementCard = (achievement: Achievement) => {
@@ -112,18 +145,14 @@ const Achievements = () => {
             : "border-border/50 opacity-70"
         }`}
       >
-        {/* Rarity Badge */}
         <Badge className={`absolute top-3 right-3 ${getRarityColor(achievement.rarity)}`}>
           {getRarityLabel(achievement.rarity)}
         </Badge>
 
         <div className="flex items-start gap-4">
-          {/* Icon */}
           <div
             className={`w-14 h-14 rounded-xl flex items-center justify-center ${
-              progress.unlocked
-                ? `${achievement.bgColor}/20`
-                : "bg-muted/50"
+              progress.unlocked ? `${achievement.bgColor}/20` : "bg-muted/50"
             }`}
           >
             {progress.unlocked ? (
@@ -133,49 +162,38 @@ const Achievements = () => {
             )}
           </div>
 
-          {/* Info */}
           <div className="flex-1">
             <h3 className="font-semibold text-foreground">{achievement.name}</h3>
-            <p className="text-sm text-muted-foreground mb-2">
-              {achievement.description}
-            </p>
+            <p className="text-sm text-muted-foreground mb-2">{achievement.description}</p>
 
-            {/* Progress */}
             {!isClaimed && (
               <div className="space-y-1">
                 <Progress value={progress.percentage} className="h-2" />
                 <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>
-                    {progress.current} / {achievement.requirement}
-                  </span>
+                  <span>{progress.current} / {achievement.requirement}</span>
                   <span>{Math.round(progress.percentage)}%</span>
                 </div>
               </div>
             )}
 
-            {/* Rewards */}
             <div className="flex items-center gap-3 mt-2 text-sm">
               <span className="flex items-center gap-1 text-primary">
-                <Sparkles size={14} />
-                +{achievement.xpReward} XP
+                <Sparkles size={14} />+{achievement.xpReward} XP
               </span>
               <span className="flex items-center gap-1 text-rank-gold">
-                <Star size={14} />
-                +{achievement.coinReward}
+                <Star size={14} />+{achievement.coinReward}
               </span>
             </div>
 
-            {/* Claim Button */}
             {canClaim && (
               <motion.button
                 initial={{ scale: 0.9 }}
                 animate={{ scale: 1 }}
                 onClick={() => claimAchievement(achievement)}
                 disabled={claimingId === achievement.id}
-                className="mt-3 w-full py-2 px-4 bg-gradient-to-r from-primary to-accent text-white rounded-lg font-medium flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+                className="mt-3 w-full py-2 px-4 bg-gradient-to-r from-primary to-accent text-white rounded-lg font-medium flex items-center justify-center gap-2 hover:opacity-90"
               >
-                <Gift size={16} />
-                Resgatar Recompensa
+                <Gift size={16} />Resgatar Recompensa
               </motion.button>
             )}
 
@@ -183,6 +201,104 @@ const Achievements = () => {
               <div className="mt-3 flex items-center gap-2 text-success">
                 <Check size={16} />
                 <span className="text-sm font-medium">Resgatado</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    );
+  };
+
+  const renderSecretCard = (secret: SecretAchievement) => {
+    const isClaimed = unlockedSecretIds.includes(secret.id);
+    const isRevealed = revealedSecrets.includes(secret.id);
+    
+    // Simple unlock check (would need proper trigger system)
+    const isUnlocked = 
+      (secret.trigger === "10000_total_xp" && (profile?.xp || 0) >= 10000) ||
+      (secret.trigger === "100_day_streak" && stats.currentStreak >= 100) ||
+      (secret.trigger === "reach_level_50" && (profile?.level || 1) >= 50);
+    
+    const canClaim = isUnlocked && !isClaimed;
+
+    return (
+      <motion.div
+        key={secret.id}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        whileHover={canClaim ? { scale: 1.02 } : {}}
+        className={`relative bg-card/50 backdrop-blur-sm border rounded-xl p-4 transition-all ${
+          isClaimed
+            ? "border-purple-500/50 bg-purple-500/5"
+            : canClaim
+            ? "border-purple-500/50 ring-2 ring-purple-500/20"
+            : "border-border/50"
+        }`}
+      >
+        <div className="flex items-center justify-between mb-3">
+          <Badge className={getSecretRarityColor(secret.rarity)}>
+            {getSecretRarityLabel(secret.rarity)}
+          </Badge>
+          <button
+            onClick={() => toggleRevealSecret(secret.id)}
+            className="p-1.5 rounded-lg hover:bg-muted/50 transition-colors"
+          >
+            {isRevealed ? (
+              <EyeOff size={16} className="text-muted-foreground" />
+            ) : (
+              <Eye size={16} className="text-muted-foreground" />
+            )}
+          </button>
+        </div>
+
+        <div className="flex items-start gap-4">
+          <motion.div
+            animate={isClaimed ? { rotate: [0, 5, -5, 0] } : {}}
+            transition={{ duration: 2, repeat: Infinity }}
+            className={`w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br ${
+              isUnlocked || isClaimed ? secret.color : "from-gray-500 to-gray-600"
+            }`}
+          >
+            {isUnlocked || isClaimed ? (
+              <secret.icon className="text-white" size={28} />
+            ) : (
+              <span className="text-2xl">❓</span>
+            )}
+          </motion.div>
+
+          <div className="flex-1">
+            <h3 className="font-semibold text-foreground">
+              {isRevealed || isClaimed ? secret.name : "???"}
+            </h3>
+            <p className="text-sm text-muted-foreground mb-2">
+              {isRevealed || isClaimed ? secret.description : secret.hint}
+            </p>
+
+            <div className="flex items-center gap-3 mt-2 text-sm">
+              <span className="flex items-center gap-1 text-purple-400">
+                <Sparkles size={14} />+{secret.xpReward} XP
+              </span>
+              <span className="flex items-center gap-1 text-amber-400">
+                <Star size={14} />+{secret.coinReward}
+              </span>
+            </div>
+
+            {canClaim && (
+              <motion.button
+                initial={{ scale: 0.9 }}
+                animate={{ scale: 1 }}
+                onClick={() => claimSecretAchievement(secret)}
+                disabled={claimingId === secret.id}
+                className="mt-3 w-full py-2 px-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium flex items-center justify-center gap-2 hover:opacity-90"
+              >
+                <Gift size={16} />Resgatar Segredo
+              </motion.button>
+            )}
+
+            {isClaimed && (
+              <div className="mt-3 flex items-center gap-2 text-purple-400">
+                <Check size={16} />
+                <span className="text-sm font-medium">Descoberto!</span>
               </div>
             )}
           </div>
@@ -221,11 +337,15 @@ const Achievements = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 rounded-full">
-            <Trophy className="text-amber-500" size={20} />
-            <span className="font-bold">
-              {unlockedCount} / {achievements.length}
-            </span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 rounded-full">
+              <Trophy className="text-amber-500" size={20} />
+              <span className="font-bold">{unlockedCount} / {achievements.length}</span>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-full">
+              <Eye className="text-purple-400" size={20} />
+              <span className="font-bold">{unlockedSecretIds.length} / {secretAchievements.length}</span>
+            </div>
           </div>
         </div>
 
@@ -249,11 +369,7 @@ const Achievements = () => {
               </div>
             </div>
           </div>
-
-          <Progress
-            value={(unlockedCount / achievements.length) * 100}
-            className="h-3"
-          />
+          <Progress value={(unlockedCount / achievements.length) * 100} className="h-3" />
         </motion.div>
 
         {/* Tabs */}
@@ -265,6 +381,9 @@ const Achievements = () => {
             <TabsTrigger value="streak">Ofensiva</TabsTrigger>
             <TabsTrigger value="ranking">Ranking</TabsTrigger>
             <TabsTrigger value="xp">XP</TabsTrigger>
+            <TabsTrigger value="secrets" className="text-purple-400">
+              🔮 Secretas
+            </TabsTrigger>
           </TabsList>
 
           {["all", "lessons", "flashcards", "streak", "ranking", "xp"].map((type) => (
@@ -274,6 +393,24 @@ const Achievements = () => {
               </div>
             </TabsContent>
           ))}
+
+          <TabsContent value="secrets">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mt-4"
+            >
+              <div className="bg-gradient-to-br from-purple-500/10 via-pink-500/5 to-violet-500/10 border border-purple-500/30 rounded-xl p-4 mb-4">
+                <p className="text-sm text-purple-300">
+                  🔮 <strong>Conquistas Secretas</strong> são desbloqueadas ao descobrir easter eggs e completar desafios especiais. 
+                  Clique no 👁️ para ver dicas!
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {secretAchievements.map(renderSecretCard)}
+              </div>
+            </motion.div>
+          </TabsContent>
         </Tabs>
       </motion.div>
     </DashboardLayout>
