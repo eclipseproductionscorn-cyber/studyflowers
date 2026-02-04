@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -26,6 +26,7 @@ import { getRankData } from "@/lib/ranks";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { getLevelFromXP, getLevelProgress } from "@/lib/levelSystem";
 import { Progress } from "@/components/ui/progress";
+import { FloatingElements } from "@/components/FloatingElements";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -70,7 +71,11 @@ const DashboardLayout = ({ children, profile }: DashboardLayoutProps) => {
   const rankData = getRankData(profile?.current_rank || "bronze_1");
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex relative overflow-hidden">
+      {/* Floating Elements for dark mode gamification */}
+      <div className="hidden dark:block">
+        <FloatingElements count={25} />
+      </div>
       {/* Mobile Overlay */}
       <AnimatePresence>
         {sidebarOpen && (

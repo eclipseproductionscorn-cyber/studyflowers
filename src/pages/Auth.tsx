@@ -35,16 +35,30 @@ const Auth = () => {
   const [password, setPassword] = useState("");
 
   useEffect(() => {
-    // Check if user is already logged in
+    // Check if user is already logged in and handle redirect based on onboarding status
+    const checkUserAndRedirect = async (userId: string) => {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("onboarding_completed")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (profile?.onboarding_completed) {
+        navigate("/dashboard");
+      } else {
+        navigate("/onboarding");
+      }
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
-        navigate("/dashboard");
+        checkUserAndRedirect(session.user.id);
       }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        navigate("/dashboard");
+        checkUserAndRedirect(session.user.id);
       }
     });
 
@@ -107,9 +121,11 @@ const Auth = () => {
         } else {
           toast.error(error.message);
         }
+      } else if (error?.message?.includes("Email not confirmed")) {
+        toast.info("Verifique seu e-mail para confirmar a conta!");
       } else {
-        toast.success("Conta criada com sucesso! Bem-vindo ao Studio Flow!");
-        navigate("/dashboard");
+        toast.success("Conta criada com sucesso! Vamos configurar seu perfil! 🎮");
+        navigate("/onboarding");
       }
     } catch (error) {
       if (error instanceof z.ZodError) {

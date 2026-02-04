@@ -35,21 +35,72 @@ export const useAuth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
+    const handleSession = async (session: { user: User } | null) => {
       if (!session?.user) {
-        navigate("/auth");
+        setLoading(false);
+        const currentPath = window.location.pathname;
+        // Allow public routes
+        if (currentPath !== "/" && currentPath !== "/auth") {
+          navigate("/auth");
+        }
+        return;
       }
+
+      setUser(session.user);
+      
+      // Fetch profile and check onboarding status
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+
+      if (profileData) {
+        // Auto-update rank based on XP
+        const { rankId, level } = getRankFromXP(profileData.xp);
+        const newRank = getRankString(rankId, level);
+        
+        if (newRank !== profileData.current_rank) {
+          await supabase
+            .from("profiles")
+            .update({ current_rank: newRank })
+            .eq("user_id", session.user.id);
+          profileData.current_rank = newRank;
+        }
+        
+        setProfile(profileData);
+
+        // Check onboarding status for redirects
+        const currentPath = window.location.pathname;
+        if (!profileData.onboarding_completed && 
+            currentPath !== "/onboarding" && 
+            currentPath !== "/leveling-quiz" && 
+            currentPath !== "/auth" && 
+            currentPath !== "/") {
+          navigate("/onboarding");
+        }
+      }
+
+      // Fetch streak data
+      const { data: streakData } = await supabase
+        .from("user_streaks")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+
+      if (streakData) {
+        setStreak(streakData);
+      }
+
+      setLoading(false);
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      handleSession(session);
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session?.user) {
-        navigate("/auth");
-      } else {
-        setUser(session.user);
-        fetchProfile(session.user.id);
-        fetchStreak(session.user.id);
-      }
+      handleSession(session);
     });
 
     return () => subscription.unsubscribe();
@@ -65,18 +116,6 @@ export const useAuth = () => {
     if (error) {
       console.error("Error fetching profile:", error);
     } else if (data) {
-      // Auto-update rank based on XP
-      const { rankId, level } = getRankFromXP(data.xp);
-      const newRank = getRankString(rankId, level);
-      
-      if (newRank !== data.current_rank) {
-        await supabase
-          .from("profiles")
-          .update({ current_rank: newRank })
-          .eq("user_id", userId);
-        data.current_rank = newRank;
-      }
-      
       setProfile(data);
     }
     setLoading(false);

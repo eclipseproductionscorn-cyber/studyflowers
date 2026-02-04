@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { User, Mail, Save, Loader2, Moon, Sun, Palette, GraduationCap, BookOpen, Brain, Award } from "lucide-react";
+import { Link } from "react-router-dom";
+import { User, Mail, Save, Loader2, Moon, Sun, Palette, GraduationCap, BookOpen, Brain, Award, RefreshCw, Edit2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,7 +10,7 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { FloatingElements } from "@/components/FloatingElements";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { schoolYears, allSubjects } from "@/lib/subjects";
+import { schoolYears, allSubjects, getSubjectsByYear } from "@/lib/subjects";
 import { getLevelFromXP, getLevelProgress, getUnlockedRewards } from "@/lib/levelSystem";
 import { Progress } from "@/components/ui/progress";
 
@@ -17,9 +18,14 @@ const Settings = () => {
   const { profile, user, updateProfile } = useAuth();
   const [loading, setLoading] = useState(false);
   const [isDark, setIsDark] = useState(false);
+  const [editingAcademic, setEditingAcademic] = useState(false);
   const [formData, setFormData] = useState({
     public_name: profile?.public_name || "",
     full_name: profile?.full_name || "",
+  });
+  const [academicData, setAcademicData] = useState({
+    school_year: profile?.school_year || "",
+    subjects: profile?.subjects || [] as string[],
   });
 
   useEffect(() => {
@@ -32,6 +38,10 @@ const Settings = () => {
       setFormData({
         public_name: profile.public_name || "",
         full_name: profile.full_name || "",
+      });
+      setAcademicData({
+        school_year: profile.school_year || "",
+        subjects: profile.subjects || [],
       });
     }
   }, [profile]);
@@ -70,6 +80,40 @@ const Settings = () => {
     }
     setLoading(false);
   };
+
+  const handleSaveAcademic = async () => {
+    if (!academicData.school_year || academicData.subjects.length === 0) {
+      toast.error("Selecione o ano escolar e pelo menos uma matéria");
+      return;
+    }
+
+    setLoading(true);
+    const success = await updateProfile({
+      school_year: academicData.school_year,
+      subjects: academicData.subjects,
+    } as any);
+
+    if (success) {
+      toast.success("Dados acadêmicos atualizados! 🎓");
+      setEditingAcademic(false);
+    } else {
+      toast.error("Erro ao atualizar dados acadêmicos");
+    }
+    setLoading(false);
+  };
+
+  const toggleSubject = (subjectId: string) => {
+    setAcademicData(prev => ({
+      ...prev,
+      subjects: prev.subjects.includes(subjectId)
+        ? prev.subjects.filter(s => s !== subjectId)
+        : [...prev.subjects, subjectId]
+    }));
+  };
+
+  const availableSubjects = academicData.school_year 
+    ? getSubjectsByYear(academicData.school_year) 
+    : allSubjects;
 
   const currentLevel = getLevelFromXP(profile?.xp || 0);
   const levelProgress = getLevelProgress(profile?.xp || 0);
@@ -220,31 +264,116 @@ const Settings = () => {
 
             {/* School Info */}
             <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-6">
-              <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                <GraduationCap size={20} className="text-green-500" />
-                Dados Escolares
-              </h2>
-
-              <div className="space-y-4">
-                <div className="p-4 bg-muted/30 rounded-lg">
-                  <p className="text-sm text-muted-foreground">Ano Escolar</p>
-                  <p className="font-semibold text-foreground">{schoolYearLabel}</p>
-                </div>
-
-                <div className="p-4 bg-muted/30 rounded-lg">
-                  <p className="text-sm text-muted-foreground mb-2">Matérias</p>
-                  <div className="flex flex-wrap gap-2">
-                    {userSubjects.map(subject => subject && (
-                      <span
-                        key={subject.id}
-                        className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm"
-                      >
-                        {subject.icon} {subject.label}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                  <GraduationCap size={20} className="text-success" />
+                  Dados Escolares
+                </h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setEditingAcademic(!editingAcademic)}
+                >
+                  {editingAcademic ? (
+                    <>Cancelar</>
+                  ) : (
+                    <>
+                      <Edit2 size={14} className="mr-1" />
+                      Editar
+                    </>
+                  )}
+                </Button>
               </div>
+
+              {editingAcademic ? (
+                <div className="space-y-4">
+                  {/* Year Selection */}
+                  <div>
+                    <Label className="text-sm text-muted-foreground mb-2 block">Ano Escolar</Label>
+                    <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto">
+                      {schoolYears.map((year) => (
+                        <button
+                          key={year.value}
+                          onClick={() => setAcademicData(prev => ({ ...prev, school_year: year.value }))}
+                          className={`p-3 rounded-lg border text-left text-sm transition-all ${
+                            academicData.school_year === year.value
+                              ? "border-primary bg-primary/10 text-primary"
+                              : "border-border hover:border-primary/50"
+                          }`}
+                        >
+                          {year.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Subject Selection */}
+                  <div>
+                    <Label className="text-sm text-muted-foreground mb-2 block">
+                      Matérias ({academicData.subjects.length} selecionadas)
+                    </Label>
+                    <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                      {availableSubjects.map((subject) => (
+                        <button
+                          key={subject.id}
+                          onClick={() => toggleSubject(subject.id)}
+                          className={`p-3 rounded-lg border text-left text-sm transition-all flex items-center gap-2 ${
+                            academicData.subjects.includes(subject.id)
+                              ? "border-primary bg-primary/10 text-primary"
+                              : "border-border hover:border-primary/50"
+                          }`}
+                        >
+                          <span>{subject.icon}</span>
+                          <span>{subject.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Button onClick={handleSaveAcademic} disabled={loading} className="w-full">
+                    {loading ? (
+                      <Loader2 size={18} className="mr-2 animate-spin" />
+                    ) : (
+                      <Check size={18} className="mr-2" />
+                    )}
+                    Salvar Dados Escolares
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="p-4 bg-muted/30 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Ano Escolar</p>
+                    <p className="font-semibold text-foreground">{schoolYearLabel}</p>
+                  </div>
+
+                  <div className="p-4 bg-muted/30 rounded-lg">
+                    <p className="text-sm text-muted-foreground mb-2">Matérias</p>
+                    {userSubjects.length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {userSubjects.map(subject => subject && (
+                          <span
+                            key={subject.id}
+                            className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm"
+                          >
+                            {subject.icon} {subject.label}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground italic">
+                        Nenhuma matéria configurada. Clique em "Editar" para adicionar.
+                      </p>
+                    )}
+                  </div>
+
+                  <Link to="/leveling-quiz">
+                    <Button variant="outline" className="w-full">
+                      <RefreshCw size={16} className="mr-2" />
+                      Refazer Quiz de Nivelamento
+                    </Button>
+                  </Link>
+                </div>
+              )}
             </div>
           </motion.div>
         </div>
