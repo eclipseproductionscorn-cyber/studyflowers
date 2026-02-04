@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
 import {
   BookOpen,
   Brain,
@@ -18,6 +19,8 @@ import {
   Gamepad2,
   Target,
   Wand2,
+  Settings,
+  Rocket,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -28,6 +31,7 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { FloatingElements } from "@/components/FloatingElements";
 import DailyMissions from "@/components/DailyMissions";
 import CustomActivityCreator from "@/components/CustomActivityCreator";
+import { ActivityIllustration, SamukSpeechBubble, ActivityDecorations } from "@/components/ActivityIllustrations";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { getSubjectLabel, getSubjectIcon } from "@/lib/subjects";
@@ -361,19 +365,54 @@ const Activities = () => {
             </div>
           </div>
 
-          {/* Content Card */}
-          <Card className="mb-6">
+          {/* Content Card with Illustration */}
+          <Card className="mb-6 overflow-hidden relative">
+            <ActivityDecorations difficulty={selectedActivity.difficulty} />
             <CardHeader>
-              <CardTitle className="text-xl">{selectedActivity.title}</CardTitle>
+              <div className="flex items-start gap-4">
+                <ActivityIllustration subject={selectedActivity.subject} size="md" />
+                <div className="flex-1">
+                  <CardTitle className="text-xl">{selectedActivity.title}</CardTitle>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge variant="outline">
+                      {getSubjectIcon(selectedActivity.subject)}{" "}
+                      {getSubjectLabel(selectedActivity.subject)}
+                    </Badge>
+                    <Badge className={difficultyColors[selectedActivity.difficulty]}>
+                      {difficultyLabels[selectedActivity.difficulty]}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="prose prose-sm dark:prose-invert max-w-none">
-                <p className="text-muted-foreground whitespace-pre-wrap">
+              <div className="prose prose-sm dark:prose-invert max-w-none bg-muted/30 p-4 rounded-xl border border-border/30">
+                <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">
                   {selectedActivity.content_text}
                 </p>
               </div>
             </CardContent>
           </Card>
+
+          {/* Teacher Samuk Hint */}
+          {!showResult && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6"
+            >
+              <SamukSpeechBubble 
+                message={
+                  selectedActivity.difficulty === "hard" 
+                    ? "Essa é difícil! Leia o texto com atenção e pense bem antes de responder. Você consegue! 💪" 
+                    : selectedActivity.difficulty === "easy"
+                    ? "Essa é fácil! Confie no seu conhecimento e manda ver! 🚀"
+                    : "Analise bem as opções antes de escolher. Boa sorte! 🍀"
+                }
+                type="hint"
+              />
+            </motion.div>
+          )}
 
           {/* Question Card */}
           <Card>
@@ -623,16 +662,24 @@ const Activities = () => {
             className="bg-warning/10 border border-warning/30 rounded-xl p-4"
           >
             <div className="flex items-center gap-3">
-              <Lightbulb className="text-warning" size={24} />
-              <div>
+              <div className="p-3 rounded-xl bg-warning/20">
+                <GraduationCap className="text-warning" size={24} />
+              </div>
+              <div className="flex-1">
                 <h3 className="font-semibold text-foreground">
-                  Configure seu perfil
+                  Configure seu perfil primeiro! 🎓
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   Adicione seu ano escolar e matérias para receber atividades
-                  personalizadas.
+                  personalizadas pela IA.
                 </p>
               </div>
+              <Link to="/settings">
+                <Button variant="outline" size="sm">
+                  <Settings size={16} className="mr-2" />
+                  Configurar
+                </Button>
+              </Link>
             </div>
           </motion.div>
         )}
@@ -644,15 +691,23 @@ const Activities = () => {
             animate={{ opacity: 1, y: 0 }}
             className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-8 text-center"
           >
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-              <BookOpen className="text-primary" size={32} />
-            </div>
+            <motion.div
+              animate={{ y: [0, -5, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center mx-auto mb-4"
+            >
+              <Rocket className="text-white" size={32} />
+            </motion.div>
             <h3 className="text-xl font-semibold text-foreground mb-2">
-              Nenhuma atividade ainda
+              Pronto para começar! 🎮
             </h3>
             <p className="text-muted-foreground mb-4">
-              Clique em "Gerar Atividade" ou use o criador personalizado!
+              Clique em "Gerar Atividade" e deixe a IA criar um desafio personalizado para você!
             </p>
+            <SamukSpeechBubble 
+              message="E aí, bora estudar? Gera uma atividade e vamos jogar juntos! 💪"
+              type="celebrate"
+            />
           </motion.div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -662,23 +717,21 @@ const Activities = () => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 + index * 0.05 }}
+                whileHover={{ scale: 1.02, y: -2 }}
               >
                 <Card
-                  className={`cursor-pointer transition-all duration-300 hover:shadow-lg hover:border-primary/30 ${
+                  className={`cursor-pointer transition-all duration-300 hover:shadow-lg hover:border-primary/30 relative overflow-hidden ${
                     activity.is_completed ? "opacity-80" : ""
                   }`}
                   onClick={() =>
                     !selectedActivity && setSelectedActivity(activity)
                   }
                 >
+                  <ActivityDecorations difficulty={activity.difficulty} />
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="p-2 rounded-lg bg-primary/10">
-                          <span className="text-lg">
-                            {getSubjectIcon(activity.subject)}
-                          </span>
-                        </div>
+                      <div className="flex items-center gap-3">
+                        <ActivityIllustration subject={activity.subject} size="sm" animate={!activity.is_completed} />
                         <Badge variant="outline" className="text-xs">
                           {getSubjectLabel(activity.subject)}
                         </Badge>
@@ -689,7 +742,13 @@ const Activities = () => {
                         </Badge>
                         {activity.is_completed &&
                           (activity.is_correct ? (
-                            <CheckCircle2 className="text-success" size={20} />
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              transition={{ type: "spring", bounce: 0.5 }}
+                            >
+                              <CheckCircle2 className="text-success" size={20} />
+                            </motion.div>
                           ) : (
                             <XCircle className="text-destructive" size={20} />
                           ))}
@@ -701,7 +760,7 @@ const Activities = () => {
                       {activity.title}
                     </CardTitle>
                     <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                      {activity.content_text.substring(0, 120)}...
+                      {activity.content_text.substring(0, 100)}...
                     </p>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3 text-sm">
@@ -716,8 +775,8 @@ const Activities = () => {
                       </div>
                       {!activity.is_completed && (
                         <Button size="sm" variant="ghost" className="text-primary">
+                          <Gamepad2 size={16} className="mr-1" />
                           Jogar
-                          <ChevronRight size={16} className="ml-1" />
                         </Button>
                       )}
                     </div>
