@@ -21,16 +21,23 @@ import {
   Wand2,
   Settings,
   Rocket,
+  Zap,
+  Youtube,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { FloatingElements } from "@/components/FloatingElements";
 import DailyMissions from "@/components/DailyMissions";
 import CustomActivityCreator from "@/components/CustomActivityCreator";
+import QuickQuiz from "@/components/QuickQuiz";
+import YouTubeSearch from "@/components/YouTubeSearch";
+import StudyMaterialGenerator from "@/components/StudyMaterialGenerator";
 import { ActivityIllustration, SamukSpeechBubble, ActivityDecorations } from "@/components/ActivityIllustrations";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -651,38 +658,63 @@ const Activities = () => {
           </div>
         </motion.div>
 
-        {/* Custom Activity Creator */}
-        <CustomActivityCreator onActivityCreated={fetchTodayActivities} />
+        {/* Tabs for different study modes */}
+        <Tabs defaultValue="activities" className="w-full">
+          <TabsList className="grid w-full grid-cols-4 h-auto p-1">
+            <TabsTrigger value="activities" className="flex items-center gap-1 text-xs sm:text-sm py-2">
+              <Gamepad2 size={14} />
+              <span className="hidden sm:inline">Atividades</span>
+              <span className="sm:hidden">Ativ.</span>
+            </TabsTrigger>
+            <TabsTrigger value="quiz" className="flex items-center gap-1 text-xs sm:text-sm py-2">
+              <Zap size={14} />
+              Quiz
+            </TabsTrigger>
+            <TabsTrigger value="youtube" className="flex items-center gap-1 text-xs sm:text-sm py-2">
+              <Youtube size={14} />
+              <span className="hidden sm:inline">Vídeos</span>
+              <span className="sm:hidden">Vídeo</span>
+            </TabsTrigger>
+            <TabsTrigger value="material" className="flex items-center gap-1 text-xs sm:text-sm py-2">
+              <FileText size={14} />
+              <span className="hidden sm:inline">Material</span>
+              <span className="sm:hidden">Texto</span>
+            </TabsTrigger>
+          </TabsList>
 
-        {/* No subjects warning */}
-        {(!profile?.subjects || profile.subjects.length === 0) && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-warning/10 border border-warning/30 rounded-xl p-4"
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-3 rounded-xl bg-warning/20">
-                <GraduationCap className="text-warning" size={24} />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-foreground">
-                  Configure seu perfil primeiro! 🎓
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Adicione seu ano escolar e matérias para receber atividades
-                  personalizadas pela IA.
-                </p>
-              </div>
-              <Link to="/settings">
-                <Button variant="outline" size="sm">
-                  <Settings size={16} className="mr-2" />
-                  Configurar
-                </Button>
-              </Link>
-            </div>
-          </motion.div>
-        )}
+          <TabsContent value="activities" className="mt-4 space-y-4">
+            {/* Custom Activity Creator */}
+            <CustomActivityCreator onActivityCreated={fetchTodayActivities} />
+
+            {/* No subjects warning */}
+            {(!profile?.subjects || profile.subjects.length === 0) && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-warning/10 border border-warning/30 rounded-xl p-4"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-3 rounded-xl bg-warning/20">
+                    <GraduationCap className="text-warning" size={24} />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-foreground">
+                      Configure seu perfil primeiro! 🎓
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Adicione seu ano escolar e matérias para receber atividades
+                      personalizadas pela IA.
+                    </p>
+                  </div>
+                  <Link to="/settings">
+                    <Button variant="outline" size="sm">
+                      <Settings size={16} className="mr-2" />
+                      Configurar
+                    </Button>
+                  </Link>
+                </div>
+              </motion.div>
+            )}
 
         {/* Activities Grid */}
         {activities.length === 0 ? (
@@ -786,6 +818,20 @@ const Activities = () => {
             ))}
           </div>
         )}
+          </TabsContent>
+
+          <TabsContent value="quiz" className="mt-4">
+            <QuickQuiz />
+          </TabsContent>
+
+          <TabsContent value="youtube" className="mt-4">
+            <YouTubeSearch />
+          </TabsContent>
+
+          <TabsContent value="material" className="mt-4">
+            <StudyMaterialGenerator />
+          </TabsContent>
+        </Tabs>
       </motion.div>
     </DashboardLayout>
   );
