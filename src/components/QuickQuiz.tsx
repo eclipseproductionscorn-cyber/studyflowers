@@ -107,8 +107,8 @@ const QuickQuiz = () => {
       setQuizDone(true);
       const xpEarned = score * 15;
       const coinsEarned = score * 5;
-      await addXP(xpEarned);
-      await addCoins(coinsEarned);
+      if (xpEarned > 0) await addXP(xpEarned);
+      if (coinsEarned > 0) await addCoins(coinsEarned);
       toast.success(`Quiz finalizado! +${xpEarned} XP +${coinsEarned} moedas 🏆`);
     } else {
       setCurrentIndex((prev) => prev + 1);

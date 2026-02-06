@@ -716,108 +716,106 @@ const Activities = () => {
               </motion.div>
             )}
 
-        {/* Activities Grid */}
-        {activities.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-8 text-center"
-          >
-            <motion.div
-              animate={{ y: [0, -5, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center mx-auto mb-4"
-            >
-              <Rocket className="text-white" size={32} />
-            </motion.div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">
-              Pronto para começar! 🎮
-            </h3>
-            <p className="text-muted-foreground mb-4">
-              Clique em "Gerar Atividade" e deixe a IA criar um desafio personalizado para você!
-            </p>
-            <SamukSpeechBubble 
-              message="E aí, bora estudar? Gera uma atividade e vamos jogar juntos! 💪"
-              type="celebrate"
-            />
-          </motion.div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {activities.map((activity, index) => (
+            {/* Activities Grid */}
+            {activities.length === 0 ? (
               <motion.div
-                key={activity.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 + index * 0.05 }}
-                whileHover={{ scale: 1.02, y: -2 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-8 text-center"
               >
-                <Card
-                  className={`cursor-pointer transition-all duration-300 hover:shadow-lg hover:border-primary/30 relative overflow-hidden ${
-                    activity.is_completed ? "opacity-80" : ""
-                  }`}
-                  onClick={() =>
-                    !selectedActivity && setSelectedActivity(activity)
-                  }
+                <motion.div
+                  animate={{ y: [0, -5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center mx-auto mb-4"
                 >
-                  <ActivityDecorations difficulty={activity.difficulty} />
-                  <CardHeader className="pb-2">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <ActivityIllustration subject={activity.subject} size="sm" animate={!activity.is_completed} />
-                        <Badge variant="outline" className="text-xs">
-                          {getSubjectLabel(activity.subject)}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge className={difficultyColors[activity.difficulty]}>
-                          {difficultyLabels[activity.difficulty]}
-                        </Badge>
-                        {activity.is_completed &&
-                          (activity.is_correct ? (
-                            <motion.div
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                              transition={{ type: "spring", bounce: 0.5 }}
-                            >
-                              <CheckCircle2 className="text-success" size={20} />
-                            </motion.div>
-                          ) : (
-                            <XCircle className="text-destructive" size={20} />
-                          ))}
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <CardTitle className="text-lg mb-2 line-clamp-2">
-                      {activity.title}
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                      {activity.content_text.substring(0, 100)}...
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 text-sm">
-                        <span className="flex items-center gap-1 text-primary">
-                          <Sparkles size={14} />
-                          {activity.xp_reward} XP
-                        </span>
-                        <span className="flex items-center gap-1 text-rank-gold">
-                          <Coins size={14} />
-                          {activity.coin_reward}
-                        </span>
-                      </div>
-                      {!activity.is_completed && (
-                        <Button size="sm" variant="ghost" className="text-primary">
-                          <Gamepad2 size={16} className="mr-1" />
-                          Jogar
-                        </Button>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                  <Rocket className="text-white" size={32} />
+                </motion.div>
+                <h3 className="text-xl font-semibold text-foreground mb-2">
+                  Pronto para começar! 🎮
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  Clique em "Gerar Atividade" e deixe a IA criar um desafio personalizado para você!
+                </p>
+                <SamukSpeechBubble 
+                  message="E aí, bora estudar? Gera uma atividade e vamos jogar juntos! 💪"
+                  type="celebrate"
+                />
               </motion.div>
-            ))}
-          </div>
-        )}
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {activities.map((activity, index) => (
+                  <motion.div
+                    key={activity.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 + index * 0.05 }}
+                    whileHover={{ scale: 1.02, y: -2 }}
+                  >
+                    <Card
+                      className={`cursor-pointer transition-all duration-300 hover:shadow-lg hover:border-primary/30 relative overflow-hidden ${
+                        activity.is_completed ? "opacity-80" : ""
+                      }`}
+                      onClick={() => !selectedActivity && setSelectedActivity(activity)}
+                    >
+                      <ActivityDecorations difficulty={activity.difficulty} />
+                      <CardHeader className="pb-2">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-3">
+                            <ActivityIllustration subject={activity.subject} size="sm" animate={!activity.is_completed} />
+                            <Badge variant="outline" className="text-xs">
+                              {getSubjectLabel(activity.subject)}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge className={difficultyColors[activity.difficulty]}>
+                              {difficultyLabels[activity.difficulty]}
+                            </Badge>
+                            {activity.is_completed &&
+                              (activity.is_correct ? (
+                                <motion.div
+                                  initial={{ scale: 0 }}
+                                  animate={{ scale: 1 }}
+                                  transition={{ type: "spring", bounce: 0.5 }}
+                                >
+                                  <CheckCircle2 className="text-success" size={20} />
+                                </motion.div>
+                              ) : (
+                                <XCircle className="text-destructive" size={20} />
+                              ))}
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <CardTitle className="text-lg mb-2 line-clamp-2">
+                          {activity.title}
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                          {activity.content_text.substring(0, 100)}...
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3 text-sm">
+                            <span className="flex items-center gap-1 text-primary">
+                              <Sparkles size={14} />
+                              {activity.xp_reward} XP
+                            </span>
+                            <span className="flex items-center gap-1 text-rank-gold">
+                              <Coins size={14} />
+                              {activity.coin_reward}
+                            </span>
+                          </div>
+                          {!activity.is_completed && (
+                            <Button size="sm" variant="ghost" className="text-primary">
+                              <Gamepad2 size={16} className="mr-1" />
+                              Jogar
+                            </Button>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="quiz" className="mt-4">
