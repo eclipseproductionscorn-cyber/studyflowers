@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import ReactMarkdown from "react-markdown";
 import {
   Send,
   Sparkles,
@@ -182,17 +183,8 @@ const TeacherSamuk = () => {
                         </span>
                       </div>
                     )}
-                    <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                      {message.content.split(/(\*\*.*?\*\*)/).map((part, i) => {
-                        if (part.startsWith("**") && part.endsWith("**")) {
-                          return (
-                            <strong key={i}>
-                              {part.slice(2, -2)}
-                            </strong>
-                          );
-                        }
-                        return part;
-                      })}
+                    <div className="text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-headings:my-2">
+                      <ReactMarkdown>{message.content}</ReactMarkdown>
                     </div>
                   </div>
                 </motion.div>
