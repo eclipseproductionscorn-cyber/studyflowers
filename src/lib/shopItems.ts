@@ -1,4 +1,4 @@
-import { Box, Sparkles, Shield, Palette, Crown, Star, Zap, Heart, Gem, Flame, Award, Target } from "lucide-react";
+import { Box, Sparkles, Shield, Palette, Crown, Star, Zap, Heart, Gem, Flame, Award, Target, Clock, BookOpen, Rocket, Swords, Eye, Music } from "lucide-react";
 
 export interface ShopItem {
   id: string;
@@ -57,6 +57,16 @@ export const shopItems: ShopItem[] = [
     rarity: "legendary",
     requiredRank: "ruby_1",
   },
+  {
+    id: "mystery_box_starter",
+    name: "Caixa do Novato",
+    description: "Perfeita para começar sua jornada!",
+    price: 50,
+    icon: Box,
+    color: "from-green-400 to-emerald-500",
+    category: "boxes",
+    rarity: "common",
+  },
 
   // Boosts
   {
@@ -81,6 +91,17 @@ export const shopItems: ShopItem[] = [
     requiredRank: "silver_1",
   },
   {
+    id: "xp_boost_double",
+    name: "XP Dobrado (1h)",
+    description: "+100% XP por 1 hora! O dobro de tudo!",
+    price: 400,
+    icon: Rocket,
+    color: "from-red-500 to-pink-500",
+    category: "boosts",
+    rarity: "rare",
+    requiredRank: "gold_1",
+  },
+  {
     id: "coin_boost_1h",
     name: "Boost Moedas (1h)",
     description: "+25% moedas por 1 hora",
@@ -89,6 +110,17 @@ export const shopItems: ShopItem[] = [
     color: "from-green-500 to-emerald-500",
     category: "boosts",
     rarity: "uncommon",
+  },
+  {
+    id: "coin_boost_24h",
+    name: "Boost Moedas (24h)",
+    description: "+25% moedas por 24 horas",
+    price: 600,
+    icon: Sparkles,
+    color: "from-emerald-500 to-teal-500",
+    category: "boosts",
+    rarity: "rare",
+    requiredRank: "silver_1",
   },
   {
     id: "streak_shield",
@@ -110,6 +142,27 @@ export const shopItems: ShopItem[] = [
     category: "boosts",
     rarity: "epic",
     requiredRank: "platinum_1",
+  },
+  {
+    id: "time_warp",
+    name: "Distorção Temporal",
+    description: "Recupera 1 dia perdido de ofensiva",
+    price: 800,
+    icon: Clock,
+    color: "from-violet-500 to-purple-600",
+    category: "boosts",
+    rarity: "epic",
+    requiredRank: "gold_1",
+  },
+  {
+    id: "study_compass",
+    name: "Bússola de Estudo",
+    description: "Revela dicas extras nas atividades por 24h",
+    price: 250,
+    icon: BookOpen,
+    color: "from-teal-400 to-cyan-500",
+    category: "boosts",
+    rarity: "uncommon",
   },
 
   // Cosméticos
@@ -146,6 +199,28 @@ export const shopItems: ShopItem[] = [
     requiredRank: "master_1",
   },
   {
+    id: "avatar_neon",
+    name: "Avatar Neon",
+    description: "Moldura com efeito neon pulsante",
+    price: 700,
+    icon: Eye,
+    color: "from-green-400 to-cyan-400",
+    category: "cosmetics",
+    rarity: "rare",
+    requiredRank: "silver_1",
+  },
+  {
+    id: "avatar_galaxy",
+    name: "Avatar Galáxia",
+    description: "Moldura cósmica com estrelas",
+    price: 1800,
+    icon: Sparkles,
+    color: "from-indigo-500 to-purple-600",
+    category: "cosmetics",
+    rarity: "epic",
+    requiredRank: "platinum_1",
+  },
+  {
     id: "name_color_gold",
     name: "Nome Dourado",
     description: "Seu nome aparece em dourado",
@@ -166,6 +241,16 @@ export const shopItems: ShopItem[] = [
     category: "cosmetics",
     rarity: "legendary",
     requiredRank: "ruby_1",
+  },
+  {
+    id: "name_color_ice",
+    name: "Nome Gelo",
+    description: "Seu nome brilha em azul glacial",
+    price: 600,
+    icon: Palette,
+    color: "from-cyan-300 to-blue-400",
+    category: "cosmetics",
+    rarity: "uncommon",
   },
   {
     id: "badge_star",
@@ -198,8 +283,29 @@ export const shopItems: ShopItem[] = [
     rarity: "epic",
     requiredRank: "onyx_1",
   },
+  {
+    id: "badge_sword",
+    name: "Emblema Guerreiro",
+    description: "Para quem luta pelos estudos diariamente",
+    price: 900,
+    icon: Swords,
+    color: "from-red-600 to-orange-600",
+    category: "cosmetics",
+    rarity: "rare",
+    requiredRank: "gold_1",
+  },
+  {
+    id: "badge_music",
+    name: "Emblema Harmonia",
+    description: "Para os que estudam com ritmo",
+    price: 350,
+    icon: Music,
+    color: "from-pink-400 to-violet-500",
+    category: "cosmetics",
+    rarity: "uncommon",
+  },
 
-  // Especiais (só para ranks altos - Mítico)
+  // Especiais
   {
     id: "mythic_aura",
     name: "Aura Mítica",
@@ -221,6 +327,39 @@ export const shopItems: ShopItem[] = [
     category: "special",
     rarity: "legendary",
     requiredRank: "mythic_2",
+  },
+  {
+    id: "master_wings",
+    name: "Asas de Mestre",
+    description: "Efeito de asas no seu perfil",
+    price: 5000,
+    icon: Rocket,
+    color: "from-sky-400 to-indigo-500",
+    category: "special",
+    rarity: "legendary",
+    requiredRank: "master_1",
+  },
+  {
+    id: "diamond_trail",
+    name: "Trilha de Diamantes",
+    description: "Partículas de diamante seguem seu avatar",
+    price: 3500,
+    icon: Gem,
+    color: "from-cyan-300 to-blue-500",
+    category: "special",
+    rarity: "epic",
+    requiredRank: "diamond_1",
+  },
+  {
+    id: "onyx_shadow",
+    name: "Sombra Ônix",
+    description: "Aura sombria e misteriosa no perfil",
+    price: 2500,
+    icon: Eye,
+    color: "from-gray-700 to-gray-900",
+    category: "special",
+    rarity: "epic",
+    requiredRank: "onyx_1",
   },
 ];
 

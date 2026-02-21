@@ -43,6 +43,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { getSubjectLabel, getSubjectIcon } from "@/lib/subjects";
 import { toast } from "sonner";
+import { fireConfetti } from "@/lib/confetti";
 
 interface AIActivity {
   id: string;
@@ -134,69 +135,67 @@ const Activities = () => {
     }
 
     setGenerating(true);
-
-    const randomSubject =
-      profile.subjects[Math.floor(Math.random() * profile.subjects.length)];
     const difficulties = ["easy", "normal", "hard"];
-    const randomDifficulty =
-      difficulties[Math.floor(Math.random() * difficulties.length)];
+    const count = 5;
 
     try {
-      const response = await supabase.functions.invoke("generate-activity", {
-        body: {
-          subject: getSubjectLabel(randomSubject),
-          difficulty: randomDifficulty,
-          schoolYear: profile.school_year,
-          questionType: Math.random() > 0.7 ? "essay" : "multiple_choice",
-        },
+      const promises = Array.from({ length: count }, async (_, i) => {
+        const randomSubject =
+          profile.subjects![Math.floor(Math.random() * profile.subjects!.length)];
+        const randomDifficulty = difficulties[i % difficulties.length];
+
+        const response = await supabase.functions.invoke("generate-activity", {
+          body: {
+            subject: getSubjectLabel(randomSubject),
+            difficulty: randomDifficulty,
+            schoolYear: profile.school_year,
+            questionType: "multiple_choice",
+          },
+        });
+
+        if (response.error) throw new Error(response.error.message);
+
+        const activity = response.data.activity;
+
+        const { data, error } = await supabase
+          .from("ai_activities")
+          .insert({
+            user_id: user!.id,
+            title: activity.title,
+            subject: randomSubject,
+            difficulty: randomDifficulty,
+            content_text: activity.content_text,
+            question: activity.question,
+            question_type: activity.question_type || "multiple_choice",
+            options: activity.options,
+            correct_answer: activity.correct_answer,
+            explanation: activity.explanation,
+            day_of_week: dayOfWeek,
+            week_number: weekNumber,
+            xp_reward: randomDifficulty === "hard" ? 50 : randomDifficulty === "normal" ? 30 : 20,
+            coin_reward: randomDifficulty === "hard" ? 30 : randomDifficulty === "normal" ? 20 : 10,
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        return { ...data, options: data.options ? (data.options as string[]) : null };
       });
 
-      if (response.error) throw new Error(response.error.message);
+      const results = await Promise.allSettled(promises);
+      const newActivities = results
+        .filter((r): r is PromiseFulfilledResult<any> => r.status === "fulfilled")
+        .map((r) => r.value);
 
-      const activity = response.data.activity;
-
-      const { data, error } = await supabase
-        .from("ai_activities")
-        .insert({
-          user_id: user!.id,
-          title: activity.title,
-          subject: randomSubject,
-          difficulty: randomDifficulty,
-          content_text: activity.content_text,
-          question: activity.question,
-          question_type: activity.question_type || "multiple_choice",
-          options: activity.options,
-          correct_answer: activity.correct_answer,
-          explanation: activity.explanation,
-          day_of_week: dayOfWeek,
-          week_number: weekNumber,
-          xp_reward:
-            randomDifficulty === "hard"
-              ? 50
-              : randomDifficulty === "normal"
-              ? 30
-              : 20,
-          coin_reward:
-            randomDifficulty === "hard"
-              ? 30
-              : randomDifficulty === "normal"
-              ? 20
-              : 10,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      const newActivity = {
-        ...data,
-        options: data.options ? (data.options as string[]) : null,
-      };
-      setActivities((prev) => [...prev, newActivity]);
-      toast.success("Nova atividade gerada! 🎉");
+      if (newActivities.length > 0) {
+        setActivities((prev) => [...prev, ...newActivities]);
+        toast.success(`${newActivities.length} atividades geradas! 🎉`);
+      } else {
+        toast.error("Erro ao gerar atividades. Tente novamente.");
+      }
     } catch (error) {
-      console.error("Error generating activity:", error);
-      toast.error("Erro ao gerar atividade. Tente novamente.");
+      console.error("Error generating activities:", error);
+      toast.error("Erro ao gerar atividades. Tente novamente.");
     } finally {
       setGenerating(false);
     }
@@ -243,6 +242,7 @@ const Activities = () => {
     if (isCorrect) {
       await addXP(selectedActivity.xp_reward);
       await addCoins(selectedActivity.coin_reward);
+      fireConfetti();
       toast.success(
         `Correto! +${selectedActivity.xp_reward} XP e +${selectedActivity.coin_reward} moedas! 🎉`
       );
@@ -597,7 +597,7 @@ const Activities = () => {
             ) : (
               <Plus className="mr-2 h-4 w-4" />
             )}
-            Gerar Atividade
+            Gerar 5 Atividades
           </Button>
         </div>
 

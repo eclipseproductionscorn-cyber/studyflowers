@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Zap, Loader2, CheckCircle2, XCircle, ChevronRight, RotateCcw, Trophy, Sparkles, Coins,
 } from "lucide-react";
@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { fireConfetti, fireConfettiBurst } from "@/lib/confetti";
 
 interface QuizQuestion {
   id: number;
@@ -64,7 +65,6 @@ const QuickQuiz = () => {
         body: {
           subject: topic,
           schoolYear: profile?.school_year || "ensino médio",
-          questionsPerLevel: 3,
         },
       });
 
@@ -89,12 +89,14 @@ const QuickQuiz = () => {
     if (!selectedAnswer) return;
 
     const current = questions[currentIndex];
-    const isCorrect =
-      current.type === "true_false"
-        ? selectedAnswer === current.correct_answer
-        : selectedAnswer.charAt(0).toUpperCase() === current.correct_answer.charAt(0).toUpperCase();
+    const selectedLetter = selectedAnswer.charAt(0).toUpperCase();
+    const correctLetter = current.correct_answer.charAt(0).toUpperCase();
+    const isCorrect = selectedLetter === correctLetter;
 
-    if (isCorrect) setScore((prev) => prev + 1);
+    if (isCorrect) {
+      setScore((prev) => prev + 1);
+      fireConfetti();
+    }
     setAnswers((prev) => [...prev, isCorrect]);
     setShowResult(true);
   };
@@ -109,6 +111,7 @@ const QuickQuiz = () => {
       const coinsEarned = score * 5;
       if (xpEarned > 0) await addXP(xpEarned);
       if (coinsEarned > 0) await addCoins(coinsEarned);
+      fireConfettiBurst();
       toast.success(`Quiz finalizado! +${xpEarned} XP +${coinsEarned} moedas 🏆`);
     } else {
       setCurrentIndex((prev) => prev + 1);
@@ -223,9 +226,12 @@ const QuickQuiz = () => {
                   )}
                 </div>
                 {!answers[answers.length - 1] && (
-                  <p className="text-sm text-muted-foreground">Resposta: {current.correct_answer}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Resposta correta: {current.options.find(o => o.charAt(0).toUpperCase() === current.correct_answer.charAt(0).toUpperCase()) || current.correct_answer}
+                  </p>
                 )}
                 <div className="p-3 rounded-xl bg-primary/5 border border-primary/20 text-sm text-muted-foreground">
+                  <p className="font-medium text-foreground mb-1">💡 Explicação:</p>
                   {current.explanation}
                 </div>
                 <Button onClick={nextQuestion} className="w-full">
@@ -275,7 +281,7 @@ const QuickQuiz = () => {
               <Zap className="text-white" size={24} />
             </motion.div>
             <p className="font-medium text-foreground">Gerando quiz...</p>
-            <p className="text-sm text-muted-foreground">9 perguntas em 3 níveis</p>
+            <p className="text-sm text-muted-foreground">10 perguntas em 3 níveis</p>
           </div>
         </motion.div>
       )}
