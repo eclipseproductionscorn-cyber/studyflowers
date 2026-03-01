@@ -27,6 +27,7 @@ import TeacherSamuk from "./pages/TeacherSamuk";
 import Achievements from "./pages/Achievements";
 import GlobalRanking from "./pages/GlobalRanking";
 import LevelingQuiz from "./pages/LevelingQuiz";
+import AdminPanel from "./pages/AdminPanel";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +62,7 @@ const App = () => (
             <Route path="/quantum-x" element={<QuantumX />} />
             <Route path="/ai-tutora" element={<AiTutora />} />
             <Route path="/flashcards" element={<Flashcards />} />
+            <Route path="/admin" element={<AdminPanel />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
