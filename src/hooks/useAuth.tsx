@@ -47,6 +47,32 @@ export const useAuth = () => {
       }
 
       setUser(session.user);
+
+      // Check if user is banned
+      const { data: banData } = await supabase
+        .from("user_bans")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .eq("is_active", true)
+        .maybeSingle();
+
+      if (banData) {
+        // Check if temporary ban has expired
+        if (banData.expires_at && new Date(banData.expires_at) < new Date()) {
+          // Ban expired, deactivate it
+          await supabase.from("user_bans").update({ is_active: false }).eq("id", banData.id);
+        } else {
+          // Still banned
+          await supabase.auth.signOut();
+          const expiresMsg = banData.expires_at
+            ? `Seu banimento expira em: ${new Date(banData.expires_at).toLocaleDateString("pt-BR")}`
+            : "Banimento permanente.";
+          alert(`Sua conta foi banida.\nMotivo: ${banData.reason}\n${expiresMsg}`);
+          setLoading(false);
+          navigate("/auth");
+          return;
+        }
+      }
       
       // Fetch profile and check onboarding status
       const { data: profileData } = await supabase
