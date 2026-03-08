@@ -66,6 +66,9 @@ const App = () => (
             <Route path="/ai-tutora" element={<AiTutora />} />
             <Route path="/flashcards" element={<Flashcards />} />
             <Route path="/admin" element={<AdminPanel />} />
+            <Route path="/notes" element={<Notes />} />
+            <Route path="/chat" element={<Chat />} />
+            <Route path="/calendar" element={<StudyCalendar />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
