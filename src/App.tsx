@@ -28,6 +28,9 @@ import Achievements from "./pages/Achievements";
 import GlobalRanking from "./pages/GlobalRanking";
 import LevelingQuiz from "./pages/LevelingQuiz";
 import AdminPanel from "./pages/AdminPanel";
+import Notes from "./pages/Notes";
+import Chat from "./pages/Chat";
+import StudyCalendar from "./pages/StudyCalendar";
 
 const queryClient = new QueryClient();
 
