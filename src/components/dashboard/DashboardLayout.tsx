@@ -17,6 +17,9 @@ import {
   Wrench,
   Award,
   Sparkles,
+  StickyNote,
+  MessageCircle,
+  CalendarDays,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,6 +46,9 @@ const menuItems = [
   { icon: Home, label: "Início", path: "/dashboard" },
   { icon: BookOpen, label: "Atividades", path: "/activities" },
   { icon: Sparkles, label: "Flashcards", path: "/flashcards" },
+  { icon: StickyNote, label: "Caderno", path: "/notes" },
+  { icon: CalendarDays, label: "Calendário", path: "/calendar" },
+  { icon: MessageCircle, label: "Chat", path: "/chat" },
   { icon: Target, label: "Metas Semanais", path: "/weekly-goals" },
   { icon: Flame, label: "Ofensiva", path: "/streak" },
   { icon: Award, label: "Conquistas", path: "/achievements" },
