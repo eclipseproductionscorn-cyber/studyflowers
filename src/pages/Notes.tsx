@@ -128,9 +128,16 @@ const Notes = () => {
             </h1>
             <p className="text-muted-foreground mt-1">Suas anotações organizadas por matéria</p>
           </div>
-          <Button onClick={() => setIsCreating(true)} className="gap-2">
-            <Plus size={18} /> Nova Nota
-          </Button>
+          <div className="flex gap-2">
+            {notes.length > 0 && (
+              <Button variant="outline" onClick={() => exportAllNotesToPDF(notes)} className="gap-2">
+                <FileDown size={18} /> Exportar PDF
+              </Button>
+            )}
+            <Button onClick={() => setIsCreating(true)} className="gap-2">
+              <Plus size={18} /> Nova Nota
+            </Button>
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
