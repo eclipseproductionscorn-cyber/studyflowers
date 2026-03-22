@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { CalendarDays, Plus, Trash2, Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { CalendarDays, Plus, Trash2, Check, ChevronLeft, ChevronRight, Bell, BellOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,6 +34,8 @@ interface StudyEvent {
   subject: string | null;
   color: string;
   is_completed: boolean;
+  reminder_minutes: number | null;
+  reminder_sent: boolean;
 }
 
 const StudyCalendar = () => {
@@ -42,11 +44,35 @@ const StudyCalendar = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [form, setForm] = useState({ title: "", description: "", subject: "", color: "#6366f1", event_time: "" });
+  const [form, setForm] = useState({ title: "", description: "", subject: "", color: "#6366f1", event_time: "", reminder: "none" });
 
   useEffect(() => {
     if (user) fetchEvents();
   }, [user, currentMonth]);
+
+  // Check for upcoming reminders every minute
+  useEffect(() => {
+    if (!("Notification" in window)) return;
+    const interval = setInterval(() => {
+      const now = new Date();
+      events.forEach((event) => {
+        if (event.reminder_minutes && !event.reminder_sent && !event.is_completed && event.event_time) {
+          const eventDate = new Date(`${event.event_date}T${event.event_time}`);
+          const reminderTime = new Date(eventDate.getTime() - event.reminder_minutes * 60000);
+          if (now >= reminderTime && now < eventDate) {
+            if (Notification.permission === "granted") {
+              new Notification(`📚 Lembrete: ${event.title}`, {
+                body: `${event.subject ? event.subject + " — " : ""}Começa em ${event.reminder_minutes} min`,
+                icon: "/favicon.ico",
+              });
+              supabase.from("study_events").update({ reminder_sent: true }).eq("id", event.id).then();
+            }
+          }
+        }
+      });
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [events]);
 
   const fetchEvents = async () => {
     const start = format(startOfMonth(currentMonth), "yyyy-MM-dd");
@@ -62,19 +88,23 @@ const StudyCalendar = () => {
 
   const handleCreate = async () => {
     if (!form.title.trim() || !selectedDate || !user) return;
+    const reminderMin = form.reminder !== "none" ? parseInt(form.reminder) : null;
     const { error } = await supabase.from("study_events").insert({
-      user_id: user.id,
-      title: form.title,
+      user_id: user.id, title: form.title,
       description: form.description || null,
       event_date: format(selectedDate, "yyyy-MM-dd"),
       event_time: form.event_time || null,
-      subject: form.subject || null,
-      color: form.color,
-    });
+      subject: form.subject || null, color: form.color,
+      reminder_minutes: reminderMin,
+    } as any);
     if (error) return toast.error("Erro ao criar evento");
+    // Request notification permission on first reminder
+    if (reminderMin && "Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
     toast.success("Evento adicionado!");
     setIsCreating(false);
-    setForm({ title: "", description: "", subject: "", color: "#6366f1", event_time: "" });
+    setForm({ title: "", description: "", subject: "", color: "#6366f1", event_time: "", reminder: "none" });
     fetchEvents();
   };
 
@@ -178,6 +208,9 @@ const StudyCalendar = () => {
                     <div className="flex gap-2 items-center mt-0.5">
                       {event.subject && <Badge variant="secondary" className="text-xs">{event.subject}</Badge>}
                       {event.event_time && <span className="text-xs text-muted-foreground">{event.event_time.slice(0, 5)}</span>}
+                      {event.reminder_minutes && (
+                        <Badge variant="outline" className="text-xs"><Bell size={10} className="mr-1" />{event.reminder_minutes}min antes</Badge>
+                      )}
                     </div>
                   </div>
                   <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => toggleComplete(event)}>
@@ -210,6 +243,18 @@ const StudyCalendar = () => {
               <Input type="time" value={form.event_time} onChange={(e) => setForm((f) => ({ ...f, event_time: e.target.value }))} className="w-32" />
             </div>
             <Textarea placeholder="Descrição (opcional)" value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} rows={3} />
+            {/* Reminder selector */}
+            <Select value={form.reminder} onValueChange={(v) => setForm((f) => ({ ...f, reminder: v }))}>
+              <SelectTrigger><SelectValue placeholder="Lembrete" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Sem lembrete</SelectItem>
+                <SelectItem value="5">5 minutos antes</SelectItem>
+                <SelectItem value="15">15 minutos antes</SelectItem>
+                <SelectItem value="30">30 minutos antes</SelectItem>
+                <SelectItem value="60">1 hora antes</SelectItem>
+                <SelectItem value="1440">1 dia antes</SelectItem>
+              </SelectContent>
+            </Select>
             <div className="flex gap-2">
               {EVENT_COLORS.map((c) => (
                 <button key={c} className={`w-7 h-7 rounded-full border-2 transition-transform ${form.color === c ? "scale-125 border-foreground" : "border-transparent"}`} style={{ backgroundColor: c }} onClick={() => setForm((f) => ({ ...f, color: c }))} />

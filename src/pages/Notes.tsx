@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Search, Pin, Trash2, Edit3, BookOpen, X, Save } from "lucide-react";
+import { Plus, Search, Pin, Trash2, Edit3, BookOpen, X, Save, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { exportNoteToPDF, exportAllNotesToPDF } from "@/lib/pdfExport";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -127,9 +128,16 @@ const Notes = () => {
             </h1>
             <p className="text-muted-foreground mt-1">Suas anotações organizadas por matéria</p>
           </div>
-          <Button onClick={() => setIsCreating(true)} className="gap-2">
-            <Plus size={18} /> Nova Nota
-          </Button>
+          <div className="flex gap-2">
+            {notes.length > 0 && (
+              <Button variant="outline" onClick={() => exportAllNotesToPDF(notes)} className="gap-2">
+                <FileDown size={18} /> Exportar PDF
+              </Button>
+            )}
+            <Button onClick={() => setIsCreating(true)} className="gap-2">
+              <Plus size={18} /> Nova Nota
+            </Button>
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
@@ -178,6 +186,9 @@ const Notes = () => {
                     {new Date(note.updated_at).toLocaleDateString("pt-BR")}
                   </p>
                   <div className="absolute bottom-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                    <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => exportNoteToPDF(note.title, note.content, note.subject, note.color)}>
+                      <FileDown size={12} />
+                    </Button>
                     <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => togglePin(note)}>
                       <Pin size={12} className={note.is_pinned ? "fill-primary text-primary" : ""} />
                     </Button>

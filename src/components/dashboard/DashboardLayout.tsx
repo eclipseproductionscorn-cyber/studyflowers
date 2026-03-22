@@ -2,24 +2,8 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Home,
-  BookOpen,
-  Flame,
-  ShoppingBag,
-  Trophy,
-  Bot,
-  Settings,
-  LogOut,
-  Coins,
-  Menu,
-  X,
-  Target,
-  Wrench,
-  Award,
-  Sparkles,
-  StickyNote,
-  MessageCircle,
-  CalendarDays,
+  Home, BookOpen, Flame, ShoppingBag, Trophy, Bot, Settings, LogOut, Coins, Menu, X,
+  Target, Wrench, Award, Sparkles, StickyNote, MessageCircle, CalendarDays, Calendar, Map,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,9 +29,11 @@ interface DashboardLayoutProps {
 const menuItems = [
   { icon: Home, label: "Início", path: "/dashboard" },
   { icon: BookOpen, label: "Atividades", path: "/activities" },
+  { icon: Map, label: "Trilhas", path: "/trails" },
   { icon: Sparkles, label: "Flashcards", path: "/flashcards" },
   { icon: StickyNote, label: "Caderno", path: "/notes" },
   { icon: CalendarDays, label: "Calendário", path: "/calendar" },
+  { icon: Calendar, label: "Eventos", path: "/events" },
   { icon: MessageCircle, label: "Chat", path: "/chat" },
   { icon: Target, label: "Metas Semanais", path: "/weekly-goals" },
   { icon: Flame, label: "Ofensiva", path: "/streak" },

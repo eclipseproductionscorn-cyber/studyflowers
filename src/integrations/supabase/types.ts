@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_logs: {
+        Row: {
+          action: string
+          admin_id: string
+          created_at: string
+          details: string | null
+          id: string
+          target_content_id: string | null
+          target_user_id: string | null
+        }
+        Insert: {
+          action: string
+          admin_id: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          target_content_id?: string | null
+          target_user_id?: string | null
+        }
+        Update: {
+          action?: string
+          admin_id?: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          target_content_id?: string | null
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
+      admin_messages: {
+        Row: {
+          admin_id: string | null
+          created_at: string
+          id: string
+          is_from_admin: boolean
+          is_read: boolean
+          message: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          admin_id?: string | null
+          created_at?: string
+          id?: string
+          is_from_admin?: boolean
+          is_read?: boolean
+          message: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          admin_id?: string | null
+          created_at?: string
+          id?: string
+          is_from_admin?: boolean
+          is_read?: boolean
+          message?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_activities: {
         Row: {
           coin_reward: number
@@ -146,6 +209,50 @@ export type Database = {
         }
         Relationships: []
       }
+      event_missions: {
+        Row: {
+          coin_reward: number
+          created_at: string
+          description: string | null
+          event_id: string
+          id: string
+          mission_type: string
+          target: number
+          title: string
+          xp_reward: number
+        }
+        Insert: {
+          coin_reward?: number
+          created_at?: string
+          description?: string | null
+          event_id: string
+          id?: string
+          mission_type?: string
+          target?: number
+          title: string
+          xp_reward?: number
+        }
+        Update: {
+          coin_reward?: number
+          created_at?: string
+          description?: string | null
+          event_id?: string
+          id?: string
+          mission_type?: string
+          target?: number
+          title?: string
+          xp_reward?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_missions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "seasonal_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notes: {
         Row: {
           color: string
@@ -239,6 +346,48 @@ export type Database = {
         }
         Relationships: []
       }
+      seasonal_events: {
+        Row: {
+          banner_url: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          ends_at: string
+          event_type: string
+          id: string
+          is_active: boolean
+          rewards: Json | null
+          starts_at: string
+          title: string
+        }
+        Insert: {
+          banner_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at: string
+          event_type?: string
+          id?: string
+          is_active?: boolean
+          rewards?: Json | null
+          starts_at: string
+          title: string
+        }
+        Update: {
+          banner_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string
+          event_type?: string
+          id?: string
+          is_active?: boolean
+          rewards?: Json | null
+          starts_at?: string
+          title?: string
+        }
+        Relationships: []
+      }
       study_events: {
         Row: {
           color: string
@@ -248,6 +397,8 @@ export type Database = {
           event_time: string | null
           id: string
           is_completed: boolean
+          reminder_minutes: number | null
+          reminder_sent: boolean | null
           subject: string | null
           title: string
           user_id: string
@@ -260,6 +411,8 @@ export type Database = {
           event_time?: string | null
           id?: string
           is_completed?: boolean
+          reminder_minutes?: number | null
+          reminder_sent?: boolean | null
           subject?: string | null
           title: string
           user_id: string
@@ -272,6 +425,8 @@ export type Database = {
           event_time?: string | null
           id?: string
           is_completed?: boolean
+          reminder_minutes?: number | null
+          reminder_sent?: boolean | null
           subject?: string | null
           title?: string
           user_id?: string
@@ -317,6 +472,95 @@ export type Database = {
         }
         Relationships: []
       }
+      study_trails: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          difficulty: string | null
+          icon: string | null
+          id: string
+          is_published: boolean
+          objective: string
+          subjects: string[] | null
+          title: string
+          total_phases: number
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          difficulty?: string | null
+          icon?: string | null
+          id?: string
+          is_published?: boolean
+          objective: string
+          subjects?: string[] | null
+          title: string
+          total_phases?: number
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          difficulty?: string | null
+          icon?: string | null
+          id?: string
+          is_published?: boolean
+          objective?: string
+          subjects?: string[] | null
+          title?: string
+          total_phases?: number
+        }
+        Relationships: []
+      }
+      trail_phases: {
+        Row: {
+          coin_reward: number
+          content: Json | null
+          created_at: string
+          description: string | null
+          id: string
+          phase_number: number
+          phase_type: string
+          title: string
+          trail_id: string
+          xp_reward: number
+        }
+        Insert: {
+          coin_reward?: number
+          content?: Json | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          phase_number: number
+          phase_type?: string
+          title: string
+          trail_id: string
+          xp_reward?: number
+        }
+        Update: {
+          coin_reward?: number
+          content?: Json | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          phase_number?: number
+          phase_type?: string
+          title?: string
+          trail_id?: string
+          xp_reward?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trail_phases_trail_id_fkey"
+            columns: ["trail_id"]
+            isOneToOne: false
+            referencedRelation: "study_trails"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_bans: {
         Row: {
           ban_type: string
@@ -352,6 +596,54 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_event_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          current: number
+          event_id: string
+          id: string
+          is_completed: boolean
+          mission_id: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          current?: number
+          event_id: string
+          id?: string
+          is_completed?: boolean
+          mission_id?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          current?: number
+          event_id?: string
+          id?: string
+          is_completed?: boolean
+          mission_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_event_progress_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "seasonal_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_event_progress_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "event_missions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_inventory: {
         Row: {
@@ -442,6 +734,47 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_trail_progress: {
+        Row: {
+          completed_at: string | null
+          completed_phases: number[] | null
+          current_phase: number
+          id: string
+          is_completed: boolean
+          started_at: string
+          trail_id: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_phases?: number[] | null
+          current_phase?: number
+          id?: string
+          is_completed?: boolean
+          started_at?: string
+          trail_id: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          completed_phases?: number[] | null
+          current_phase?: number
+          id?: string
+          is_completed?: boolean
+          started_at?: string
+          trail_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_trail_progress_trail_id_fkey"
+            columns: ["trail_id"]
+            isOneToOne: false
+            referencedRelation: "study_trails"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       weekly_goals: {
         Row: {

@@ -31,7 +31,8 @@ import AdminPanel from "./pages/AdminPanel";
 import Notes from "./pages/Notes";
 import Chat from "./pages/Chat";
 import StudyCalendar from "./pages/StudyCalendar";
-
+import Events from "./pages/Events";
+import Trails from "./pages/Trails";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -69,6 +70,8 @@ const App = () => (
             <Route path="/notes" element={<Notes />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/calendar" element={<StudyCalendar />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/trails" element={<Trails />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
