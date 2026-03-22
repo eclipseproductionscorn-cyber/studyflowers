@@ -50,6 +50,30 @@ const StudyCalendar = () => {
     if (user) fetchEvents();
   }, [user, currentMonth]);
 
+  // Check for upcoming reminders every minute
+  useEffect(() => {
+    if (!("Notification" in window)) return;
+    const interval = setInterval(() => {
+      const now = new Date();
+      events.forEach((event) => {
+        if (event.reminder_minutes && !event.reminder_sent && !event.is_completed && event.event_time) {
+          const eventDate = new Date(`${event.event_date}T${event.event_time}`);
+          const reminderTime = new Date(eventDate.getTime() - event.reminder_minutes * 60000);
+          if (now >= reminderTime && now < eventDate) {
+            if (Notification.permission === "granted") {
+              new Notification(`📚 Lembrete: ${event.title}`, {
+                body: `${event.subject ? event.subject + " — " : ""}Começa em ${event.reminder_minutes} min`,
+                icon: "/favicon.ico",
+              });
+              supabase.from("study_events").update({ reminder_sent: true }).eq("id", event.id).then();
+            }
+          }
+        }
+      });
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [events]);
+
   const fetchEvents = async () => {
     const start = format(startOfMonth(currentMonth), "yyyy-MM-dd");
     const end = format(endOfMonth(currentMonth), "yyyy-MM-dd");
