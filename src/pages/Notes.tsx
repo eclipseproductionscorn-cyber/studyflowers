@@ -186,6 +186,9 @@ const Notes = () => {
                     {new Date(note.updated_at).toLocaleDateString("pt-BR")}
                   </p>
                   <div className="absolute bottom-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                    <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => exportNoteToPDF(note.title, note.content, note.subject, note.color)}>
+                      <FileDown size={12} />
+                    </Button>
                     <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => togglePin(note)}>
                       <Pin size={12} className={note.is_pinned ? "fill-primary text-primary" : ""} />
                     </Button>
