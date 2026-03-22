@@ -44,7 +44,7 @@ const StudyCalendar = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [form, setForm] = useState({ title: "", description: "", subject: "", color: "#6366f1", event_time: "" });
+  const [form, setForm] = useState({ title: "", description: "", subject: "", color: "#6366f1", event_time: "", reminder: "none" });
 
   useEffect(() => {
     if (user) fetchEvents();
