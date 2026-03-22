@@ -34,6 +34,8 @@ interface StudyEvent {
   subject: string | null;
   color: string;
   is_completed: boolean;
+  reminder_minutes: number | null;
+  reminder_sent: boolean;
 }
 
 const StudyCalendar = () => {
