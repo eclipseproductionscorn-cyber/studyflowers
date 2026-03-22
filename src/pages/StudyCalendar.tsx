@@ -88,19 +88,23 @@ const StudyCalendar = () => {
 
   const handleCreate = async () => {
     if (!form.title.trim() || !selectedDate || !user) return;
+    const reminderMin = form.reminder !== "none" ? parseInt(form.reminder) : null;
     const { error } = await supabase.from("study_events").insert({
-      user_id: user.id,
-      title: form.title,
+      user_id: user.id, title: form.title,
       description: form.description || null,
       event_date: format(selectedDate, "yyyy-MM-dd"),
       event_time: form.event_time || null,
-      subject: form.subject || null,
-      color: form.color,
-    });
+      subject: form.subject || null, color: form.color,
+      reminder_minutes: reminderMin,
+    } as any);
     if (error) return toast.error("Erro ao criar evento");
+    // Request notification permission on first reminder
+    if (reminderMin && "Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
     toast.success("Evento adicionado!");
     setIsCreating(false);
-    setForm({ title: "", description: "", subject: "", color: "#6366f1", event_time: "" });
+    setForm({ title: "", description: "", subject: "", color: "#6366f1", event_time: "", reminder: "none" });
     fetchEvents();
   };
 
