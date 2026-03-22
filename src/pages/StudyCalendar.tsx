@@ -208,6 +208,10 @@ const StudyCalendar = () => {
                     <div className="flex gap-2 items-center mt-0.5">
                       {event.subject && <Badge variant="secondary" className="text-xs">{event.subject}</Badge>}
                       {event.event_time && <span className="text-xs text-muted-foreground">{event.event_time.slice(0, 5)}</span>}
+                      {event.reminder_minutes && (
+                        <Badge variant="outline" className="text-xs"><Bell size={10} className="mr-1" />{event.reminder_minutes}min antes</Badge>
+                      )}
+                    </div>
                     </div>
                   </div>
                   <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => toggleComplete(event)}>
