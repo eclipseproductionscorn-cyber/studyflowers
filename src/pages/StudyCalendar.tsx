@@ -212,7 +212,6 @@ const StudyCalendar = () => {
                         <Badge variant="outline" className="text-xs"><Bell size={10} className="mr-1" />{event.reminder_minutes}min antes</Badge>
                       )}
                     </div>
-                    </div>
                   </div>
                   <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => toggleComplete(event)}>
                     <Check size={14} className={event.is_completed ? "text-green-500" : "text-muted-foreground"} />
