@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Search, Pin, Trash2, Edit3, BookOpen, X, Save } from "lucide-react";
+import { Plus, Search, Pin, Trash2, Edit3, BookOpen, X, Save, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { exportNoteToPDF, exportAllNotesToPDF } from "@/lib/pdfExport";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
