@@ -31,7 +31,8 @@ import AdminPanel from "./pages/AdminPanel";
 import Notes from "./pages/Notes";
 import Chat from "./pages/Chat";
 import StudyCalendar from "./pages/StudyCalendar";
-
+import Events from "./pages/Events";
+import Trails from "./pages/Trails";
 const queryClient = new QueryClient();
 
 const App = () => (
