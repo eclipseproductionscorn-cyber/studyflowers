@@ -244,6 +244,18 @@ const StudyCalendar = () => {
               <Input type="time" value={form.event_time} onChange={(e) => setForm((f) => ({ ...f, event_time: e.target.value }))} className="w-32" />
             </div>
             <Textarea placeholder="Descrição (opcional)" value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} rows={3} />
+            {/* Reminder selector */}
+            <Select value={form.reminder} onValueChange={(v) => setForm((f) => ({ ...f, reminder: v }))}>
+              <SelectTrigger><SelectValue placeholder="Lembrete" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Sem lembrete</SelectItem>
+                <SelectItem value="5">5 minutos antes</SelectItem>
+                <SelectItem value="15">15 minutos antes</SelectItem>
+                <SelectItem value="30">30 minutos antes</SelectItem>
+                <SelectItem value="60">1 hora antes</SelectItem>
+                <SelectItem value="1440">1 dia antes</SelectItem>
+              </SelectContent>
+            </Select>
             <div className="flex gap-2">
               {EVENT_COLORS.map((c) => (
                 <button key={c} className={`w-7 h-7 rounded-full border-2 transition-transform ${form.color === c ? "scale-125 border-foreground" : "border-transparent"}`} style={{ backgroundColor: c }} onClick={() => setForm((f) => ({ ...f, color: c }))} />
