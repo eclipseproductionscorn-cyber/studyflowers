@@ -70,6 +70,8 @@ const App = () => (
             <Route path="/notes" element={<Notes />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/calendar" element={<StudyCalendar />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/trails" element={<Trails />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
