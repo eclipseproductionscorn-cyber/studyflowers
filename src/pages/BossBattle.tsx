@@ -8,7 +8,7 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { triggerConfetti } from "@/lib/confetti";
+import { fireConfetti } from "@/lib/confetti";
 
 const BOSSES = [
   {
