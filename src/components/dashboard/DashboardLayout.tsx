@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Home, BookOpen, Flame, ShoppingBag, Trophy, Bot, Settings, LogOut, Coins, Menu, X,
-  Target, Wrench, Award, Sparkles, StickyNote, MessageCircle, CalendarDays, Calendar, Map,
+  Target, Wrench, Award, Sparkles, StickyNote, MessageCircle, CalendarDays, Calendar, Map, TreePine, Swords,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
