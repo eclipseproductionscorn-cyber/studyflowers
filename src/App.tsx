@@ -33,6 +33,9 @@ import Chat from "./pages/Chat";
 import StudyCalendar from "./pages/StudyCalendar";
 import Events from "./pages/Events";
 import Trails from "./pages/Trails";
+import JourneyMap from "./pages/JourneyMap";
+import SkillTree from "./pages/SkillTree";
+import BossBattle from "./pages/BossBattle";
 const queryClient = new QueryClient();
 
 const App = () => (
