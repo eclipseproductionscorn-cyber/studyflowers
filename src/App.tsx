@@ -33,6 +33,9 @@ import Chat from "./pages/Chat";
 import StudyCalendar from "./pages/StudyCalendar";
 import Events from "./pages/Events";
 import Trails from "./pages/Trails";
+import JourneyMap from "./pages/JourneyMap";
+import SkillTree from "./pages/SkillTree";
+import BossBattle from "./pages/BossBattle";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -72,6 +75,9 @@ const App = () => (
             <Route path="/calendar" element={<StudyCalendar />} />
             <Route path="/events" element={<Events />} />
             <Route path="/trails" element={<Trails />} />
+            <Route path="/journey-map" element={<JourneyMap />} />
+            <Route path="/skill-tree" element={<SkillTree />} />
+            <Route path="/boss-battle" element={<BossBattle />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
