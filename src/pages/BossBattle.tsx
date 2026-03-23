@@ -131,7 +131,7 @@ const BossBattle = () => {
               week_number: 1,
               day_of_week: new Date().getDay(),
             } as any).then();
-            triggerConfetti();
+            fireConfetti();
             toast.success(`🎉 ${boss.name} derrotado! +${boss.xpReward} XP +${boss.coinReward} 🪙`);
             setDefeatedBosses((d) => [...d, boss.subject]);
           }

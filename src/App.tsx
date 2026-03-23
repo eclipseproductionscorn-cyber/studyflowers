@@ -75,6 +75,9 @@ const App = () => (
             <Route path="/calendar" element={<StudyCalendar />} />
             <Route path="/events" element={<Events />} />
             <Route path="/trails" element={<Trails />} />
+            <Route path="/journey-map" element={<JourneyMap />} />
+            <Route path="/skill-tree" element={<SkillTree />} />
+            <Route path="/boss-battle" element={<BossBattle />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

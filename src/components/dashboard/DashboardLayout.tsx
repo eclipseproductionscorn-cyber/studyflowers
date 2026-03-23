@@ -29,7 +29,9 @@ interface DashboardLayoutProps {
 const menuItems = [
   { icon: Home, label: "Início", path: "/dashboard" },
   { icon: BookOpen, label: "Atividades", path: "/activities" },
-  { icon: Map, label: "Trilhas", path: "/trails" },
+  { icon: Map, label: "Mapa de Jornada", path: "/journey-map" },
+  { icon: TreePine, label: "Habilidades", path: "/skill-tree" },
+  { icon: Swords, label: "Chefões", path: "/boss-battle" },
   { icon: Sparkles, label: "Flashcards", path: "/flashcards" },
   { icon: StickyNote, label: "Caderno", path: "/notes" },
   { icon: CalendarDays, label: "Calendário", path: "/calendar" },
