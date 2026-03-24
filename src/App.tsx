@@ -85,6 +85,7 @@ const App = () => (
             <Route path="/virtual-pet" element={<VirtualPet />} />
             <Route path="/energy" element={<EnergySystem />} />
             <Route path="/statistics" element={<Statistics />} />
+            <Route path="/study-plan" element={<StudyPlan />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
