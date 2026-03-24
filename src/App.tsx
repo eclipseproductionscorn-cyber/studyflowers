@@ -36,6 +36,9 @@ import Trails from "./pages/Trails";
 import JourneyMap from "./pages/JourneyMap";
 import SkillTree from "./pages/SkillTree";
 import BossBattle from "./pages/BossBattle";
+import VirtualPet from "./pages/VirtualPet";
+import EnergySystem from "./pages/EnergySystem";
+import Statistics from "./pages/Statistics";
 const queryClient = new QueryClient();
 
 const App = () => (
