@@ -39,6 +39,7 @@ import BossBattle from "./pages/BossBattle";
 import VirtualPet from "./pages/VirtualPet";
 import EnergySystem from "./pages/EnergySystem";
 import Statistics from "./pages/Statistics";
+import StudyPlan from "./pages/StudyPlan";
 const queryClient = new QueryClient();
 
 const App = () => (
