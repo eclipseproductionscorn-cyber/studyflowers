@@ -36,6 +36,9 @@ import Trails from "./pages/Trails";
 import JourneyMap from "./pages/JourneyMap";
 import SkillTree from "./pages/SkillTree";
 import BossBattle from "./pages/BossBattle";
+import VirtualPet from "./pages/VirtualPet";
+import EnergySystem from "./pages/EnergySystem";
+import Statistics from "./pages/Statistics";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -78,6 +81,9 @@ const App = () => (
             <Route path="/journey-map" element={<JourneyMap />} />
             <Route path="/skill-tree" element={<SkillTree />} />
             <Route path="/boss-battle" element={<BossBattle />} />
+            <Route path="/virtual-pet" element={<VirtualPet />} />
+            <Route path="/energy" element={<EnergySystem />} />
+            <Route path="/statistics" element={<Statistics />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
