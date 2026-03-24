@@ -39,6 +39,7 @@ import BossBattle from "./pages/BossBattle";
 import VirtualPet from "./pages/VirtualPet";
 import EnergySystem from "./pages/EnergySystem";
 import Statistics from "./pages/Statistics";
+import StudyPlan from "./pages/StudyPlan";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -84,6 +85,7 @@ const App = () => (
             <Route path="/virtual-pet" element={<VirtualPet />} />
             <Route path="/energy" element={<EnergySystem />} />
             <Route path="/statistics" element={<Statistics />} />
+            <Route path="/study-plan" element={<StudyPlan />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

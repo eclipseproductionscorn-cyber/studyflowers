@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Home, BookOpen, Flame, ShoppingBag, Trophy, Bot, Settings, LogOut, Coins, Menu, X,
   Target, Wrench, Award, Sparkles, StickyNote, MessageCircle, CalendarDays, Calendar, Map, TreePine, Swords,
-  Heart, BarChart3, PawPrint,
+  Heart, BarChart3, PawPrint, ClipboardList,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,6 +30,7 @@ interface DashboardLayoutProps {
 const menuItems = [
   { icon: Home, label: "Início", path: "/dashboard" },
   { icon: BookOpen, label: "Atividades", path: "/activities" },
+  { icon: ClipboardList, label: "Plano de Estudos", path: "/study-plan" },
   { icon: Map, label: "Mapa de Jornada", path: "/journey-map" },
   { icon: TreePine, label: "Habilidades", path: "/skill-tree" },
   { icon: Swords, label: "Chefões", path: "/boss-battle" },
