@@ -81,6 +81,9 @@ const App = () => (
             <Route path="/journey-map" element={<JourneyMap />} />
             <Route path="/skill-tree" element={<SkillTree />} />
             <Route path="/boss-battle" element={<BossBattle />} />
+            <Route path="/virtual-pet" element={<VirtualPet />} />
+            <Route path="/energy" element={<EnergySystem />} />
+            <Route path="/statistics" element={<Statistics />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
