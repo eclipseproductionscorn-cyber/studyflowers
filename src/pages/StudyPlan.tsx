@@ -46,17 +46,78 @@ const StudyPlan = () => {
   const [reviewItems, setReviewItems] = useState<any[]>([]);
   const [generating, setGenerating] = useState(false);
   const [tab, setTab] = useState("plan");
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [reminderMinutes, setReminderMinutes] = useState(10);
 
   const subjects = profile?.subjects || [];
   const PLAN_KEY = `studyflow_plan_${user?.id}`;
   const REVIEW_KEY = `studyflow_reviews_${user?.id}`;
+  const NOTIF_KEY = `studyflow_notif_${user?.id}`;
 
   useEffect(() => {
     if (!user) return;
     loadPlan();
     loadReviews();
     loadCompletedActivities();
+    // Load notification preference
+    const savedNotif = localStorage.getItem(NOTIF_KEY);
+    if (savedNotif) {
+      const parsed = JSON.parse(savedNotif);
+      setNotificationsEnabled(parsed.enabled);
+      setReminderMinutes(parsed.minutes || 10);
+    }
   }, [user]);
+
+  // Schedule browser notifications for today's blocks
+  useEffect(() => {
+    if (!notificationsEnabled || !("Notification" in window)) return;
+    if (Notification.permission !== "granted") return;
+
+    const timers: number[] = [];
+    const todayStr = format(new Date(), "yyyy-MM-dd");
+    const todayStudyBlocks = studyBlocks.filter(b => b.date === todayStr && !b.completed);
+
+    todayStudyBlocks.forEach(block => {
+      const [hours, minutes] = block.time.split(":").map(Number);
+      const blockTime = setDate(new Date(), { hours, minutes, seconds: 0 });
+      const notifyTime = new Date(blockTime.getTime() - reminderMinutes * 60 * 1000);
+      const msUntil = differenceInMilliseconds(notifyTime, new Date());
+
+      if (msUntil > 0) {
+        const timer = window.setTimeout(() => {
+          new Notification(`📚 Hora de estudar!`, {
+            body: `${block.subject} - ${block.type === "study" ? "Estudo" : block.type === "review" ? "Revisão" : "Prática"} em ${reminderMinutes} minutos (${block.time})`,
+            icon: "/favicon.ico",
+            tag: block.id,
+          });
+        }, msUntil);
+        timers.push(timer);
+      }
+    });
+
+    return () => timers.forEach(t => window.clearTimeout(t));
+  }, [studyBlocks, notificationsEnabled, reminderMinutes]);
+
+  const toggleNotifications = async () => {
+    if (!notificationsEnabled) {
+      if (!("Notification" in window)) {
+        toast.error("Seu navegador não suporta notificações.");
+        return;
+      }
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") {
+        toast.error("Permissão de notificação negada. Ative nas configurações do navegador.");
+        return;
+      }
+      setNotificationsEnabled(true);
+      localStorage.setItem(NOTIF_KEY, JSON.stringify({ enabled: true, minutes: reminderMinutes }));
+      toast.success("🔔 Lembretes ativados!");
+    } else {
+      setNotificationsEnabled(false);
+      localStorage.setItem(NOTIF_KEY, JSON.stringify({ enabled: false, minutes: reminderMinutes }));
+      toast.success("🔕 Lembretes desativados.");
+    }
+  };
 
   const loadPlan = () => {
     try {
