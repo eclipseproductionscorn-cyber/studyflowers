@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Swords, Shield, Heart, Zap, Trophy, Star, Crown, Flame, CheckCircle } from "lucide-react";
+import { Swords, Shield, Heart, Zap, Trophy, Star, Crown, Flame, CheckCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -43,6 +43,13 @@ const BOSSES = [
   },
 ];
 
+interface BattleQuestion {
+  question: string;
+  options: string[];
+  correct: number;
+  explanation?: string;
+}
+
 interface BattleState {
   bossId: string;
   bossHp: number;
@@ -50,7 +57,7 @@ interface BattleState {
   currentQuestion: number;
   totalQuestions: number;
   isActive: boolean;
-  questions: { question: string; options: string[]; correct: number }[];
+  questions: BattleQuestion[];
   score: number;
 }
 
@@ -60,6 +67,7 @@ const BossBattle = () => {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [defeatedBosses, setDefeatedBosses] = useState<string[]>([]);
+  const [loadingBattle, setLoadingBattle] = useState(false);
 
   useEffect(() => {
     if (user) fetchDefeated();
@@ -78,23 +86,32 @@ const BossBattle = () => {
   };
 
   const startBattle = async (boss: typeof BOSSES[0]) => {
-    // Generate simple questions locally for the boss battle
-    const sampleQuestions = Array.from({ length: boss.questions }, (_, i) => ({
-      question: `Pergunta ${i + 1} de ${boss.subject} — Desafio do ${boss.name}`,
-      options: ["Opção A", "Opção B", "Opção C", "Opção D"],
-      correct: Math.floor(Math.random() * 4),
-    }));
+    setLoadingBattle(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-boss-questions", {
+        body: { subject: boss.subject, bossName: boss.name, questionCount: boss.questions },
+      });
 
-    setBattle({
-      bossId: boss.id,
-      bossHp: boss.hp,
-      playerHp: 100,
-      currentQuestion: 0,
-      totalQuestions: boss.questions,
-      isActive: true,
-      questions: sampleQuestions,
-      score: 0,
-    });
+      if (error || !data?.questions) {
+        throw new Error(data?.error || "Erro ao gerar perguntas");
+      }
+
+      setBattle({
+        bossId: boss.id,
+        bossHp: boss.hp,
+        playerHp: 100,
+        currentQuestion: 0,
+        totalQuestions: data.questions.length,
+        isActive: true,
+        questions: data.questions,
+        score: 0,
+      });
+    } catch (err: any) {
+      console.error("Error starting battle:", err);
+      toast.error(err.message || "Erro ao iniciar batalha. Tente novamente.");
+    } finally {
+      setLoadingBattle(false);
+    }
   };
 
   const handleAnswer = (answerIndex: number) => {
@@ -102,7 +119,8 @@ const BossBattle = () => {
     setSelectedAnswer(answerIndex);
     setShowResult(true);
 
-    const isCorrect = answerIndex === battle.questions[battle.currentQuestion].correct;
+    const currentQ = battle.questions[battle.currentQuestion];
+    const isCorrect = answerIndex === currentQ.correct;
 
     setTimeout(() => {
       setBattle((prev) => {
@@ -148,7 +166,7 @@ const BossBattle = () => {
       });
       setSelectedAnswer(null);
       setShowResult(false);
-    }, 1200);
+    }, 2000);
   };
 
   const boss = battle ? BOSSES.find((b) => b.id === battle.bossId) : null;
@@ -157,16 +175,21 @@ const BossBattle = () => {
   return (
     <DashboardLayout profile={profile}>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 relative z-10">
-        {!battle?.isActive ? (
+        {loadingBattle ? (
+          <div className="flex flex-col items-center justify-center py-24 gap-4">
+            <Loader2 size={48} className="animate-spin text-primary" />
+            <p className="text-lg font-bold text-foreground">Invocando o Chefão...</p>
+            <p className="text-sm text-muted-foreground">A IA está gerando perguntas reais de estudo</p>
+          </div>
+        ) : !battle?.isActive ? (
           <>
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
                 <Swords className="text-destructive" /> Chefões por Matéria
               </h1>
-              <p className="text-muted-foreground mt-1">Enfrente os guardiões de cada disciplina em batalhas épicas</p>
+              <p className="text-muted-foreground mt-1">Enfrente os guardiões com perguntas reais geradas por IA</p>
             </div>
 
-            {/* Victory summary if battle just ended */}
             {battle && !battle.isActive && (
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
@@ -184,7 +207,6 @@ const BossBattle = () => {
               </motion.div>
             )}
 
-            {/* Boss grid */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {BOSSES.map((b, i) => {
                 const isDefeated = defeatedBosses.includes(b.subject);
@@ -198,7 +220,6 @@ const BossBattle = () => {
                       isDefeated ? "border-green-500/30" : "border-border/50"
                     }`}
                   >
-                    {/* Epic gradient header */}
                     <div className={`bg-gradient-to-r ${b.gradient} p-6 text-white relative overflow-hidden`}>
                       <div className="absolute inset-0 bg-black/10" />
                       <div className="relative z-10">
@@ -240,9 +261,7 @@ const BossBattle = () => {
             </div>
           </>
         ) : boss && currentQ ? (
-          /* BATTLE SCREEN */
           <div className="max-w-2xl mx-auto">
-            {/* Battle header */}
             <motion.div
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -279,7 +298,6 @@ const BossBattle = () => {
               </div>
             </motion.div>
 
-            {/* Player HP */}
             <div className="flex items-center gap-3 mb-6 p-3 rounded-xl border border-border/50 bg-card/50">
               <Shield size={20} className="text-primary" />
               <span className="text-sm font-medium text-foreground">Sua Vida</span>
@@ -289,7 +307,6 @@ const BossBattle = () => {
               <span className="text-sm font-bold text-primary">{battle.playerHp}%</span>
             </div>
 
-            {/* Question */}
             <motion.div
               key={battle.currentQuestion}
               initial={{ opacity: 0, x: 20 }}
@@ -325,6 +342,17 @@ const BossBattle = () => {
                   );
                 })}
               </div>
+              {showResult && currentQ.explanation && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-4 p-3 rounded-lg bg-muted/50 border border-border/50"
+                >
+                  <p className="text-xs text-muted-foreground">
+                    <span className="font-bold">💡 Explicação:</span> {currentQ.explanation}
+                  </p>
+                </motion.div>
+              )}
             </motion.div>
           </div>
         ) : null}

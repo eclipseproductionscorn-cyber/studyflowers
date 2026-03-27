@@ -1,15 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { BookOpen, Calendar, Brain, RefreshCw, Sparkles, Check, Clock, ChevronRight, Zap, Target, TrendingUp } from "lucide-react";
+import { BookOpen, Calendar, Brain, RefreshCw, Sparkles, Check, Clock, ChevronRight, Zap, Target, TrendingUp, Bell, BellOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { format, addDays, startOfWeek, isToday, isBefore } from "date-fns";
+import { format, addDays, startOfWeek, isToday, isBefore, differenceInMilliseconds, parse, set as setDate } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 const SUBJECT_COLORS: Record<string, string> = {
@@ -45,17 +46,78 @@ const StudyPlan = () => {
   const [reviewItems, setReviewItems] = useState<any[]>([]);
   const [generating, setGenerating] = useState(false);
   const [tab, setTab] = useState("plan");
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [reminderMinutes, setReminderMinutes] = useState(10);
 
   const subjects = profile?.subjects || [];
   const PLAN_KEY = `studyflow_plan_${user?.id}`;
   const REVIEW_KEY = `studyflow_reviews_${user?.id}`;
+  const NOTIF_KEY = `studyflow_notif_${user?.id}`;
 
   useEffect(() => {
     if (!user) return;
     loadPlan();
     loadReviews();
     loadCompletedActivities();
+    // Load notification preference
+    const savedNotif = localStorage.getItem(NOTIF_KEY);
+    if (savedNotif) {
+      const parsed = JSON.parse(savedNotif);
+      setNotificationsEnabled(parsed.enabled);
+      setReminderMinutes(parsed.minutes || 10);
+    }
   }, [user]);
+
+  // Schedule browser notifications for today's blocks
+  useEffect(() => {
+    if (!notificationsEnabled || !("Notification" in window)) return;
+    if (Notification.permission !== "granted") return;
+
+    const timers: number[] = [];
+    const todayStr = format(new Date(), "yyyy-MM-dd");
+    const todayStudyBlocks = studyBlocks.filter(b => b.date === todayStr && !b.completed);
+
+    todayStudyBlocks.forEach(block => {
+      const [hours, minutes] = block.time.split(":").map(Number);
+      const blockTime = setDate(new Date(), { hours, minutes, seconds: 0 });
+      const notifyTime = new Date(blockTime.getTime() - reminderMinutes * 60 * 1000);
+      const msUntil = differenceInMilliseconds(notifyTime, new Date());
+
+      if (msUntil > 0) {
+        const timer = window.setTimeout(() => {
+          new Notification(`📚 Hora de estudar!`, {
+            body: `${block.subject} - ${block.type === "study" ? "Estudo" : block.type === "review" ? "Revisão" : "Prática"} em ${reminderMinutes} minutos (${block.time})`,
+            icon: "/favicon.ico",
+            tag: block.id,
+          });
+        }, msUntil);
+        timers.push(timer);
+      }
+    });
+
+    return () => timers.forEach(t => window.clearTimeout(t));
+  }, [studyBlocks, notificationsEnabled, reminderMinutes]);
+
+  const toggleNotifications = async () => {
+    if (!notificationsEnabled) {
+      if (!("Notification" in window)) {
+        toast.error("Seu navegador não suporta notificações.");
+        return;
+      }
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") {
+        toast.error("Permissão de notificação negada. Ative nas configurações do navegador.");
+        return;
+      }
+      setNotificationsEnabled(true);
+      localStorage.setItem(NOTIF_KEY, JSON.stringify({ enabled: true, minutes: reminderMinutes }));
+      toast.success("🔔 Lembretes ativados!");
+    } else {
+      setNotificationsEnabled(false);
+      localStorage.setItem(NOTIF_KEY, JSON.stringify({ enabled: false, minutes: reminderMinutes }));
+      toast.success("🔕 Lembretes desativados.");
+    }
+  };
 
   const loadPlan = () => {
     try {
@@ -261,10 +323,17 @@ const StudyPlan = () => {
             <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">📋 Plano de Estudos Inteligente</h1>
             <p className="text-muted-foreground">Plano automático + Revisão espaçada + Calendário inteligente</p>
           </div>
-          <Button onClick={generateWeeklyPlan} disabled={generating} className="bg-gradient-to-r from-primary to-accent text-white">
-            <RefreshCw size={18} className={generating ? "animate-spin mr-2" : "mr-2"} />
-            {studyBlocks.length > 0 ? "Regenerar Plano" : "Gerar Plano Semanal"}
-          </Button>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border bg-card">
+              {notificationsEnabled ? <Bell size={16} className="text-primary" /> : <BellOff size={16} className="text-muted-foreground" />}
+              <span className="text-sm">{reminderMinutes}min antes</span>
+              <Switch checked={notificationsEnabled} onCheckedChange={toggleNotifications} />
+            </div>
+            <Button onClick={generateWeeklyPlan} disabled={generating} className="bg-gradient-to-r from-primary to-accent text-white">
+              <RefreshCw size={18} className={generating ? "animate-spin mr-2" : "mr-2"} />
+              {studyBlocks.length > 0 ? "Regenerar Plano" : "Gerar Plano Semanal"}
+            </Button>
+          </div>
         </motion.div>
 
         {/* Progress Overview */}
