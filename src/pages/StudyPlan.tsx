@@ -323,10 +323,17 @@ const StudyPlan = () => {
             <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">📋 Plano de Estudos Inteligente</h1>
             <p className="text-muted-foreground">Plano automático + Revisão espaçada + Calendário inteligente</p>
           </div>
-          <Button onClick={generateWeeklyPlan} disabled={generating} className="bg-gradient-to-r from-primary to-accent text-white">
-            <RefreshCw size={18} className={generating ? "animate-spin mr-2" : "mr-2"} />
-            {studyBlocks.length > 0 ? "Regenerar Plano" : "Gerar Plano Semanal"}
-          </Button>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border bg-card">
+              {notificationsEnabled ? <Bell size={16} className="text-primary" /> : <BellOff size={16} className="text-muted-foreground" />}
+              <span className="text-sm">{reminderMinutes}min antes</span>
+              <Switch checked={notificationsEnabled} onCheckedChange={toggleNotifications} />
+            </div>
+            <Button onClick={generateWeeklyPlan} disabled={generating} className="bg-gradient-to-r from-primary to-accent text-white">
+              <RefreshCw size={18} className={generating ? "animate-spin mr-2" : "mr-2"} />
+              {studyBlocks.length > 0 ? "Regenerar Plano" : "Gerar Plano Semanal"}
+            </Button>
+          </div>
         </motion.div>
 
         {/* Progress Overview */}
