@@ -1,15 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { BookOpen, Calendar, Brain, RefreshCw, Sparkles, Check, Clock, ChevronRight, Zap, Target, TrendingUp } from "lucide-react";
+import { BookOpen, Calendar, Brain, RefreshCw, Sparkles, Check, Clock, ChevronRight, Zap, Target, TrendingUp, Bell, BellOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { format, addDays, startOfWeek, isToday, isBefore } from "date-fns";
+import { format, addDays, startOfWeek, isToday, isBefore, differenceInMilliseconds, parse, set as setDate } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 const SUBJECT_COLORS: Record<string, string> = {
