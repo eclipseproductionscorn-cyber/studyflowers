@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Home, BookOpen, Flame, ShoppingBag, Trophy, Bot, Settings, LogOut, Coins, Menu, X,
   Target, Wrench, Award, Sparkles, StickyNote, MessageCircle, CalendarDays, Calendar, Map, TreePine, Swords,
-  Heart, BarChart3, PawPrint, ClipboardList,
+  Heart, BarChart3, PawPrint, ClipboardList, Shield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -46,6 +46,7 @@ const menuItems = [
   { icon: ShoppingBag, label: "Loja", path: "/shop" },
   { icon: PawPrint, label: "Pet Virtual", path: "/virtual-pet" },
   { icon: Heart, label: "Energia", path: "/energy" },
+  { icon: Shield, label: "Guildas", path: "/guilds" },
   { icon: BarChart3, label: "Estatísticas", path: "/statistics" },
   { icon: Wrench, label: "Ferramentas", path: "/tools" },
   { icon: Bot, label: "Teacher Samuk", path: "/teacher-samuk" },

@@ -253,6 +253,118 @@ export type Database = {
           },
         ]
       }
+      guild_members: {
+        Row: {
+          guild_id: string
+          id: string
+          joined_at: string
+          role: string
+          user_id: string
+          xp_contributed: number
+        }
+        Insert: {
+          guild_id: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id: string
+          xp_contributed?: number
+        }
+        Update: {
+          guild_id?: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+          xp_contributed?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guild_members_guild_id_fkey"
+            columns: ["guild_id"]
+            isOneToOne: false
+            referencedRelation: "guilds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guild_messages: {
+        Row: {
+          created_at: string
+          guild_id: string
+          id: string
+          message: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          guild_id: string
+          id?: string
+          message: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          guild_id?: string
+          id?: string
+          message?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guild_messages_guild_id_fkey"
+            columns: ["guild_id"]
+            isOneToOne: false
+            referencedRelation: "guilds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guilds: {
+        Row: {
+          color: string
+          created_at: string
+          description: string | null
+          emblem: string
+          id: string
+          is_public: boolean
+          leader_id: string
+          level: number
+          max_members: number
+          name: string
+          total_wins: number
+          total_xp: number
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          description?: string | null
+          emblem?: string
+          id?: string
+          is_public?: boolean
+          leader_id: string
+          level?: number
+          max_members?: number
+          name: string
+          total_wins?: number
+          total_xp?: number
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          description?: string | null
+          emblem?: string
+          id?: string
+          is_public?: boolean
+          leader_id?: string
+          level?: number
+          max_members?: number
+          name?: string
+          total_wins?: number
+          total_xp?: number
+        }
+        Relationships: []
+      }
       notes: {
         Row: {
           color: string
