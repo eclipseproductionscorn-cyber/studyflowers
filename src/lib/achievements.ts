@@ -1,4 +1,4 @@
-import { Trophy, Flame, BookOpen, Star, Target, Crown, Zap, Award, Medal, Sparkles, Brain, Heart } from "lucide-react";
+import { Trophy, Flame, BookOpen, Star, Target, Crown, Zap, Award, Medal, Sparkles, Brain, Heart, Shield, Swords } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export interface Achievement {
