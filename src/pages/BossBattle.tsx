@@ -11,22 +11,35 @@ import { toast } from "sonner";
 import { fireConfetti } from "@/lib/confetti";
 
 const BOSSES = [
-  // Tier 1 - Easy
+  // Tier 1 - Aprendiz (Easy)
   { id: "math-1", subject: "Matemática", name: "Aprendiz Numérico", emoji: "🔢", hp: 60, questions: 5, xpReward: 100, coinReward: 50, tier: 1, gradient: "from-blue-500 to-indigo-600", description: "Operações básicas e aritmética.", ability: "Confusão Numérica" },
   { id: "port-1", subject: "Português", name: "Guardião Gramatical", emoji: "📝", hp: 60, questions: 5, xpReward: 100, coinReward: 50, tier: 1, gradient: "from-emerald-500 to-teal-600", description: "Gramática e ortografia fundamental.", ability: "Embaralhamento" },
-  // Tier 2 - Medium
+  { id: "sci-1", subject: "Ciências", name: "Elemental Aprendiz", emoji: "🌿", hp: 60, questions: 5, xpReward: 100, coinReward: 50, tier: 1, gradient: "from-green-500 to-lime-600", description: "Seres vivos e ecossistemas.", ability: "Esporos Confusos" },
+  { id: "geo-1", subject: "Geografia", name: "Explorador Novato", emoji: "🗺️", hp: 60, questions: 5, xpReward: 100, coinReward: 50, tier: 1, gradient: "from-teal-500 to-cyan-600", description: "Mapas, capitais e biomas.", ability: "Névoa Geográfica" },
+  { id: "hist-1", subject: "História", name: "Cronista Iniciante", emoji: "📜", hp: 60, questions: 5, xpReward: 100, coinReward: 50, tier: 1, gradient: "from-amber-500 to-orange-600", description: "Primeiras civilizações.", ability: "Ilusão Temporal" },
+  // Tier 2 - Guardião (Medium)
   { id: "math-2", subject: "Matemática", name: "Guardião dos Números", emoji: "🧮", hp: 100, questions: 10, xpReward: 200, coinReward: 100, tier: 2, gradient: "from-blue-600 via-indigo-600 to-violet-700", description: "Funções, equações e geometria.", ability: "Cálculo Sombrio" },
-  { id: "port-2", subject: "Português", name: "Mestre da Interpretação", emoji: "📜", hp: 100, questions: 10, xpReward: 200, coinReward: 100, tier: 2, gradient: "from-emerald-600 via-teal-600 to-cyan-700", description: "Interpretação textual avançada.", ability: "Verbo Enigma" },
+  { id: "port-2", subject: "Português", name: "Mestre da Interpretação", emoji: "📖", hp: 100, questions: 10, xpReward: 200, coinReward: 100, tier: 2, gradient: "from-emerald-600 via-teal-600 to-cyan-700", description: "Interpretação textual avançada.", ability: "Verbo Enigma" },
   { id: "hist-2", subject: "História", name: "Senhor das Revoluções", emoji: "⚔️", hp: 100, questions: 10, xpReward: 200, coinReward: 100, tier: 2, gradient: "from-red-600 via-orange-600 to-amber-600", description: "Grandes marcos da humanidade.", ability: "Paradoxo Temporal" },
   { id: "sci-2", subject: "Ciências", name: "Arquiteto dos Elementos", emoji: "🔬", hp: 100, questions: 10, xpReward: 200, coinReward: 100, tier: 2, gradient: "from-green-600 via-emerald-600 to-teal-600", description: "Poder dos elementos.", ability: "Reação em Cadeia" },
   { id: "geo-2", subject: "Geografia", name: "Titã dos Continentes", emoji: "🌍", hp: 100, questions: 10, xpReward: 200, coinReward: 100, tier: 2, gradient: "from-cyan-600 via-sky-600 to-blue-700", description: "Cartografia e geopolítica.", ability: "Terremoto Mental" },
-  // Tier 3 - Hard
+  { id: "art-2", subject: "Artes", name: "Pintor Fantasma", emoji: "🎨", hp: 90, questions: 8, xpReward: 180, coinReward: 90, tier: 2, gradient: "from-pink-500 via-fuchsia-500 to-purple-600", description: "Movimentos artísticos e pintores.", ability: "Ilusão Cromática" },
+  { id: "eng-2", subject: "Inglês", name: "Grammar Knight", emoji: "🗡️", hp: 90, questions: 8, xpReward: 180, coinReward: 90, tier: 2, gradient: "from-orange-500 via-amber-500 to-yellow-600", description: "Grammar, vocabulary & tenses.", ability: "Verb Confusion" },
+  { id: "phil-2", subject: "Filosofia", name: "Pensador Sombrio", emoji: "🧠", hp: 90, questions: 8, xpReward: 180, coinReward: 90, tier: 2, gradient: "from-slate-600 via-gray-600 to-zinc-700", description: "Grandes filósofos e correntes.", ability: "Dilema Existencial" },
+  // Tier 3 - Mestre (Hard)
   { id: "phys-3", subject: "Física", name: "Senhor da Gravidade", emoji: "⚛️", hp: 150, questions: 12, xpReward: 350, coinReward: 175, tier: 3, gradient: "from-purple-600 via-violet-700 to-indigo-800", description: "Leis de Newton e termodinâmica.", ability: "Campo Gravitacional" },
   { id: "chem-3", subject: "Química", name: "Alquimista Sombrio", emoji: "🧪", hp: 150, questions: 12, xpReward: 350, coinReward: 175, tier: 3, gradient: "from-pink-600 via-rose-700 to-red-800", description: "Reações e tabela periódica.", ability: "Transmutação" },
   { id: "bio-3", subject: "Biologia", name: "Dragão Genético", emoji: "🧬", hp: 150, questions: 12, xpReward: 350, coinReward: 175, tier: 3, gradient: "from-green-600 via-lime-700 to-emerald-800", description: "Genética e evolução.", ability: "Mutação Caótica" },
   { id: "eng-3", subject: "Inglês", name: "Phantom Speaker", emoji: "👻", hp: 150, questions: 12, xpReward: 350, coinReward: 175, tier: 3, gradient: "from-orange-500 via-amber-600 to-yellow-700", description: "Grammar & comprehension.", ability: "Language Barrier" },
-  // Tier 4 - Legendary
-  { id: "final", subject: "Redação", name: "Imperador do Conhecimento", emoji: "👑", hp: 200, questions: 15, xpReward: 500, coinReward: 250, tier: 4, gradient: "from-yellow-500 via-amber-600 to-red-700", description: "O chefão final. Domine todas as habilidades.", ability: "Onisciência" },
+  { id: "math-3", subject: "Matemática", name: "Arquimago Algébrico", emoji: "∞", hp: 160, questions: 12, xpReward: 350, coinReward: 175, tier: 3, gradient: "from-indigo-600 via-blue-700 to-violet-800", description: "Cálculo, matrizes e logaritmos.", ability: "Paradoxo Infinito" },
+  { id: "hist-3", subject: "História", name: "Imperatriz das Eras", emoji: "🏛️", hp: 150, questions: 12, xpReward: 350, coinReward: 175, tier: 3, gradient: "from-amber-600 via-orange-700 to-red-800", description: "Guerras mundiais e era moderna.", ability: "Maré da História" },
+  { id: "geo-3", subject: "Geografia", name: "Titã Climático", emoji: "🌪️", hp: 150, questions: 12, xpReward: 350, coinReward: 175, tier: 3, gradient: "from-sky-600 via-blue-700 to-indigo-800", description: "Clima, geologia e urbanização.", ability: "Tempestade Caótica" },
+  { id: "soc-3", subject: "Sociologia", name: "Oráculo Social", emoji: "🏙️", hp: 140, questions: 10, xpReward: 300, coinReward: 150, tier: 3, gradient: "from-rose-600 via-pink-700 to-fuchsia-800", description: "Sociedade, cultura e desigualdade.", ability: "Reflexo Sociológico" },
+  // Tier 4 - Lendário
+  { id: "red-4", subject: "Redação", name: "Imperador do Conhecimento", emoji: "👑", hp: 200, questions: 15, xpReward: 500, coinReward: 250, tier: 4, gradient: "from-yellow-500 via-amber-600 to-red-700", description: "O chefão final. Domine todas as habilidades.", ability: "Onisciência" },
+  { id: "enem-4", subject: "ENEM", name: "Hydra do ENEM", emoji: "🐉", hp: 220, questions: 15, xpReward: 600, coinReward: 300, tier: 4, gradient: "from-red-600 via-rose-700 to-purple-800", description: "Questões multidisciplinares do ENEM.", ability: "Multi-Cabeça" },
+  { id: "logic-4", subject: "Raciocínio Lógico", name: "Esfinge Lógica", emoji: "🦁", hp: 200, questions: 15, xpReward: 550, coinReward: 275, tier: 4, gradient: "from-violet-600 via-purple-700 to-indigo-800", description: "Lógica, probabilidade e enigmas.", ability: "Enigma Fatal" },
+  { id: "all-4", subject: "Todas as Matérias", name: "Deus do Saber", emoji: "⚡", hp: 250, questions: 20, xpReward: 800, coinReward: 400, tier: 4, gradient: "from-yellow-400 via-orange-500 to-red-600", description: "O desafio supremo. Perguntas de todas as áreas.", ability: "Julgamento Final" },
 ];
 
 const TIER_NAMES = ["", "Aprendiz", "Guardião", "Mestre", "Lendário"];
