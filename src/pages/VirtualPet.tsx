@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Sparkles, Star, Zap, Shield, Trophy, Gift, TrendingUp, ShoppingBag, Palette, ArrowRight } from "lucide-react";
+import { Heart, Sparkles, Star, Zap, Shield, Trophy, Gift, TrendingUp, ShoppingBag, Palette, Music, Gamepad2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +19,17 @@ const PET_SPECIES = [
   { id: "wolf", name: "Lobo", stages: ["🥚", "🐣", "🐺", "🐺", "🔥🐺", "⚡🐺", "🌟🐺"], color: "from-gray-600 to-blue-700", trait: "Lealdade — Bônus em streak", description: "Fiel e determinado" },
   { id: "phoenix", name: "Fênix", stages: ["🥚", "🐣", "🐦", "🦅", "🔥🦅", "⚡🦅", "🌟🦅"], color: "from-yellow-500 to-orange-600", trait: "Resiliência — Bônus em recuperação", description: "Renasce sempre mais forte" },
   { id: "cat", name: "Gato", stages: ["🥚", "🐱", "🐱", "🐈", "🔮🐈", "⚡🐈", "🌟🐈"], color: "from-pink-500 to-purple-500", trait: "Curiosidade — Bônus em exploração", description: "Curioso e independente" },
+  // New species
+  { id: "bear", name: "Urso", stages: ["🥚", "🐻", "🐻", "🐻‍❄️", "🔥🐻‍❄️", "⚡🐻‍❄️", "🌟🐻‍❄️"], color: "from-amber-600 to-yellow-700", trait: "Força — Bônus em resistência", description: "Forte e resiliente" },
+  { id: "rabbit", name: "Coelho", stages: ["🥚", "🐰", "🐰", "🐇", "🔥🐇", "⚡🐇", "🌟🐇"], color: "from-pink-400 to-rose-500", trait: "Velocidade — Bônus em tempo", description: "Rápido e ágil" },
+  { id: "turtle", name: "Tartaruga", stages: ["🥚", "🐢", "🐢", "🐢", "🔮🐢", "⚡🐢", "🌟🐢"], color: "from-green-500 to-emerald-600", trait: "Paciência — Bônus em precisão", description: "Calma e precisa" },
+  { id: "eagle", name: "Águia", stages: ["🥚", "🐣", "🦅", "🦅", "🔥🦅", "⚡🦅", "🌟🦅"], color: "from-sky-500 to-blue-600", trait: "Visão — Bônus em detalhes", description: "Olhos afiados e perspicaz" },
+  { id: "lion", name: "Leão", stages: ["🥚", "🐱", "🦁", "🦁", "🔥🦁", "⚡🦁", "🌟🦁"], color: "from-yellow-500 to-amber-600", trait: "Coragem — Bônus em desafios", description: "Corajoso e líder nato" },
+  { id: "panda", name: "Panda", stages: ["🥚", "🐼", "🐼", "🐼", "🔮🐼", "⚡🐼", "🌟🐼"], color: "from-gray-400 to-gray-600", trait: "Equilíbrio — Bônus em foco", description: "Zen e equilibrado" },
+  { id: "shark", name: "Tubarão", stages: ["🥚", "🐟", "🦈", "🦈", "🔥🦈", "⚡🦈", "🌟🦈"], color: "from-blue-600 to-cyan-700", trait: "Instinto — Bônus em quiz", description: "Predador implacável" },
+  { id: "unicorn", name: "Unicórnio", stages: ["🥚", "🐴", "🦄", "🦄", "🔮🦄", "⚡🦄", "🌟🦄"], color: "from-violet-500 to-pink-500", trait: "Magia — Bônus em XP", description: "Mágico e raro" },
+  { id: "monkey", name: "Macaco", stages: ["🥚", "🐒", "🐒", "🐵", "🔥🐵", "⚡🐵", "🌟🐵"], color: "from-orange-400 to-brown-500", trait: "Inteligência — Bônus em lógica", description: "Esperto e brincalhão" },
+  { id: "penguin", name: "Pinguim", stages: ["🥚", "🐧", "🐧", "🐧", "🔮🐧", "⚡🐧", "🌟🐧"], color: "from-slate-500 to-blue-600", trait: "Persistência — Bônus em missões", description: "Determinado e fiel" },
 ];
 
 const PET_STAGE_NAMES = ["Ovo", "Filhote", "Jovem", "Adulto", "Guerreiro", "Lendário", "Mítico"];
@@ -31,6 +42,8 @@ const PET_MOODS = [
   { streak: 7, mood: "🤩", label: "Empolgado", color: "text-orange-500" },
   { streak: 14, mood: "🔥", label: "Em Chamas", color: "text-red-500" },
   { streak: 30, mood: "⚡", label: "Elétrico", color: "text-purple-500" },
+  { streak: 60, mood: "🌟", label: "Radiante", color: "text-yellow-400" },
+  { streak: 100, mood: "💎", label: "Transcendente", color: "text-cyan-400" },
 ];
 
 const SHOP_ITEMS = [
@@ -39,16 +52,32 @@ const SHOP_ITEMS = [
   { id: "glasses", name: "Óculos Estilosos", emoji: "🕶️", price: 150, category: "roupa", requiredStreak: 0 },
   { id: "scarf", name: "Cachecol Nerd", emoji: "🧣", price: 120, category: "roupa", requiredStreak: 0 },
   { id: "bowtie", name: "Gravata Borboleta", emoji: "🎀", price: 80, category: "roupa", requiredStreak: 0 },
+  { id: "headband", name: "Bandana Ninja", emoji: "🥷", price: 200, category: "roupa", requiredStreak: 5 },
+  { id: "hoodie", name: "Moletom Gamer", emoji: "🧥", price: 250, category: "roupa", requiredStreak: 7 },
+  { id: "armor", name: "Armadura Leve", emoji: "🛡️", price: 400, category: "roupa", requiredStreak: 15 },
+  { id: "kimono", name: "Kimono Sábio", emoji: "👘", price: 350, category: "roupa", requiredStreak: 12 },
   // Acessórios
   { id: "cape", name: "Capa Heroica", emoji: "🦸", price: 300, category: "acessório", requiredStreak: 10 },
   { id: "crown", name: "Coroa Real", emoji: "👑", price: 500, category: "acessório", requiredStreak: 20 },
   { id: "wings", name: "Asas Celestiais", emoji: "🪽", price: 800, category: "acessório", requiredStreak: 40 },
   { id: "aura", name: "Aura Mítica", emoji: "✨", price: 1000, category: "acessório", requiredStreak: 60 },
+  { id: "halo", name: "Auréola Divina", emoji: "😇", price: 1200, category: "acessório", requiredStreak: 70 },
+  { id: "sword", name: "Espada Flamejante", emoji: "🗡️", price: 600, category: "acessório", requiredStreak: 25 },
+  { id: "shield_acc", name: "Escudo Ancestral", emoji: "🛡️", price: 550, category: "acessório", requiredStreak: 20 },
+  { id: "wand", name: "Varinha Arcana", emoji: "🪄", price: 700, category: "acessório", requiredStreak: 30 },
+  { id: "orb", name: "Orbe Cósmico", emoji: "🔮", price: 900, category: "acessório", requiredStreak: 50 },
+  { id: "necklace", name: "Colar de Poder", emoji: "📿", price: 450, category: "acessório", requiredStreak: 18 },
   // Skins
   { id: "golden", name: "Skin Dourada", emoji: "🌟", price: 600, category: "skin", requiredStreak: 15 },
   { id: "crystal", name: "Skin Cristal", emoji: "💎", price: 900, category: "skin", requiredStreak: 30 },
   { id: "shadow", name: "Skin Sombria", emoji: "🌑", price: 700, category: "skin", requiredStreak: 25 },
   { id: "rainbow", name: "Skin Arco-Íris", emoji: "🌈", price: 1200, category: "skin", requiredStreak: 50 },
+  { id: "fire", name: "Skin Infernal", emoji: "🔥", price: 800, category: "skin", requiredStreak: 20 },
+  { id: "ice", name: "Skin Glacial", emoji: "❄️", price: 850, category: "skin", requiredStreak: 22 },
+  { id: "galaxy", name: "Skin Galáxia", emoji: "🌌", price: 1500, category: "skin", requiredStreak: 60 },
+  { id: "neon", name: "Skin Neon", emoji: "💜", price: 1000, category: "skin", requiredStreak: 35 },
+  { id: "sakura", name: "Skin Sakura", emoji: "🌸", price: 750, category: "skin", requiredStreak: 18 },
+  { id: "thunder", name: "Skin Trovão", emoji: "⚡", price: 1100, category: "skin", requiredStreak: 45 },
 ];
 
 const PET_KEY = "studyflow_pet";
@@ -120,8 +149,6 @@ const VirtualPet = () => {
     if (ownedItems.includes(item.id)) { toast.error("Você já possui esse item!"); return; }
     if (coins < item.price) { toast.error("Moedas insuficientes!"); return; }
     if (currentStreak < item.requiredStreak) { toast.error(`Precisa de ${item.requiredStreak} dias de streak!`); return; }
-
-    // Deduct coins
     if (user) {
       await supabase.from("profiles").update({ coins: coins - item.price }).eq("user_id", user.id);
     }
@@ -146,6 +173,7 @@ const VirtualPet = () => {
       feed: `${species.stages[stageIdx]} Adorou o lanche!`,
       play: `${species.stages[stageIdx]} Se divertindo!`,
       train: `${species.stages[stageIdx]} Ficou mais forte!`,
+      sing: `${species.stages[stageIdx]} Cantando feliz! 🎵`,
     };
     toast.success(messages[action] || "✨");
   };
@@ -168,7 +196,7 @@ const VirtualPet = () => {
 
         {/* Pet Display */}
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-          className={`relative bg-gradient-to-br ${species.color.replace("from-", "from-").replace("to-", "to-")}/10 rounded-2xl p-8 border border-primary/20 overflow-hidden`}>
+          className={`relative bg-gradient-to-br ${species.color}/10 rounded-2xl p-8 border border-primary/20 overflow-hidden`}>
           <AnimatePresence>
             {showParticles && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 pointer-events-none">
@@ -186,7 +214,6 @@ const VirtualPet = () => {
               {species.stages[stageIdx]}
             </motion.div>
 
-            {/* Equipped items display */}
             {equippedItems.length > 0 && (
               <div className="flex justify-center gap-1 mb-2">
                 {equippedItems.map(id => {
@@ -204,7 +231,6 @@ const VirtualPet = () => {
             <Badge variant="outline" className={mood.color}>{mood.label}</Badge>
           </div>
 
-          {/* Evolution Progress */}
           {nextStageIdx !== null && (
             <div className="mt-6 max-w-md mx-auto">
               <div className="flex justify-between text-sm mb-1">
@@ -220,11 +246,12 @@ const VirtualPet = () => {
         </motion.div>
 
         {/* Interactions */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { action: "feed", icon: Heart, label: "Alimentar", color: "from-pink-500 to-rose-500" },
-            { action: "play", icon: Sparkles, label: "Brincar", color: "from-yellow-500 to-orange-500" },
+            { action: "play", icon: Gamepad2, label: "Brincar", color: "from-yellow-500 to-orange-500" },
             { action: "train", icon: Zap, label: "Treinar", color: "from-blue-500 to-cyan-500" },
+            { action: "sing", icon: Music, label: "Cantar", color: "from-violet-500 to-purple-500" },
           ].map(({ action, icon: Icon, label, color }) => (
             <motion.div key={action} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button onClick={() => interactWithPet(action)} className={`w-full h-20 bg-gradient-to-r ${color} text-white flex flex-col gap-1 border-0`} variant="ghost">
@@ -293,9 +320,9 @@ const VirtualPet = () => {
 
       {/* Species Selection Dialog */}
       <Dialog open={showSpeciesSelect} onOpenChange={setShowSpeciesSelect}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader><DialogTitle className="text-center text-xl">🐾 Escolha seu Companheiro</DialogTitle></DialogHeader>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {PET_SPECIES.map(sp => (
               <motion.button key={sp.id} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={() => chooseSpecies(sp.id)}
                 className={`p-4 rounded-xl border-2 transition-all text-left ${selectedSpecies === sp.id ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}>
