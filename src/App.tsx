@@ -40,6 +40,7 @@ import VirtualPet from "./pages/VirtualPet";
 import EnergySystem from "./pages/EnergySystem";
 import Statistics from "./pages/Statistics";
 import StudyPlan from "./pages/StudyPlan";
+import Guilds from "./pages/Guilds";
 const queryClient = new QueryClient();
 
 const App = () => (
