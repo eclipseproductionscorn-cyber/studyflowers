@@ -46,6 +46,7 @@ const menuItems = [
   { icon: ShoppingBag, label: "Loja", path: "/shop" },
   { icon: PawPrint, label: "Pet Virtual", path: "/virtual-pet" },
   { icon: Heart, label: "Energia", path: "/energy" },
+  { icon: Shield, label: "Guildas", path: "/guilds" },
   { icon: BarChart3, label: "Estatísticas", path: "/statistics" },
   { icon: Wrench, label: "Ferramentas", path: "/tools" },
   { icon: Bot, label: "Teacher Samuk", path: "/teacher-samuk" },

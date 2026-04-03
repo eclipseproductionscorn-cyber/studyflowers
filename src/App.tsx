@@ -87,6 +87,7 @@ const App = () => (
             <Route path="/energy" element={<EnergySystem />} />
             <Route path="/statistics" element={<Statistics />} />
             <Route path="/study-plan" element={<StudyPlan />} />
+            <Route path="/guilds" element={<Guilds />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
