@@ -13,23 +13,22 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const PET_SPECIES = [
-  { id: "fox", name: "Raposa", stages: ["🥚", "🦊", "🦊", "🦊", "🔥🦊", "⚡🦊", "🌟🦊"], color: "from-orange-500 to-red-500", trait: "Astúcia — Bônus em estratégia", description: "Esperta e ágil" },
-  { id: "dragon", name: "Dragão", stages: ["🥚", "🐣", "🐉", "🐲", "🔥🐲", "⚡🐲", "🌟🐲"], color: "from-red-500 to-purple-600", trait: "Poder — Bônus em combate", description: "Força bruta e fogo" },
-  { id: "owl", name: "Coruja", stages: ["🥚", "🐣", "🦉", "🦉", "🔮🦉", "⚡🦉", "🌟🦉"], color: "from-indigo-500 to-blue-600", trait: "Sabedoria — Bônus em revisão", description: "Inteligente e sábia" },
-  { id: "wolf", name: "Lobo", stages: ["🥚", "🐣", "🐺", "🐺", "🔥🐺", "⚡🐺", "🌟🐺"], color: "from-gray-600 to-blue-700", trait: "Lealdade — Bônus em streak", description: "Fiel e determinado" },
-  { id: "phoenix", name: "Fênix", stages: ["🥚", "🐣", "🐦", "🦅", "🔥🦅", "⚡🦅", "🌟🦅"], color: "from-yellow-500 to-orange-600", trait: "Resiliência — Bônus em recuperação", description: "Renasce sempre mais forte" },
-  { id: "cat", name: "Gato", stages: ["🥚", "🐱", "🐱", "🐈", "🔮🐈", "⚡🐈", "🌟🐈"], color: "from-pink-500 to-purple-500", trait: "Curiosidade — Bônus em exploração", description: "Curioso e independente" },
-  // New species
-  { id: "bear", name: "Urso", stages: ["🥚", "🐻", "🐻", "🐻‍❄️", "🔥🐻‍❄️", "⚡🐻‍❄️", "🌟🐻‍❄️"], color: "from-amber-600 to-yellow-700", trait: "Força — Bônus em resistência", description: "Forte e resiliente" },
-  { id: "rabbit", name: "Coelho", stages: ["🥚", "🐰", "🐰", "🐇", "🔥🐇", "⚡🐇", "🌟🐇"], color: "from-pink-400 to-rose-500", trait: "Velocidade — Bônus em tempo", description: "Rápido e ágil" },
-  { id: "turtle", name: "Tartaruga", stages: ["🥚", "🐢", "🐢", "🐢", "🔮🐢", "⚡🐢", "🌟🐢"], color: "from-green-500 to-emerald-600", trait: "Paciência — Bônus em precisão", description: "Calma e precisa" },
-  { id: "eagle", name: "Águia", stages: ["🥚", "🐣", "🦅", "🦅", "🔥🦅", "⚡🦅", "🌟🦅"], color: "from-sky-500 to-blue-600", trait: "Visão — Bônus em detalhes", description: "Olhos afiados e perspicaz" },
-  { id: "lion", name: "Leão", stages: ["🥚", "🐱", "🦁", "🦁", "🔥🦁", "⚡🦁", "🌟🦁"], color: "from-yellow-500 to-amber-600", trait: "Coragem — Bônus em desafios", description: "Corajoso e líder nato" },
-  { id: "panda", name: "Panda", stages: ["🥚", "🐼", "🐼", "🐼", "🔮🐼", "⚡🐼", "🌟🐼"], color: "from-gray-400 to-gray-600", trait: "Equilíbrio — Bônus em foco", description: "Zen e equilibrado" },
-  { id: "shark", name: "Tubarão", stages: ["🥚", "🐟", "🦈", "🦈", "🔥🦈", "⚡🦈", "🌟🦈"], color: "from-blue-600 to-cyan-700", trait: "Instinto — Bônus em quiz", description: "Predador implacável" },
-  { id: "unicorn", name: "Unicórnio", stages: ["🥚", "🐴", "🦄", "🦄", "🔮🦄", "⚡🦄", "🌟🦄"], color: "from-violet-500 to-pink-500", trait: "Magia — Bônus em XP", description: "Mágico e raro" },
-  { id: "monkey", name: "Macaco", stages: ["🥚", "🐒", "🐒", "🐵", "🔥🐵", "⚡🐵", "🌟🐵"], color: "from-orange-400 to-brown-500", trait: "Inteligência — Bônus em lógica", description: "Esperto e brincalhão" },
-  { id: "penguin", name: "Pinguim", stages: ["🥚", "🐧", "🐧", "🐧", "🔮🐧", "⚡🐧", "🌟🐧"], color: "from-slate-500 to-blue-600", trait: "Persistência — Bônus em missões", description: "Determinado e fiel" },
+  { id: "fox", name: "Raposa", stages: ["🥚", "🦊", "🦊", "🦊", "🔥🦊", "⚡🦊", "🌟🦊"], color: "from-orange-500 to-red-500", trait: "Astúcia — Bônus em estratégia", description: "Esperta e ágil", model: { body: "#f97316", accent: "#dc2626", shape: "rounded" } },
+  { id: "dragon", name: "Dragão", stages: ["🥚", "🐣", "🐉", "🐲", "🔥🐲", "⚡🐲", "🌟🐲"], color: "from-red-500 to-purple-600", trait: "Poder — Bônus em combate", description: "Força bruta e fogo", model: { body: "#ef4444", accent: "#9333ea", shape: "spiky" } },
+  { id: "owl", name: "Coruja", stages: ["🥚", "🐣", "🦉", "🦉", "🔮🦉", "⚡🦉", "🌟🦉"], color: "from-indigo-500 to-blue-600", trait: "Sabedoria — Bônus em revisão", description: "Inteligente e sábia", model: { body: "#6366f1", accent: "#2563eb", shape: "round" } },
+  { id: "wolf", name: "Lobo", stages: ["🥚", "🐣", "🐺", "🐺", "🔥🐺", "⚡🐺", "🌟🐺"], color: "from-gray-600 to-blue-700", trait: "Lealdade — Bônus em streak", description: "Fiel e determinado", model: { body: "#4b5563", accent: "#1d4ed8", shape: "angular" } },
+  { id: "phoenix", name: "Fênix", stages: ["🥚", "🐣", "🐦", "🦅", "🔥🦅", "⚡🦅", "🌟🦅"], color: "from-yellow-500 to-orange-600", trait: "Resiliência — Bônus em recuperação", description: "Renasce sempre mais forte", model: { body: "#eab308", accent: "#ea580c", shape: "wing" } },
+  { id: "cat", name: "Gato", stages: ["🥚", "🐱", "🐱", "🐈", "🔮🐈", "⚡🐈", "🌟🐈"], color: "from-pink-500 to-purple-500", trait: "Curiosidade — Bônus em exploração", description: "Curioso e independente", model: { body: "#ec4899", accent: "#a855f7", shape: "sleek" } },
+  { id: "bear", name: "Urso", stages: ["🥚", "🐻", "🐻", "🐻‍❄️", "🔥🐻‍❄️", "⚡🐻‍❄️", "🌟🐻‍❄️"], color: "from-amber-600 to-yellow-700", trait: "Força — Bônus em resistência", description: "Forte e resiliente", model: { body: "#d97706", accent: "#a16207", shape: "bulky" } },
+  { id: "rabbit", name: "Coelho", stages: ["🥚", "🐰", "🐰", "🐇", "🔥🐇", "⚡🐇", "🌟🐇"], color: "from-pink-400 to-rose-500", trait: "Velocidade — Bônus em tempo", description: "Rápido e ágil", model: { body: "#f472b6", accent: "#f43f5e", shape: "round" } },
+  { id: "turtle", name: "Tartaruga", stages: ["🥚", "🐢", "🐢", "🐢", "🔮🐢", "⚡🐢", "🌟🐢"], color: "from-green-500 to-emerald-600", trait: "Paciência — Bônus em precisão", description: "Calma e precisa", model: { body: "#22c55e", accent: "#059669", shape: "shell" } },
+  { id: "eagle", name: "Águia", stages: ["🥚", "🐣", "🦅", "🦅", "🔥🦅", "⚡🦅", "🌟🦅"], color: "from-sky-500 to-blue-600", trait: "Visão — Bônus em detalhes", description: "Olhos afiados", model: { body: "#0ea5e9", accent: "#2563eb", shape: "wing" } },
+  { id: "lion", name: "Leão", stages: ["🥚", "🐱", "🦁", "🦁", "🔥🦁", "⚡🦁", "🌟🦁"], color: "from-yellow-500 to-amber-600", trait: "Coragem — Bônus em desafios", description: "Corajoso e líder", model: { body: "#eab308", accent: "#d97706", shape: "mane" } },
+  { id: "panda", name: "Panda", stages: ["🥚", "🐼", "🐼", "🐼", "🔮🐼", "⚡🐼", "🌟🐼"], color: "from-gray-400 to-gray-600", trait: "Equilíbrio — Bônus em foco", description: "Zen e equilibrado", model: { body: "#f5f5f5", accent: "#1f2937", shape: "round" } },
+  { id: "shark", name: "Tubarão", stages: ["🥚", "🐟", "🦈", "🦈", "🔥🦈", "⚡🦈", "🌟🦈"], color: "from-blue-600 to-cyan-700", trait: "Instinto — Bônus em quiz", description: "Predador implacável", model: { body: "#2563eb", accent: "#0e7490", shape: "angular" } },
+  { id: "unicorn", name: "Unicórnio", stages: ["🥚", "🐴", "🦄", "🦄", "🔮🦄", "⚡🦄", "🌟🦄"], color: "from-violet-500 to-pink-500", trait: "Magia — Bônus em XP", description: "Mágico e raro", model: { body: "#8b5cf6", accent: "#ec4899", shape: "elegant" } },
+  { id: "monkey", name: "Macaco", stages: ["🥚", "🐒", "🐒", "🐵", "🔥🐵", "⚡🐵", "🌟🐵"], color: "from-orange-400 to-amber-600", trait: "Inteligência — Bônus em lógica", description: "Esperto e brincalhão", model: { body: "#fb923c", accent: "#92400e", shape: "agile" } },
+  { id: "penguin", name: "Pinguim", stages: ["🥚", "🐧", "🐧", "🐧", "🔮🐧", "⚡🐧", "🌟🐧"], color: "from-slate-500 to-blue-600", trait: "Persistência — Bônus em missões", description: "Determinado e fiel", model: { body: "#1e293b", accent: "#f8fafc", shape: "round" } },
 ];
 
 const PET_STAGE_NAMES = ["Ovo", "Filhote", "Jovem", "Adulto", "Guerreiro", "Lendário", "Mítico"];
@@ -47,7 +46,6 @@ const PET_MOODS = [
 ];
 
 const SHOP_ITEMS = [
-  // Roupas
   { id: "hat", name: "Chapéu Mágico", emoji: "🎩", price: 100, category: "roupa", requiredStreak: 0 },
   { id: "glasses", name: "Óculos Estilosos", emoji: "🕶️", price: 150, category: "roupa", requiredStreak: 0 },
   { id: "scarf", name: "Cachecol Nerd", emoji: "🧣", price: 120, category: "roupa", requiredStreak: 0 },
@@ -56,7 +54,6 @@ const SHOP_ITEMS = [
   { id: "hoodie", name: "Moletom Gamer", emoji: "🧥", price: 250, category: "roupa", requiredStreak: 7 },
   { id: "armor", name: "Armadura Leve", emoji: "🛡️", price: 400, category: "roupa", requiredStreak: 15 },
   { id: "kimono", name: "Kimono Sábio", emoji: "👘", price: 350, category: "roupa", requiredStreak: 12 },
-  // Acessórios
   { id: "cape", name: "Capa Heroica", emoji: "🦸", price: 300, category: "acessório", requiredStreak: 10 },
   { id: "crown", name: "Coroa Real", emoji: "👑", price: 500, category: "acessório", requiredStreak: 20 },
   { id: "wings", name: "Asas Celestiais", emoji: "🪽", price: 800, category: "acessório", requiredStreak: 40 },
@@ -67,7 +64,6 @@ const SHOP_ITEMS = [
   { id: "wand", name: "Varinha Arcana", emoji: "🪄", price: 700, category: "acessório", requiredStreak: 30 },
   { id: "orb", name: "Orbe Cósmico", emoji: "🔮", price: 900, category: "acessório", requiredStreak: 50 },
   { id: "necklace", name: "Colar de Poder", emoji: "📿", price: 450, category: "acessório", requiredStreak: 18 },
-  // Skins
   { id: "golden", name: "Skin Dourada", emoji: "🌟", price: 600, category: "skin", requiredStreak: 15 },
   { id: "crystal", name: "Skin Cristal", emoji: "💎", price: 900, category: "skin", requiredStreak: 30 },
   { id: "shadow", name: "Skin Sombria", emoji: "🌑", price: 700, category: "skin", requiredStreak: 25 },
@@ -82,6 +78,166 @@ const SHOP_ITEMS = [
 
 const PET_KEY = "studyflow_pet";
 const SHOP_KEY = "studyflow_pet_shop";
+
+// 3D Pet Component with CSS 3D transforms
+const Pet3D = ({ species, stageIdx, petAction, equippedItems, mood }: {
+  species: typeof PET_SPECIES[0]; stageIdx: number; petAction: string;
+  equippedItems: string[]; mood: typeof PET_MOODS[0];
+}) => {
+  const { body, accent } = species.model;
+  const isEgg = stageIdx === 0;
+  const scale = 0.7 + stageIdx * 0.1;
+
+  return (
+    <div className="relative" style={{ perspective: "800px" }}>
+      <motion.div
+        animate={petAction ? { rotateY: [0, 360], scale: [1, 1.2, 1] } : { rotateY: [0, 5, -5, 0], translateY: [0, -8, 0] }}
+        transition={petAction ? { duration: 0.8 } : { duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        style={{ transformStyle: "preserve-3d", transform: `scale(${scale})` }}
+        className="relative mx-auto"
+      >
+        {/* Shadow */}
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-4 rounded-full bg-black/20 blur-md" />
+
+        {/* Main Body */}
+        <div className="relative w-32 h-32 mx-auto" style={{ transformStyle: "preserve-3d" }}>
+          {isEgg ? (
+            <motion.div
+              animate={{ rotate: [-3, 3, -3] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+              className="w-24 h-32 mx-auto rounded-[50%] relative overflow-hidden"
+              style={{
+                background: `linear-gradient(135deg, ${body}, ${accent})`,
+                boxShadow: `0 8px 32px ${body}40, inset -4px -4px 12px rgba(0,0,0,0.2), inset 4px 4px 12px rgba(255,255,255,0.3)`,
+              }}
+            >
+              <div className="absolute top-[40%] left-1/2 -translate-x-1/2 flex gap-3">
+                <div className="w-2 h-2 rounded-full bg-white/80" />
+                <div className="w-2 h-2 rounded-full bg-white/80" />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
+            </motion.div>
+          ) : (
+            <>
+              {/* Body sphere */}
+              <motion.div
+                className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-[40%_40%_45%_45%]"
+                style={{
+                  width: "80px", height: "72px",
+                  background: `radial-gradient(circle at 35% 30%, ${body}dd, ${body}99, ${accent}88)`,
+                  boxShadow: `0 12px 40px ${body}50, inset -6px -6px 20px rgba(0,0,0,0.15), inset 6px 6px 20px rgba(255,255,255,0.2), 0 0 ${stageIdx >= 4 ? "30" : "0"}px ${stageIdx >= 5 ? accent : "transparent"}`,
+                }}
+              />
+              {/* Head sphere */}
+              <motion.div
+                animate={{ rotate: petAction ? [0, 10, -10, 0] : [0, 2, -2, 0] }}
+                transition={{ duration: petAction ? 0.4 : 2, repeat: petAction ? 2 : Infinity }}
+                className="absolute top-0 left-1/2 -translate-x-1/2 rounded-full"
+                style={{
+                  width: "64px", height: "60px",
+                  background: `radial-gradient(circle at 35% 30%, ${body}ee, ${body}aa, ${accent}77)`,
+                  boxShadow: `0 4px 20px ${body}40, inset -4px -4px 16px rgba(0,0,0,0.1), inset 4px 4px 16px rgba(255,255,255,0.25)`,
+                }}
+              >
+                {/* Eyes */}
+                <div className="absolute top-[35%] left-1/2 -translate-x-1/2 flex gap-4">
+                  <motion.div animate={{ scaleY: [1, 0.1, 1] }} transition={{ duration: 3, repeat: Infinity, repeatDelay: 4 }}
+                    className="w-3 h-3 rounded-full bg-gray-900 relative">
+                    <div className="absolute top-0.5 left-0.5 w-1.5 h-1.5 rounded-full bg-white/80" />
+                  </motion.div>
+                  <motion.div animate={{ scaleY: [1, 0.1, 1] }} transition={{ duration: 3, repeat: Infinity, repeatDelay: 4 }}
+                    className="w-3 h-3 rounded-full bg-gray-900 relative">
+                    <div className="absolute top-0.5 left-0.5 w-1.5 h-1.5 rounded-full bg-white/80" />
+                  </motion.div>
+                </div>
+                {/* Mouth */}
+                <div className="absolute top-[60%] left-1/2 -translate-x-1/2">
+                  {petAction === "feed" ? (
+                    <div className="w-4 h-3 rounded-full bg-pink-400" />
+                  ) : (
+                    <div className="w-4 h-1 rounded-full bg-gray-800/60" style={{ borderRadius: "0 0 50% 50%" }} />
+                  )}
+                </div>
+                {/* Cheeks */}
+                <div className="absolute top-[48%] left-[10%] w-3 h-2 rounded-full bg-pink-300/40" />
+                <div className="absolute top-[48%] right-[10%] w-3 h-2 rounded-full bg-pink-300/40" />
+              </motion.div>
+
+              {/* Ears */}
+              <div className="absolute -top-2 left-[22%] w-4 h-6 rounded-t-full" style={{ background: `linear-gradient(${body}, ${accent})`, transform: "rotate(-15deg)" }} />
+              <div className="absolute -top-2 right-[22%] w-4 h-6 rounded-t-full" style={{ background: `linear-gradient(${body}, ${accent})`, transform: "rotate(15deg)" }} />
+
+              {/* Arms */}
+              <motion.div animate={{ rotate: petAction === "play" ? [0, 30, -30, 0] : [0, 5, -5, 0] }}
+                transition={{ duration: petAction ? 0.3 : 2, repeat: petAction ? 3 : Infinity }}
+                className="absolute top-[50%] -left-2 w-4 h-10 rounded-full origin-top"
+                style={{ background: `linear-gradient(${body}cc, ${accent}88)` }} />
+              <motion.div animate={{ rotate: petAction === "play" ? [0, -30, 30, 0] : [0, -5, 5, 0] }}
+                transition={{ duration: petAction ? 0.3 : 2, repeat: petAction ? 3 : Infinity }}
+                className="absolute top-[50%] -right-2 w-4 h-10 rounded-full origin-top"
+                style={{ background: `linear-gradient(${body}cc, ${accent}88)` }} />
+
+              {/* Feet */}
+              <div className="absolute -bottom-1 left-[25%] w-5 h-3 rounded-full" style={{ background: accent }} />
+              <div className="absolute -bottom-1 right-[25%] w-5 h-3 rounded-full" style={{ background: accent }} />
+
+              {/* Stage effects */}
+              {stageIdx >= 4 && (
+                <motion.div animate={{ opacity: [0.3, 0.8, 0.3], scale: [1, 1.1, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="absolute inset-0 rounded-full"
+                  style={{ boxShadow: `0 0 40px ${accent}60, 0 0 80px ${accent}30` }} />
+              )}
+              {stageIdx >= 5 && (
+                <>
+                  {[...Array(6)].map((_, i) => (
+                    <motion.div key={i}
+                      animate={{ opacity: [0, 1, 0], y: [-10, -40], x: [0, (i % 2 ? 10 : -10)] }}
+                      transition={{ duration: 2, repeat: Infinity, delay: i * 0.3 }}
+                      className="absolute text-xs"
+                      style={{ top: `${20 + (i * 10)}%`, left: `${10 + (i * 15)}%` }}>
+                      ✦
+                    </motion.div>
+                  ))}
+                </>
+              )}
+              {stageIdx >= 6 && (
+                <motion.div animate={{ rotate: 360 }} transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                  className="absolute -inset-4 rounded-full border-2 border-dashed"
+                  style={{ borderColor: `${accent}40` }} />
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Equipped items floating around */}
+        {equippedItems.length > 0 && (
+          <div className="absolute -top-4 left-1/2 -translate-x-1/2 flex gap-1">
+            {equippedItems.map((id, i) => {
+              const item = SHOP_ITEMS.find(it => it.id === id);
+              return item ? (
+                <motion.span key={id}
+                  animate={{ y: [-2, 2, -2], rotate: [0, 5, -5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, delay: i * 0.2 }}
+                  className="text-lg drop-shadow-lg">{item.emoji}</motion.span>
+              ) : null;
+            })}
+          </div>
+        )}
+      </motion.div>
+
+      {/* Mood indicator */}
+      <motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2, repeat: Infinity }}
+        className="absolute top-2 right-4">
+        <span className="text-2xl">{mood.mood}</span>
+      </motion.div>
+
+      {/* Ground reflection */}
+      <div className="mt-2 mx-auto w-32 h-8 rounded-full"
+        style={{ background: `radial-gradient(ellipse, ${body}15, transparent)` }} />
+    </div>
+  );
+};
 
 const VirtualPet = () => {
   const { profile, streak, user, loading } = useAuth();
@@ -105,9 +261,7 @@ const VirtualPet = () => {
       const parsed = JSON.parse(saved);
       setSelectedSpecies(parsed.species);
       setEquippedItems(parsed.equipped || []);
-    } else {
-      setShowSpeciesSelect(true);
-    }
+    } else { setShowSpeciesSelect(true); }
     const shopSaved = localStorage.getItem(`${SHOP_KEY}_${user.id}`);
     if (shopSaved) setOwnedItems(JSON.parse(shopSaved));
   }, [user]);
@@ -149,9 +303,7 @@ const VirtualPet = () => {
     if (ownedItems.includes(item.id)) { toast.error("Você já possui esse item!"); return; }
     if (coins < item.price) { toast.error("Moedas insuficientes!"); return; }
     if (currentStreak < item.requiredStreak) { toast.error(`Precisa de ${item.requiredStreak} dias de streak!`); return; }
-    if (user) {
-      await supabase.from("profiles").update({ coins: coins - item.price }).eq("user_id", user.id);
-    }
+    if (user) { await supabase.from("profiles").update({ coins: coins - item.price }).eq("user_id", user.id); }
     const newOwned = [...ownedItems, item.id];
     setOwnedItems(newOwned);
     if (user) localStorage.setItem(`${SHOP_KEY}_${user.id}`, JSON.stringify(newOwned));
@@ -170,10 +322,10 @@ const VirtualPet = () => {
     setShowParticles(true);
     setTimeout(() => { setPetAction(""); setShowParticles(false); }, 2000);
     const messages: Record<string, string> = {
-      feed: `${species.stages[stageIdx]} Adorou o lanche!`,
-      play: `${species.stages[stageIdx]} Se divertindo!`,
-      train: `${species.stages[stageIdx]} Ficou mais forte!`,
-      sing: `${species.stages[stageIdx]} Cantando feliz! 🎵`,
+      feed: `${species.name} adorou o lanche! 🍖`,
+      play: `${species.name} está se divertindo! 🎾`,
+      train: `${species.name} ficou mais forte! 💪`,
+      sing: `${species.name} está cantando! 🎵`,
     };
     toast.success(messages[action] || "✨");
   };
@@ -194,53 +346,49 @@ const VirtualPet = () => {
           </div>
         </motion.div>
 
-        {/* Pet Display */}
+        {/* 3D Pet Display */}
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-          className={`relative bg-gradient-to-br ${species.color}/10 rounded-2xl p-8 border border-primary/20 overflow-hidden`}>
+          className="relative rounded-2xl p-8 border border-primary/20 overflow-hidden"
+          style={{ background: `linear-gradient(135deg, ${species.model.body}08, ${species.model.accent}08, transparent)` }}>
+
+          {/* Ambient particles */}
           <AnimatePresence>
             {showParticles && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 pointer-events-none">
-                {Array.from({ length: 15 }).map((_, i) => (
-                  <motion.div key={i} initial={{ opacity: 1, x: "50%", y: "50%" }} animate={{ opacity: 0, x: `${15 + Math.random() * 70}%`, y: `${5 + Math.random() * 50}%` }} transition={{ duration: 1.5, delay: i * 0.08 }} className="absolute text-2xl">
-                    {["⭐", "✨", "💫", "🌟", "❤️", "💜"][i % 6]}
+                {Array.from({ length: 20 }).map((_, i) => (
+                  <motion.div key={i} initial={{ opacity: 1, x: "50%", y: "60%" }}
+                    animate={{ opacity: 0, x: `${10 + Math.random() * 80}%`, y: `${Math.random() * 40}%`, scale: [1, 1.5, 0] }}
+                    transition={{ duration: 1.5, delay: i * 0.05 }}
+                    className="absolute text-xl">
+                    {["⭐", "✨", "💫", "🌟", "❤️", "💜", "🔥", "⚡"][i % 8]}
                   </motion.div>
                 ))}
               </motion.div>
             )}
           </AnimatePresence>
 
-          <div className="text-center">
-            <motion.div animate={petAction ? { scale: [1, 1.4, 1], rotate: [0, 15, -15, 0] } : { y: [0, -10, 0] }} transition={petAction ? { duration: 0.6 } : { duration: 2.5, repeat: Infinity, ease: "easeInOut" }} className="text-8xl mb-4 inline-block">
-              {species.stages[stageIdx]}
-            </motion.div>
+          {/* Background ambient glow */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full blur-3xl opacity-20"
+              style={{ background: species.model.body }} />
+          </div>
 
-            {equippedItems.length > 0 && (
-              <div className="flex justify-center gap-1 mb-2">
-                {equippedItems.map(id => {
-                  const item = SHOP_ITEMS.find(i => i.id === id);
-                  return item ? <span key={id} className="text-2xl">{item.emoji}</span> : null;
-                })}
-              </div>
-            )}
+          <Pet3D species={species} stageIdx={stageIdx} petAction={petAction} equippedItems={equippedItems} mood={mood} />
 
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <h2 className="text-2xl font-bold">{species.name} — {PET_STAGE_NAMES[stageIdx]}</h2>
-              <span className={`text-xl ${mood.color}`}>{mood.mood}</span>
-            </div>
+          <div className="text-center mt-4 relative z-10">
+            <h2 className="text-2xl font-bold text-foreground">{species.name} — {PET_STAGE_NAMES[stageIdx]}</h2>
             <p className="text-muted-foreground mb-1 text-sm">{species.trait}</p>
             <Badge variant="outline" className={mood.color}>{mood.label}</Badge>
           </div>
 
           {nextStageIdx !== null && (
-            <div className="mt-6 max-w-md mx-auto">
+            <div className="mt-6 max-w-md mx-auto relative z-10">
               <div className="flex justify-between text-sm mb-1">
                 <span>{PET_STAGE_NAMES[stageIdx]}</span>
                 <span>{PET_STAGE_NAMES[nextStageIdx]}</span>
               </div>
               <Progress value={stageProgress} className="h-3" />
-              <p className="text-center text-xs text-muted-foreground mt-1">
-                {PET_STAGE_MIN_STREAK[nextStageIdx] - currentStreak} dias para evoluir
-              </p>
+              <p className="text-center text-xs text-muted-foreground mt-1">{PET_STAGE_MIN_STREAK[nextStageIdx] - currentStreak} dias para evoluir</p>
             </div>
           )}
         </motion.div>
@@ -297,7 +445,7 @@ const VirtualPet = () => {
           </div>
         </div>
 
-        {/* Equipped Items */}
+        {/* Owned Items */}
         {ownedItems.length > 0 && (
           <div className="bg-card rounded-xl p-6 border border-border">
             <h3 className="text-lg font-bold mb-4">🎨 Meus Itens</h3>
@@ -326,7 +474,10 @@ const VirtualPet = () => {
             {PET_SPECIES.map(sp => (
               <motion.button key={sp.id} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={() => chooseSpecies(sp.id)}
                 className={`p-4 rounded-xl border-2 transition-all text-left ${selectedSpecies === sp.id ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}>
-                <div className="text-4xl mb-2">{sp.stages[1]}</div>
+                <div className="w-12 h-12 rounded-full mb-2 flex items-center justify-center"
+                  style={{ background: `radial-gradient(circle, ${sp.model.body}40, ${sp.model.accent}20)` }}>
+                  <span className="text-2xl">{sp.stages[2]}</span>
+                </div>
                 <h4 className="font-bold text-sm">{sp.name}</h4>
                 <p className="text-xs text-muted-foreground">{sp.description}</p>
                 <Badge variant="outline" className="mt-2 text-[10px]">{sp.trait}</Badge>
