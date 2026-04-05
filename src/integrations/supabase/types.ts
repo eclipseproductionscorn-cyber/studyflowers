@@ -320,6 +320,126 @@ export type Database = {
           },
         ]
       }
+      guild_missions: {
+        Row: {
+          coin_reward: number
+          completed_at: string | null
+          created_at: string
+          current: number
+          description: string | null
+          expires_at: string
+          guild_id: string
+          id: string
+          is_completed: boolean
+          mission_type: string
+          target: number
+          title: string
+          xp_reward: number
+        }
+        Insert: {
+          coin_reward?: number
+          completed_at?: string | null
+          created_at?: string
+          current?: number
+          description?: string | null
+          expires_at?: string
+          guild_id: string
+          id?: string
+          is_completed?: boolean
+          mission_type?: string
+          target?: number
+          title: string
+          xp_reward?: number
+        }
+        Update: {
+          coin_reward?: number
+          completed_at?: string | null
+          created_at?: string
+          current?: number
+          description?: string | null
+          expires_at?: string
+          guild_id?: string
+          id?: string
+          is_completed?: boolean
+          mission_type?: string
+          target?: number
+          title?: string
+          xp_reward?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guild_missions_guild_id_fkey"
+            columns: ["guild_id"]
+            isOneToOne: false
+            referencedRelation: "guilds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guild_wars: {
+        Row: {
+          created_at: string
+          ends_at: string
+          guild_a_id: string
+          guild_a_score: number
+          guild_b_id: string
+          guild_b_score: number
+          id: string
+          rewards_claimed: boolean
+          started_at: string
+          status: string
+          winner_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          ends_at?: string
+          guild_a_id: string
+          guild_a_score?: number
+          guild_b_id: string
+          guild_b_score?: number
+          id?: string
+          rewards_claimed?: boolean
+          started_at?: string
+          status?: string
+          winner_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string
+          guild_a_id?: string
+          guild_a_score?: number
+          guild_b_id?: string
+          guild_b_score?: number
+          id?: string
+          rewards_claimed?: boolean
+          started_at?: string
+          status?: string
+          winner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guild_wars_guild_a_id_fkey"
+            columns: ["guild_a_id"]
+            isOneToOne: false
+            referencedRelation: "guilds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guild_wars_guild_b_id_fkey"
+            columns: ["guild_b_id"]
+            isOneToOne: false
+            referencedRelation: "guilds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guild_wars_winner_id_fkey"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "guilds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guilds: {
         Row: {
           color: string
