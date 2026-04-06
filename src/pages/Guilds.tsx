@@ -50,6 +50,7 @@ interface GuildWar { id: string; guild_a_id: string; guild_b_id: string; guild_a
 
 const Guilds = () => {
   const { profile, user } = useAuth();
+  const navigate = useNavigate();
   const [myGuild, setMyGuild] = useState<Guild | null>(null);
   const [myMembership, setMyMembership] = useState<GuildMember | null>(null);
   const [members, setMembers] = useState<GuildMember[]>([]);
