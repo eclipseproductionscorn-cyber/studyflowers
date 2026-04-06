@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Globe, Shield, Crown, Trophy, Zap, Lock, MapPin, Sparkles, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { fireConfetti, fireConfettiBurst, fireStars } from "@/lib/confetti";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
