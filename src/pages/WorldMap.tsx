@@ -68,8 +68,14 @@ const WorldMap = () => {
       conquest_points: conquered ? 0 : newPts,
       owner_guild_id: conquered ? myGuildId : territory.owner_guild_id,
     }).eq("id", territory.id);
-    if (conquered) toast.success(`🏴 Território "${territory.name}" conquistado!`);
-    else toast.success(`⚔️ +1 ponto de conquista! (${newPts}/${territory.required_wins})`);
+    if (conquered) {
+      toast.success(`🏴 Território "${territory.name}" conquistado!`);
+      fireConfetti();
+      setTimeout(() => fireConfettiBurst(), 300);
+      setTimeout(() => fireStars(), 600);
+    } else {
+      toast.success(`⚔️ +1 ponto de conquista! (${newPts}/${territory.required_wins})`);
+    }
     loadTerritories();
     setSelected(null);
   };
