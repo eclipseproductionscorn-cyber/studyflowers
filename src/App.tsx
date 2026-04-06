@@ -35,6 +35,7 @@ import Events from "./pages/Events";
 import Trails from "./pages/Trails";
 import JourneyMap from "./pages/JourneyMap";
 import WorldMap from "./pages/WorldMap";
+import GuildRanking from "./pages/GuildRanking";
 import SkillTree from "./pages/SkillTree";
 import BossBattle from "./pages/BossBattle";
 import VirtualPet from "./pages/VirtualPet";
