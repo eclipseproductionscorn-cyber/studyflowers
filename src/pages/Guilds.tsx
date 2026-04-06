@@ -3,9 +3,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Shield, Users, Crown, Plus, Send, Trophy, Star, Swords,
   LogOut, MessageCircle, TrendingUp, Search, Lock, Globe,
-  Target, Flame, Zap, Award, Timer,
+  Target, Flame, Zap, Award, Timer, Map,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import TournamentTab from "@/components/guild/TournamentTab";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -48,6 +50,7 @@ interface GuildWar { id: string; guild_a_id: string; guild_b_id: string; guild_a
 
 const Guilds = () => {
   const { profile, user } = useAuth();
+  const navigate = useNavigate();
   const [myGuild, setMyGuild] = useState<Guild | null>(null);
   const [myMembership, setMyMembership] = useState<GuildMember | null>(null);
   const [members, setMembers] = useState<GuildMember[]>([]);
@@ -274,8 +277,9 @@ const Guilds = () => {
 
         {myGuild ? (
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid grid-cols-5 w-full bg-card/50 border border-border/50">
+            <TabsList className="grid grid-cols-6 w-full bg-card/50 border border-border/50">
               <TabsTrigger value="overview" className="gap-1 text-xs"><Shield size={14} /><span className="hidden md:inline">Guilda</span></TabsTrigger>
+              <TabsTrigger value="tournaments" className="gap-1 text-xs"><Trophy size={14} /><span className="hidden md:inline">Torneios</span></TabsTrigger>
               <TabsTrigger value="missions" className="gap-1 text-xs"><Target size={14} /><span className="hidden md:inline">Missões</span></TabsTrigger>
               <TabsTrigger value="wars" className="gap-1 text-xs"><Swords size={14} /><span className="hidden md:inline">Guerras</span></TabsTrigger>
               <TabsTrigger value="members" className="gap-1 text-xs"><Users size={14} /><span className="hidden md:inline">Membros</span></TabsTrigger>
@@ -322,6 +326,18 @@ const Guilds = () => {
                   <Button variant="outline" onClick={leaveGuild} className="gap-2 text-destructive"><LogOut size={16} /> Sair da Guilda</Button>
                 )}
               </motion.div>
+            </TabsContent>
+
+            {/* Tournaments */}
+            <TabsContent value="tournaments">
+              <div className="space-y-4 mt-4">
+                <div className="flex justify-end">
+                  <Button variant="outline" onClick={() => navigate("/world-map")} className="gap-2">
+                    <Map size={16} /> Mapa do Mundo
+                  </Button>
+                </div>
+                <TournamentTab guildId={myGuild.id} isLeader={myMembership?.role === "leader"} />
+              </div>
             </TabsContent>
 
             {/* Cooperative Missions */}
