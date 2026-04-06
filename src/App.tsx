@@ -34,6 +34,7 @@ import StudyCalendar from "./pages/StudyCalendar";
 import Events from "./pages/Events";
 import Trails from "./pages/Trails";
 import JourneyMap from "./pages/JourneyMap";
+import WorldMap from "./pages/WorldMap";
 import SkillTree from "./pages/SkillTree";
 import BossBattle from "./pages/BossBattle";
 import VirtualPet from "./pages/VirtualPet";
