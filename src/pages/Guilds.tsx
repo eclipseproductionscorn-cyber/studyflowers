@@ -328,6 +328,18 @@ const Guilds = () => {
               </motion.div>
             </TabsContent>
 
+            {/* Tournaments */}
+            <TabsContent value="tournaments">
+              <div className="space-y-4 mt-4">
+                <div className="flex justify-end">
+                  <Button variant="outline" onClick={() => navigate("/world-map")} className="gap-2">
+                    <Map size={16} /> Mapa do Mundo
+                  </Button>
+                </div>
+                <TournamentTab guildId={myGuild.id} isLeader={myMembership?.role === "leader"} />
+              </div>
+            </TabsContent>
+
             {/* Cooperative Missions */}
             <TabsContent value="missions">
               <div className="space-y-4 mt-4">
