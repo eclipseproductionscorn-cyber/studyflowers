@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Globe, Shield, Crown, Trophy, Zap, Lock, MapPin, Sparkles, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { fireConfetti, fireConfettiBurst, fireStars } from "@/lib/confetti";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
@@ -67,8 +68,14 @@ const WorldMap = () => {
       conquest_points: conquered ? 0 : newPts,
       owner_guild_id: conquered ? myGuildId : territory.owner_guild_id,
     }).eq("id", territory.id);
-    if (conquered) toast.success(`🏴 Território "${territory.name}" conquistado!`);
-    else toast.success(`⚔️ +1 ponto de conquista! (${newPts}/${territory.required_wins})`);
+    if (conquered) {
+      toast.success(`🏴 Território "${territory.name}" conquistado!`);
+      fireConfetti();
+      setTimeout(() => fireConfettiBurst(), 300);
+      setTimeout(() => fireStars(), 600);
+    } else {
+      toast.success(`⚔️ +1 ponto de conquista! (${newPts}/${territory.required_wins})`);
+    }
     loadTerritories();
     setSelected(null);
   };

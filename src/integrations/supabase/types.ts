@@ -376,6 +376,87 @@ export type Database = {
           },
         ]
       }
+      guild_season_results: {
+        Row: {
+          created_at: string
+          final_rank: number
+          guild_id: string
+          id: string
+          season_id: string
+          territories_held: number
+          total_score: number
+          trophies_earned: number
+          wars_won: number
+        }
+        Insert: {
+          created_at?: string
+          final_rank?: number
+          guild_id: string
+          id?: string
+          season_id: string
+          territories_held?: number
+          total_score?: number
+          trophies_earned?: number
+          wars_won?: number
+        }
+        Update: {
+          created_at?: string
+          final_rank?: number
+          guild_id?: string
+          id?: string
+          season_id?: string
+          territories_held?: number
+          total_score?: number
+          trophies_earned?: number
+          wars_won?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guild_season_results_guild_id_fkey"
+            columns: ["guild_id"]
+            isOneToOne: false
+            referencedRelation: "guilds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guild_season_results_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "guild_seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guild_seasons: {
+        Row: {
+          created_at: string
+          ends_at: string
+          id: string
+          season_number: number
+          starts_at: string
+          status: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at?: string
+          id?: string
+          season_number: number
+          starts_at?: string
+          status?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string
+          id?: string
+          season_number?: number
+          starts_at?: string
+          status?: string
+          title?: string
+        }
+        Relationships: []
+      }
       guild_tournament_entries: {
         Row: {
           guild_id: string
