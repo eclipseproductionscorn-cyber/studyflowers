@@ -376,6 +376,105 @@ export type Database = {
           },
         ]
       }
+      guild_tournament_entries: {
+        Row: {
+          guild_id: string
+          id: string
+          joined_at: string
+          rank: number | null
+          rewards_claimed: boolean
+          score: number
+          tournament_id: string
+        }
+        Insert: {
+          guild_id: string
+          id?: string
+          joined_at?: string
+          rank?: number | null
+          rewards_claimed?: boolean
+          score?: number
+          tournament_id: string
+        }
+        Update: {
+          guild_id?: string
+          id?: string
+          joined_at?: string
+          rank?: number | null
+          rewards_claimed?: boolean
+          score?: number
+          tournament_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guild_tournament_entries_guild_id_fkey"
+            columns: ["guild_id"]
+            isOneToOne: false
+            referencedRelation: "guilds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guild_tournament_entries_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "guild_tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guild_tournaments: {
+        Row: {
+          coin_reward_first: number
+          coin_reward_second: number
+          coin_reward_third: number
+          created_at: string
+          description: string | null
+          ends_at: string
+          id: string
+          max_participants: number
+          min_guild_level: number
+          starts_at: string
+          status: string
+          title: string
+          xp_reward_first: number
+          xp_reward_second: number
+          xp_reward_third: number
+        }
+        Insert: {
+          coin_reward_first?: number
+          coin_reward_second?: number
+          coin_reward_third?: number
+          created_at?: string
+          description?: string | null
+          ends_at?: string
+          id?: string
+          max_participants?: number
+          min_guild_level?: number
+          starts_at?: string
+          status?: string
+          title: string
+          xp_reward_first?: number
+          xp_reward_second?: number
+          xp_reward_third?: number
+        }
+        Update: {
+          coin_reward_first?: number
+          coin_reward_second?: number
+          coin_reward_third?: number
+          created_at?: string
+          description?: string | null
+          ends_at?: string
+          id?: string
+          max_participants?: number
+          min_guild_level?: number
+          starts_at?: string
+          status?: string
+          title?: string
+          xp_reward_first?: number
+          xp_reward_second?: number
+          xp_reward_third?: number
+        }
+        Relationships: []
+      }
       guild_wars: {
         Row: {
           created_at: string
@@ -1055,6 +1154,71 @@ export type Database = {
           xp_reward?: number
         }
         Relationships: []
+      }
+      world_territories: {
+        Row: {
+          bonus_type: string
+          bonus_value: number
+          color: string
+          conquest_points: number
+          created_at: string
+          description: string | null
+          icon: string
+          id: string
+          is_capital: boolean
+          name: string
+          owner_guild_id: string | null
+          region: string
+          required_wins: number
+          size: string
+          x_position: number
+          y_position: number
+        }
+        Insert: {
+          bonus_type?: string
+          bonus_value?: number
+          color?: string
+          conquest_points?: number
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          is_capital?: boolean
+          name: string
+          owner_guild_id?: string | null
+          region?: string
+          required_wins?: number
+          size?: string
+          x_position?: number
+          y_position?: number
+        }
+        Update: {
+          bonus_type?: string
+          bonus_value?: number
+          color?: string
+          conquest_points?: number
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          is_capital?: boolean
+          name?: string
+          owner_guild_id?: string | null
+          region?: string
+          required_wins?: number
+          size?: string
+          x_position?: number
+          y_position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "world_territories_owner_guild_id_fkey"
+            columns: ["owner_guild_id"]
+            isOneToOne: false
+            referencedRelation: "guilds"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
