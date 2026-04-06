@@ -277,8 +277,9 @@ const Guilds = () => {
 
         {myGuild ? (
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid grid-cols-5 w-full bg-card/50 border border-border/50">
+            <TabsList className="grid grid-cols-6 w-full bg-card/50 border border-border/50">
               <TabsTrigger value="overview" className="gap-1 text-xs"><Shield size={14} /><span className="hidden md:inline">Guilda</span></TabsTrigger>
+              <TabsTrigger value="tournaments" className="gap-1 text-xs"><Trophy size={14} /><span className="hidden md:inline">Torneios</span></TabsTrigger>
               <TabsTrigger value="missions" className="gap-1 text-xs"><Target size={14} /><span className="hidden md:inline">Missões</span></TabsTrigger>
               <TabsTrigger value="wars" className="gap-1 text-xs"><Swords size={14} /><span className="hidden md:inline">Guerras</span></TabsTrigger>
               <TabsTrigger value="members" className="gap-1 text-xs"><Users size={14} /><span className="hidden md:inline">Membros</span></TabsTrigger>
