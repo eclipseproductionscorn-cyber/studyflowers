@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import logo from "@/assets/studyflow-logo.png";
 import { getRankData } from "@/lib/ranks";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import NotificationBell from "@/components/NotificationBell";
 import { getLevelFromXP, getLevelProgress } from "@/lib/levelSystem";
 import { Progress } from "@/components/ui/progress";
 import { FloatingElements } from "@/components/FloatingElements";
@@ -138,6 +139,8 @@ const DashboardLayout = ({ children, profile }: DashboardLayoutProps) => {
             </Button>
 
             <div className="flex items-center gap-3 ml-auto">
+              {/* Notifications */}
+              <NotificationBell />
               {/* Theme Toggle */}
               <ThemeToggle />
 
