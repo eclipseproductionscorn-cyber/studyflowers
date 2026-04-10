@@ -555,6 +555,13 @@ const Guilds = () => {
                 </div>
               </div>
             </TabsContent>
+
+            {/* Private DMs */}
+            <TabsContent value="dms">
+              <div className="bg-card/50 border border-border/50 rounded-xl overflow-hidden mt-4 p-4">
+                <GuildPrivateChat guildId={myGuild.id} members={members.map(m => ({ user_id: m.user_id, profile: m.profile ? { public_name: m.profile.public_name, avatar_url: m.profile.avatar_url } : undefined }))} />
+              </div>
+            </TabsContent>
           </Tabs>
         ) : (
           <div className="space-y-4">
