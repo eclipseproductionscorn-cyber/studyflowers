@@ -279,7 +279,7 @@ const Guilds = () => {
 
         {myGuild ? (
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid grid-cols-7 w-full bg-card/50 border border-border/50">
+            <TabsList className="grid grid-cols-8 w-full bg-card/50 border border-border/50">
               <TabsTrigger value="overview" className="gap-1 text-xs"><Shield size={14} /><span className="hidden md:inline">Guilda</span></TabsTrigger>
               {myMembership?.role === "leader" && (
                 <TabsTrigger value="manage" className="gap-1 text-xs"><Crown size={14} /><span className="hidden md:inline">Gestão</span></TabsTrigger>
@@ -289,6 +289,7 @@ const Guilds = () => {
               <TabsTrigger value="wars" className="gap-1 text-xs"><Swords size={14} /><span className="hidden md:inline">Guerras</span></TabsTrigger>
               <TabsTrigger value="members" className="gap-1 text-xs"><Users size={14} /><span className="hidden md:inline">Membros</span></TabsTrigger>
               <TabsTrigger value="chat" className="gap-1 text-xs"><MessageCircle size={14} /><span className="hidden md:inline">Chat</span></TabsTrigger>
+              <TabsTrigger value="dms" className="gap-1 text-xs"><Mail size={14} /><span className="hidden md:inline">Privado</span></TabsTrigger>
             </TabsList>
 
             {/* Overview */}
