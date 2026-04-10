@@ -3,12 +3,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Shield, Users, Crown, Plus, Send, Trophy, Star, Swords,
   LogOut, MessageCircle, TrendingUp, Search, Lock, Globe,
-  Target, Flame, Zap, Award, Timer, Map,
+  Target, Flame, Zap, Award, Timer, Map, Mail,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import TournamentTab from "@/components/guild/TournamentTab";
 import GuildManagement from "@/components/guild/GuildManagement";
+import GuildPrivateChat from "@/components/guild/GuildPrivateChat";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -184,14 +185,38 @@ const Guilds = () => {
     await supabase.from("guild_missions").update({
       current: newCurrent, is_completed: completed, completed_at: completed ? new Date().toISOString() : null,
     }).eq("id", mission.id);
-    if (completed) toast.success(`🏆 Missão "${mission.title}" completada!`);
-    else toast.success(`+10 progresso na missão!`);
+    if (completed) {
+      toast.success(`🏆 Missão "${mission.title}" completada!`);
+      // Notify all guild members
+      for (const m of members) {
+        await supabase.from("notifications").insert({
+          user_id: m.user_id,
+          title: "🎯 Missão Completa!",
+          message: `A missão "${mission.title}" foi completada pela guilda!`,
+          type: "mission",
+          link: "/guilds",
+        });
+      }
+    } else toast.success(`+10 progresso na missão!`);
     loadMissions(myGuild!.id);
   };
 
   const declareWar = async (targetGuildId: string) => {
     if (!myGuild) return;
     await supabase.from("guild_wars").insert({ guild_a_id: myGuild.id, guild_b_id: targetGuildId });
+    // Notify enemy guild members
+    const { data: enemyMembers } = await supabase.from("guild_members").select("user_id").eq("guild_id", targetGuildId);
+    if (enemyMembers) {
+      for (const m of enemyMembers) {
+        await supabase.from("notifications").insert({
+          user_id: m.user_id,
+          title: "⚔️ Guerra Declarada!",
+          message: `A guilda ${myGuild.name} declarou guerra contra vocês!`,
+          type: "war",
+          link: "/guilds",
+        });
+      }
+    }
     setShowDeclareWar(false);
     toast.success("⚔️ Guerra declarada!");
     loadWars(myGuild.id);
@@ -278,7 +303,7 @@ const Guilds = () => {
 
         {myGuild ? (
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid grid-cols-7 w-full bg-card/50 border border-border/50">
+            <TabsList className="grid grid-cols-8 w-full bg-card/50 border border-border/50">
               <TabsTrigger value="overview" className="gap-1 text-xs"><Shield size={14} /><span className="hidden md:inline">Guilda</span></TabsTrigger>
               {myMembership?.role === "leader" && (
                 <TabsTrigger value="manage" className="gap-1 text-xs"><Crown size={14} /><span className="hidden md:inline">Gestão</span></TabsTrigger>
@@ -288,6 +313,7 @@ const Guilds = () => {
               <TabsTrigger value="wars" className="gap-1 text-xs"><Swords size={14} /><span className="hidden md:inline">Guerras</span></TabsTrigger>
               <TabsTrigger value="members" className="gap-1 text-xs"><Users size={14} /><span className="hidden md:inline">Membros</span></TabsTrigger>
               <TabsTrigger value="chat" className="gap-1 text-xs"><MessageCircle size={14} /><span className="hidden md:inline">Chat</span></TabsTrigger>
+              <TabsTrigger value="dms" className="gap-1 text-xs"><Mail size={14} /><span className="hidden md:inline">Privado</span></TabsTrigger>
             </TabsList>
 
             {/* Overview */}
@@ -551,6 +577,13 @@ const Guilds = () => {
                     onKeyDown={(e) => e.key === "Enter" && sendMessage()} className="flex-1" />
                   <Button size="icon" onClick={sendMessage}><Send size={16} /></Button>
                 </div>
+              </div>
+            </TabsContent>
+
+            {/* Private DMs */}
+            <TabsContent value="dms">
+              <div className="bg-card/50 border border-border/50 rounded-xl overflow-hidden mt-4 p-4">
+                <GuildPrivateChat guildId={myGuild.id} members={members.map(m => ({ user_id: m.user_id, profile: m.profile ? { public_name: m.profile.public_name, avatar_url: m.profile.avatar_url } : undefined }))} />
               </div>
             </TabsContent>
           </Tabs>

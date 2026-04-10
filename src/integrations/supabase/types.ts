@@ -253,6 +253,50 @@ export type Database = {
           },
         ]
       }
+      guild_direct_messages: {
+        Row: {
+          created_at: string
+          guild_id: string
+          id: string
+          is_read: boolean
+          mentions: string[] | null
+          message: string
+          reactions: Json | null
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          created_at?: string
+          guild_id: string
+          id?: string
+          is_read?: boolean
+          mentions?: string[] | null
+          message: string
+          reactions?: Json | null
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          created_at?: string
+          guild_id?: string
+          id?: string
+          is_read?: boolean
+          mentions?: string[] | null
+          message?: string
+          reactions?: Json | null
+          receiver_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guild_direct_messages_guild_id_fkey"
+            columns: ["guild_id"]
+            isOneToOne: false
+            referencedRelation: "guilds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guild_members: {
         Row: {
           guild_id: string
@@ -697,6 +741,39 @@ export type Database = {
           subject?: string | null
           title?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          link: string | null
+          message: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          message: string
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          message?: string
+          title?: string
+          type?: string
           user_id?: string
         }
         Relationships: []
