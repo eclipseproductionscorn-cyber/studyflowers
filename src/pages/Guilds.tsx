@@ -185,14 +185,38 @@ const Guilds = () => {
     await supabase.from("guild_missions").update({
       current: newCurrent, is_completed: completed, completed_at: completed ? new Date().toISOString() : null,
     }).eq("id", mission.id);
-    if (completed) toast.success(`🏆 Missão "${mission.title}" completada!`);
-    else toast.success(`+10 progresso na missão!`);
+    if (completed) {
+      toast.success(`🏆 Missão "${mission.title}" completada!`);
+      // Notify all guild members
+      for (const m of members) {
+        await supabase.from("notifications").insert({
+          user_id: m.user_id,
+          title: "🎯 Missão Completa!",
+          message: `A missão "${mission.title}" foi completada pela guilda!`,
+          type: "mission",
+          link: "/guilds",
+        });
+      }
+    } else toast.success(`+10 progresso na missão!`);
     loadMissions(myGuild!.id);
   };
 
   const declareWar = async (targetGuildId: string) => {
     if (!myGuild) return;
     await supabase.from("guild_wars").insert({ guild_a_id: myGuild.id, guild_b_id: targetGuildId });
+    // Notify enemy guild members
+    const { data: enemyMembers } = await supabase.from("guild_members").select("user_id").eq("guild_id", targetGuildId);
+    if (enemyMembers) {
+      for (const m of enemyMembers) {
+        await supabase.from("notifications").insert({
+          user_id: m.user_id,
+          title: "⚔️ Guerra Declarada!",
+          message: `A guilda ${myGuild.name} declarou guerra contra vocês!`,
+          type: "war",
+          link: "/guilds",
+        });
+      }
+    }
     setShowDeclareWar(false);
     toast.success("⚔️ Guerra declarada!");
     loadWars(myGuild.id);
