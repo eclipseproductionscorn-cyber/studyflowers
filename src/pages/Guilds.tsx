@@ -3,12 +3,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Shield, Users, Crown, Plus, Send, Trophy, Star, Swords,
   LogOut, MessageCircle, TrendingUp, Search, Lock, Globe,
-  Target, Flame, Zap, Award, Timer, Map,
+  Target, Flame, Zap, Award, Timer, Map, Mail,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import TournamentTab from "@/components/guild/TournamentTab";
 import GuildManagement from "@/components/guild/GuildManagement";
+import GuildPrivateChat from "@/components/guild/GuildPrivateChat";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
