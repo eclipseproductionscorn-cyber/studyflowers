@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import TournamentTab from "@/components/guild/TournamentTab";
+import GuildManagement from "@/components/guild/GuildManagement";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -277,8 +278,11 @@ const Guilds = () => {
 
         {myGuild ? (
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid grid-cols-6 w-full bg-card/50 border border-border/50">
+            <TabsList className="grid grid-cols-7 w-full bg-card/50 border border-border/50">
               <TabsTrigger value="overview" className="gap-1 text-xs"><Shield size={14} /><span className="hidden md:inline">Guilda</span></TabsTrigger>
+              {myMembership?.role === "leader" && (
+                <TabsTrigger value="manage" className="gap-1 text-xs"><Crown size={14} /><span className="hidden md:inline">Gestão</span></TabsTrigger>
+              )}
               <TabsTrigger value="tournaments" className="gap-1 text-xs"><Trophy size={14} /><span className="hidden md:inline">Torneios</span></TabsTrigger>
               <TabsTrigger value="missions" className="gap-1 text-xs"><Target size={14} /><span className="hidden md:inline">Missões</span></TabsTrigger>
               <TabsTrigger value="wars" className="gap-1 text-xs"><Swords size={14} /><span className="hidden md:inline">Guerras</span></TabsTrigger>
@@ -327,6 +331,13 @@ const Guilds = () => {
                 )}
               </motion.div>
             </TabsContent>
+
+            {/* Management - Leader only */}
+            {myMembership?.role === "leader" && (
+              <TabsContent value="manage">
+                <GuildManagement guild={myGuild} members={members} currentUserId={user!.id} onRefresh={loadData} />
+              </TabsContent>
+            )}
 
             {/* Tournaments */}
             <TabsContent value="tournaments">
