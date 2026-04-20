@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { storyChapters, getChapterById, type StoryChoice } from "@/lib/storyChapters";
+import { storyChapters, getChapterById, calculateDominantPath, PATH_INFO, type StoryChoice } from "@/lib/storyChapters";
 import { toast } from "sonner";
 import { fireConfetti } from "@/lib/confetti";
 
@@ -18,6 +18,7 @@ interface Progress {
   completed_chapters: number[];
   total_score: number;
   is_completed: boolean;
+  career_path: string | null;
 }
 
 const StoryMode = () => {
@@ -44,13 +45,14 @@ const StoryMode = () => {
         completed_chapters: data.completed_chapters || [],
         total_score: data.total_score,
         is_completed: data.is_completed,
+        career_path: data.career_path,
       });
     } else {
       const { data: created } = await supabase.from("story_progress").insert({ user_id: user.id }).select().single();
       if (created) {
         setProgress({
           current_chapter: 1, current_scene: 0, choices: {},
-          completed_chapters: [], total_score: 0, is_completed: false,
+          completed_chapters: [], total_score: 0, is_completed: false, career_path: null,
         });
       }
     }
@@ -110,19 +112,43 @@ const StoryMode = () => {
       });
 
       const newCompleted = [...progress.completed_chapters, chapterId];
-      const isFinished = newCompleted.length === storyChapters.length;
+      
+      // Detectar caminho ao completar capítulo 5 (encruzilhada)
+      let detectedPath = progress.career_path;
+      if (chapterId === 5 && !detectedPath) {
+        detectedPath = calculateDominantPath(progress.choices);
+        if (detectedPath) {
+          toast.success(`✨ Caminho Revelado: ${PATH_INFO[detectedPath].label}!`, {
+            description: `${PATH_INFO[detectedPath].emoji} Seu final está sendo escrito...`,
+            duration: 5000,
+          });
+        }
+      }
+      
+      // Considera finalizado quando completou capítulos 1-5 + um final ramificado
+      const finalChapterIds = [6, 7, 8];
+      const completedFinal = newCompleted.some(c => finalChapterIds.includes(c));
+      const isFinished = completedFinal && newCompleted.length >= 6;
+      
+      // Próximo capítulo: se for um final, finaliza; se chegou no 5 com caminho, vai pro final
+      let nextChapter = Math.min(chapterId + 1, 5);
+      if (chapterId === 5 && detectedPath) {
+        nextChapter = PATH_INFO[detectedPath].finalChapterId;
+      }
       
       await supabase.from("story_progress").update({
         completed_chapters: newCompleted,
-        current_chapter: Math.min(chapterId + 1, storyChapters.length),
+        current_chapter: nextChapter,
         is_completed: isFinished,
+        career_path: detectedPath,
       }).eq("user_id", user.id);
 
       setProgress({
         ...progress,
         completed_chapters: newCompleted,
-        current_chapter: Math.min(chapterId + 1, storyChapters.length),
+        current_chapter: nextChapter,
         is_completed: isFinished,
+        career_path: detectedPath,
       });
     }
     
@@ -263,6 +289,12 @@ const StoryMode = () => {
                 <div className="text-white/80 text-sm">Pontuação Lendária</div>
               </div>
             </div>
+            {progress?.career_path && (
+              <div className="mt-4 inline-flex items-center gap-2 bg-white/20 backdrop-blur px-4 py-2 rounded-full border border-white/30">
+                <span className="text-2xl">{PATH_INFO[progress.career_path as keyof typeof PATH_INFO].emoji}</span>
+                <span className="font-semibold">Caminho: {PATH_INFO[progress.career_path as keyof typeof PATH_INFO].label}</span>
+              </div>
+            )}
             <div className="mt-6 bg-white/20 rounded-full h-3 overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
@@ -271,51 +303,72 @@ const StoryMode = () => {
                 className="h-full bg-white"
               />
             </div>
-            <p className="text-sm mt-2 text-white/90">{completedCount} / {totalChapters} capítulos completos</p>
+            <p className="text-sm mt-2 text-white/90">{completedCount} capítulo(s) completo(s)</p>
           </div>
         </div>
 
         <div className="grid gap-4">
-          {storyChapters.map((chapter, i) => {
-            const isCompleted = progress?.completed_chapters.includes(chapter.id);
-            const isUnlocked = chapter.id === 1 || progress?.completed_chapters.includes(chapter.id - 1);
-            
-            return (
-              <motion.div
-                key={chapter.id}
-                initial={{ opacity: 0, x: -30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.1 }}
-              >
-                <button
-                  disabled={!isUnlocked}
-                  onClick={() => isUnlocked && startChapter(chapter.id)}
-                  className={`w-full text-left bg-gradient-to-r ${chapter.color} rounded-2xl p-5 md:p-6 text-white shadow-lg relative overflow-hidden transition-all ${
-                    isUnlocked ? "hover:scale-[1.02] hover:shadow-2xl cursor-pointer" : "opacity-50 cursor-not-allowed"
-                  }`}
+          {storyChapters
+            .filter((chapter) => {
+              // Capítulos principais (1-5) sempre visíveis
+              if (!chapter.isPathChapter) return true;
+              // Finais ramificados: só mostra o do caminho do usuário
+              return progress?.career_path === chapter.pathType;
+            })
+            .map((chapter, i) => {
+              const isCompleted = progress?.completed_chapters.includes(chapter.id);
+              const prevId = chapter.isPathChapter ? 5 : chapter.id - 1;
+              const isUnlocked = chapter.id === 1 || progress?.completed_chapters.includes(prevId);
+              
+              return (
+                <motion.div
+                  key={chapter.id}
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.1 }}
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="text-5xl md:text-6xl flex-shrink-0">{chapter.emoji}</div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Badge className="bg-white/25 text-white border-white/40 text-xs">{chapter.subtitle}</Badge>
-                        {isCompleted && <Badge className="bg-green-500 border-0"><Check size={12} className="mr-1" /> Completo</Badge>}
-                        {!isUnlocked && <Badge className="bg-black/40 border-0"><Lock size={12} className="mr-1" /> Bloqueado</Badge>}
+                  <button
+                    disabled={!isUnlocked}
+                    onClick={() => isUnlocked && startChapter(chapter.id)}
+                    className={`w-full text-left bg-gradient-to-r ${chapter.color} rounded-2xl p-5 md:p-6 text-white shadow-lg relative overflow-hidden transition-all ${
+                      isUnlocked ? "hover:scale-[1.02] hover:shadow-2xl cursor-pointer" : "opacity-50 cursor-not-allowed"
+                    }`}
+                  >
+                    {chapter.isPathChapter && (
+                      <div className="absolute top-2 right-2 bg-white/20 backdrop-blur px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                        <Sparkles size={12} /> FINAL ÉPICO
                       </div>
-                      <h3 className="text-xl md:text-2xl font-bold">{chapter.title}</h3>
-                      <p className="text-white/90 text-sm md:text-base mt-1">{chapter.description}</p>
-                      <div className="flex gap-3 mt-3 text-xs md:text-sm">
-                        <span className="bg-white/20 px-2 py-1 rounded-full">⚡ +{chapter.completionReward.xp} XP</span>
-                        <span className="bg-white/20 px-2 py-1 rounded-full">🪙 +{chapter.completionReward.coins}</span>
+                    )}
+                    <div className="flex items-center gap-4">
+                      <div className="text-5xl md:text-6xl flex-shrink-0">{chapter.emoji}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <Badge className="bg-white/25 text-white border-white/40 text-xs">{chapter.subtitle}</Badge>
+                          {isCompleted && <Badge className="bg-green-500 border-0"><Check size={12} className="mr-1" /> Completo</Badge>}
+                          {!isUnlocked && <Badge className="bg-black/40 border-0"><Lock size={12} className="mr-1" /> Bloqueado</Badge>}
+                        </div>
+                        <h3 className="text-xl md:text-2xl font-bold">{chapter.title}</h3>
+                        <p className="text-white/90 text-sm md:text-base mt-1">{chapter.description}</p>
+                        <div className="flex gap-3 mt-3 text-xs md:text-sm flex-wrap">
+                          <span className="bg-white/20 px-2 py-1 rounded-full">⚡ +{chapter.completionReward.xp} XP</span>
+                          <span className="bg-white/20 px-2 py-1 rounded-full">🪙 +{chapter.completionReward.coins}</span>
+                        </div>
                       </div>
+                      {isCompleted && <Star className="text-yellow-300 fill-yellow-300 flex-shrink-0" size={32} />}
                     </div>
-                    {isCompleted && <Star className="text-yellow-300 fill-yellow-300 flex-shrink-0" size={32} />}
-                  </div>
-                </button>
-              </motion.div>
-            );
-          })}
+                  </button>
+                </motion.div>
+              );
+            })}
         </div>
+
+        {!progress?.career_path && (completedCount >= 5) && (
+          <div className="bg-gradient-to-r from-violet-500 to-purple-600 rounded-2xl p-5 text-white shadow-xl">
+            <Sparkles className="mb-2" />
+            <h3 className="font-bold text-lg">Caminho ainda não definido</h3>
+            <p className="text-white/90 text-sm">Complete o Capítulo 5 (A Encruzilhada do Destino) para descobrir seu final único: Cientista, Filósofo ou Inventor!</p>
+          </div>
+        )}
 
         {progress?.is_completed && (
           <motion.div

@@ -6,6 +6,7 @@ import {
   Swords, Plus, Edit, BookOpen, TrendingUp, Target, Gift
 } from "lucide-react";
 import AdminDistribution from "@/components/admin/AdminDistribution";
+import AdminDistributionHistory from "@/components/admin/AdminDistributionHistory";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -56,7 +57,7 @@ const getExpiresAt = (duration: string): string | null => {
   return new Date(now.getTime() + (map[duration] || 0)).toISOString();
 };
 
-type Tab = "dashboard" | "users" | "bans" | "messages" | "logs" | "activities" | "events" | "bosses" | "metrics" | "distribution";
+type Tab = "dashboard" | "users" | "bans" | "messages" | "logs" | "activities" | "events" | "bosses" | "metrics" | "distribution" | "history";
 
 const AdminPanel = () => {
   const { profile, user } = useAuth();
@@ -265,6 +266,7 @@ const AdminPanel = () => {
     { id: "bosses", label: "Chefões", icon: <Swords size={16} /> },
     { id: "metrics", label: "Métricas", icon: <TrendingUp size={16} /> },
     { id: "distribution", label: "Distribuição", icon: <Gift size={16} /> },
+    { id: "history", label: "Histórico", icon: <Activity size={16} /> },
     { id: "logs", label: "Logs", icon: <Activity size={16} /> },
   ];
 
@@ -596,6 +598,9 @@ const AdminPanel = () => {
             onRefresh={() => window.location.reload()}
           />
         )}
+
+        {/* History Tab */}
+        {tab === "history" && <AdminDistributionHistory />}
 
         {/* Logs Tab */}
         {tab === "logs" && (
