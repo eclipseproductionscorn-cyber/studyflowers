@@ -43,6 +43,7 @@ import EnergySystem from "./pages/EnergySystem";
 import Statistics from "./pages/Statistics";
 import StudyPlan from "./pages/StudyPlan";
 import Guilds from "./pages/Guilds";
+import StoryMode from "./pages/StoryMode";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -92,6 +93,7 @@ const App = () => (
             <Route path="/statistics" element={<Statistics />} />
             <Route path="/study-plan" element={<StudyPlan />} />
             <Route path="/guilds" element={<Guilds />} />
+            <Route path="/story" element={<StoryMode />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
