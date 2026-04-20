@@ -3,8 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Shield, Trash2, Users, Search, Loader2, AlertTriangle, Crown, XCircle, Ban, Clock,
   CheckCircle, MessageCircle, Activity, BarChart3, Send, Eye, Calendar, Zap, FileText,
-  Swords, Plus, Edit, BookOpen, TrendingUp, Target
+  Swords, Plus, Edit, BookOpen, TrendingUp, Target, Gift
 } from "lucide-react";
+import AdminDistribution from "@/components/admin/AdminDistribution";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -55,7 +56,7 @@ const getExpiresAt = (duration: string): string | null => {
   return new Date(now.getTime() + (map[duration] || 0)).toISOString();
 };
 
-type Tab = "dashboard" | "users" | "bans" | "messages" | "logs" | "activities" | "events" | "bosses" | "metrics";
+type Tab = "dashboard" | "users" | "bans" | "messages" | "logs" | "activities" | "events" | "bosses" | "metrics" | "distribution";
 
 const AdminPanel = () => {
   const { profile, user } = useAuth();
@@ -263,6 +264,7 @@ const AdminPanel = () => {
     { id: "events", label: "Eventos", icon: <Calendar size={16} />, badge: events.filter(e => e.is_active).length },
     { id: "bosses", label: "Chefões", icon: <Swords size={16} /> },
     { id: "metrics", label: "Métricas", icon: <TrendingUp size={16} /> },
+    { id: "distribution", label: "Distribuição", icon: <Gift size={16} /> },
     { id: "logs", label: "Logs", icon: <Activity size={16} /> },
   ];
 
@@ -584,6 +586,15 @@ const AdminPanel = () => {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Distribution Tab */}
+        {tab === "distribution" && user && (
+          <AdminDistribution
+            users={users}
+            currentAdminId={user.id}
+            onRefresh={() => window.location.reload()}
+          />
         )}
 
         {/* Logs Tab */}
