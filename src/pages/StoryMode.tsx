@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { storyChapters, getChapterById, type StoryChoice } from "@/lib/storyChapters";
+import { storyChapters, getChapterById, calculateDominantPath, PATH_INFO, type StoryChoice } from "@/lib/storyChapters";
 import { toast } from "sonner";
 import { fireConfetti } from "@/lib/confetti";
 
@@ -18,6 +18,7 @@ interface Progress {
   completed_chapters: number[];
   total_score: number;
   is_completed: boolean;
+  career_path: string | null;
 }
 
 const StoryMode = () => {
@@ -44,13 +45,14 @@ const StoryMode = () => {
         completed_chapters: data.completed_chapters || [],
         total_score: data.total_score,
         is_completed: data.is_completed,
+        career_path: data.career_path,
       });
     } else {
       const { data: created } = await supabase.from("story_progress").insert({ user_id: user.id }).select().single();
       if (created) {
         setProgress({
           current_chapter: 1, current_scene: 0, choices: {},
-          completed_chapters: [], total_score: 0, is_completed: false,
+          completed_chapters: [], total_score: 0, is_completed: false, career_path: null,
         });
       }
     }
@@ -110,19 +112,43 @@ const StoryMode = () => {
       });
 
       const newCompleted = [...progress.completed_chapters, chapterId];
-      const isFinished = newCompleted.length === storyChapters.length;
+      
+      // Detectar caminho ao completar capítulo 5 (encruzilhada)
+      let detectedPath = progress.career_path;
+      if (chapterId === 5 && !detectedPath) {
+        detectedPath = calculateDominantPath(progress.choices);
+        if (detectedPath) {
+          toast.success(`✨ Caminho Revelado: ${PATH_INFO[detectedPath].label}!`, {
+            description: `${PATH_INFO[detectedPath].emoji} Seu final está sendo escrito...`,
+            duration: 5000,
+          });
+        }
+      }
+      
+      // Considera finalizado quando completou capítulos 1-5 + um final ramificado
+      const finalChapterIds = [6, 7, 8];
+      const completedFinal = newCompleted.some(c => finalChapterIds.includes(c));
+      const isFinished = completedFinal && newCompleted.length >= 6;
+      
+      // Próximo capítulo: se for um final, finaliza; se chegou no 5 com caminho, vai pro final
+      let nextChapter = Math.min(chapterId + 1, 5);
+      if (chapterId === 5 && detectedPath) {
+        nextChapter = PATH_INFO[detectedPath].finalChapterId;
+      }
       
       await supabase.from("story_progress").update({
         completed_chapters: newCompleted,
-        current_chapter: Math.min(chapterId + 1, storyChapters.length),
+        current_chapter: nextChapter,
         is_completed: isFinished,
+        career_path: detectedPath,
       }).eq("user_id", user.id);
 
       setProgress({
         ...progress,
         completed_chapters: newCompleted,
-        current_chapter: Math.min(chapterId + 1, storyChapters.length),
+        current_chapter: nextChapter,
         is_completed: isFinished,
+        career_path: detectedPath,
       });
     }
     
