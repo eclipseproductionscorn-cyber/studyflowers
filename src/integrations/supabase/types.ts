@@ -877,6 +877,48 @@ export type Database = {
         }
         Relationships: []
       }
+      story_progress: {
+        Row: {
+          career_path: string | null
+          choices: Json
+          completed_chapters: number[]
+          current_chapter: number
+          current_scene: number
+          id: string
+          is_completed: boolean
+          started_at: string
+          total_score: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          career_path?: string | null
+          choices?: Json
+          completed_chapters?: number[]
+          current_chapter?: number
+          current_scene?: number
+          id?: string
+          is_completed?: boolean
+          started_at?: string
+          total_score?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          career_path?: string | null
+          choices?: Json
+          completed_chapters?: number[]
+          current_chapter?: number
+          current_scene?: number
+          id?: string
+          is_completed?: boolean
+          started_at?: string
+          total_score?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       study_events: {
         Row: {
           color: string
