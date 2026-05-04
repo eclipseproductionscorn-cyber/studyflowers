@@ -1,5 +1,7 @@
-import { Trophy, Flame, BookOpen, Star, Target, Crown, Zap, Award, Medal, Sparkles, Brain, Heart, Shield, Swords } from "lucide-react";
+import { Trophy, Flame, BookOpen, Star, Target, Crown, Zap, Award, Medal, Sparkles, Brain, Heart, Shield, Swords, FlaskConical, ScrollText, Wrench } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+
+export type StoryPath = "scientist" | "philosopher" | "inventor";
 
 export interface Achievement {
   id: string;
@@ -9,7 +11,8 @@ export interface Achievement {
   color: string;
   bgColor: string;
   requirement: number;
-  type: "lessons" | "flashcards" | "streak" | "activities" | "ranking" | "xp" | "coins" | "login";
+  type: "lessons" | "flashcards" | "streak" | "activities" | "ranking" | "xp" | "coins" | "login" | "story";
+  storyPath?: StoryPath;
   rarity: "common" | "rare" | "epic" | "legendary";
   xpReward: number;
   coinReward: number;
