@@ -67,6 +67,21 @@ const Achievements = () => {
       .eq("user_id", user.id)
       .single();
 
+    const { data: story } = await supabase
+      .from("story_progress")
+      .select("career_path, completed_chapters, is_completed")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    const pathChapterMap: Record<number, StoryPath> = { 6: "scientist", 7: "philosopher", 8: "inventor" };
+    const completedPaths: StoryPath[] = [];
+    if (story?.completed_chapters) {
+      for (const ch of story.completed_chapters as number[]) {
+        const p = pathChapterMap[ch];
+        if (p && !completedPaths.includes(p)) completedPaths.push(p);
+      }
+    }
+
     setStats({
       lessonsCompleted: activities?.length || 0,
       flashcardsCorrect: Math.floor((activities?.length || 0) * 2.5),
@@ -74,6 +89,7 @@ const Achievements = () => {
       rankPosition: 50,
       totalXP: profile?.xp || 0,
       totalCoins: profile?.coins || 0,
+      storyPathsCompleted: completedPaths,
     });
   };
 
