@@ -26,13 +26,22 @@ const Achievements = () => {
   const [unlockedIds, setUnlockedIds] = useState<string[]>([]);
   const [unlockedSecretIds, setUnlockedSecretIds] = useState<string[]>([]);
   const [revealedSecrets, setRevealedSecrets] = useState<string[]>([]);
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<{
+    lessonsCompleted: number;
+    flashcardsCorrect: number;
+    currentStreak: number;
+    rankPosition: number;
+    totalXP: number;
+    totalCoins: number;
+    storyPathsCompleted: StoryPath[];
+  }>({
     lessonsCompleted: 0,
     flashcardsCorrect: 0,
     currentStreak: 0,
     rankPosition: 0,
     totalXP: profile?.xp || 0,
     totalCoins: profile?.coins || 0,
+    storyPathsCompleted: [],
   });
   const [claimingId, setClaimingId] = useState<string | null>(null);
 
