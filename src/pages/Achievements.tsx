@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { FloatingElements } from "@/components/FloatingElements";
 import { useAuth } from "@/hooks/useAuth";
-import { achievements, getRarityColor, getRarityLabel, getAchievementProgress, type Achievement } from "@/lib/achievements";
+import { achievements, getRarityColor, getRarityLabel, getAchievementProgress, type Achievement, type StoryPath } from "@/lib/achievements";
 import { secretAchievements, getRarityColor as getSecretRarityColor, getRarityLabel as getSecretRarityLabel, type SecretAchievement } from "@/lib/secretAchievements";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
