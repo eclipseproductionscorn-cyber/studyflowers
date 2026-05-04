@@ -406,12 +406,13 @@ const Achievements = () => {
             <TabsTrigger value="streak">Ofensiva</TabsTrigger>
             <TabsTrigger value="ranking">Ranking</TabsTrigger>
             <TabsTrigger value="xp">XP</TabsTrigger>
+            <TabsTrigger value="story" className="text-rose-500">📖 História</TabsTrigger>
             <TabsTrigger value="secrets" className="text-purple-400">
               🔮 Secretas
             </TabsTrigger>
           </TabsList>
 
-          {["all", "lessons", "flashcards", "streak", "ranking", "xp"].map((type) => (
+          {["all", "lessons", "flashcards", "streak", "ranking", "xp", "story"].map((type) => (
             <TabsContent key={type} value={type}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 {filterByType(type).map(renderAchievementCard)}
