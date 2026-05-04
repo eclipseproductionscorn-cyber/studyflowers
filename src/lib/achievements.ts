@@ -443,6 +443,7 @@ export const getAchievementProgress = (
     rankPosition: number;
     totalXP: number;
     totalCoins: number;
+    storyPathsCompleted?: StoryPath[];
   }
 ): { current: number; percentage: number; unlocked: boolean } => {
   let current = 0;
