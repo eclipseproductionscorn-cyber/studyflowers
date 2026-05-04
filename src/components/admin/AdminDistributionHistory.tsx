@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { History, Filter, Calendar, Zap, Coins, Package, Sparkles, Users, Crown, Loader2 } from "lucide-react";
+import { History, Filter, Calendar, Zap, Coins, Package, Sparkles, Users, Crown, Loader2, PieChart as PieIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 
 interface AdminLog {
   id: string;
