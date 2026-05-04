@@ -171,6 +171,64 @@ const AdminDistributionHistory = () => {
         })}
       </div>
 
+      {/* Pie chart - proporção XP/Moedas/Itens */}
+      <div className="bg-card border border-border rounded-2xl p-5">
+        <div className="flex items-center gap-2 mb-4 text-foreground font-semibold">
+          <PieIcon size={18} className="text-primary" /> Proporção Distribuída
+          <span className="text-xs text-muted-foreground font-normal ml-auto">
+            Baseado nos filtros atuais
+          </span>
+        </div>
+        {pieData.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground text-sm">
+            Sem dados para exibir
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 gap-4 items-center">
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    innerRadius={45}
+                    paddingAngle={3}
+                    label={(e: any) => `${Math.round((e.value / totalSum) * 100)}%`}
+                  >
+                    {pieData.map((d, i) => (
+                      <Cell key={i} fill={d.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={(v: number) => v.toLocaleString("pt-BR")}
+                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }}
+                  />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-3 rounded-xl bg-primary/10">
+                <span className="flex items-center gap-2 text-sm font-medium"><Zap size={16} className="text-primary" /> XP total</span>
+                <span className="font-bold">{distribution.xp.toLocaleString("pt-BR")}</span>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-xl bg-amber-500/10">
+                <span className="flex items-center gap-2 text-sm font-medium"><Coins size={16} className="text-amber-500" /> Moedas totais</span>
+                <span className="font-bold">{distribution.coins.toLocaleString("pt-BR")}</span>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-xl bg-purple-500/10">
+                <span className="flex items-center gap-2 text-sm font-medium"><Package size={16} className="text-purple-500" /> Itens entregues</span>
+                <span className="font-bold">{distribution.items.toLocaleString("pt-BR")}</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Filters */}
       <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
         <div className="flex items-center gap-2 text-foreground font-semibold">
