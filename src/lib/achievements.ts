@@ -473,6 +473,11 @@ export const getAchievementProgress = (
     case "coins":
       current = stats.totalCoins;
       break;
+    case "story":
+      if (achievement.storyPath && stats.storyPathsCompleted?.includes(achievement.storyPath)) {
+        current = 1;
+      }
+      break;
     default:
       current = 0;
   }
