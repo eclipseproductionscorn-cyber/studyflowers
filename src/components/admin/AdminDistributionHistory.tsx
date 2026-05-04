@@ -103,6 +103,34 @@ const AdminDistributionHistory = () => {
     return counts;
   }, [filtered]);
 
+  // Totais distribuídos para o gráfico de pizza
+  const distribution = useMemo(() => {
+    let xp = 0, coins = 0, items = 0;
+    const xpRe = /\+?(\d+)\s*XP/i;
+    const coinRe = /\+?(\d+)\s*(?:coins?|moedas?)/i;
+    const usersRe = /(\d+)\s*users?/i;
+    filtered.forEach(l => {
+      const d = l.details || "";
+      if (l.action === "give_item") { items += 1; return; }
+      if (l.action === "god_mode_self") { xp += 999999; coins += 999999; return; }
+      const xpM = d.match(xpRe);
+      const coinM = d.match(coinRe);
+      const userM = l.action === "broadcast_reward" ? d.match(usersRe) : null;
+      const mult = userM ? parseInt(userM[1]) : 1;
+      if (xpM) xp += parseInt(xpM[1]) * mult;
+      if (coinM) coins += parseInt(coinM[1]) * mult;
+    });
+    return { xp, coins, items };
+  }, [filtered]);
+
+  const pieData = useMemo(() => ([
+    { name: "XP", value: distribution.xp, color: "hsl(var(--primary))" },
+    { name: "Moedas", value: distribution.coins, color: "#f59e0b" },
+    { name: "Itens", value: distribution.items, color: "#a855f7" },
+  ].filter(d => d.value > 0)), [distribution]);
+
+  const totalSum = pieData.reduce((s, d) => s + d.value, 0);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
