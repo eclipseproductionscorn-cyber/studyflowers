@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { FloatingElements } from "@/components/FloatingElements";
 import { useAuth } from "@/hooks/useAuth";
-import { achievements, getRarityColor, getRarityLabel, getAchievementProgress, type Achievement } from "@/lib/achievements";
+import { achievements, getRarityColor, getRarityLabel, getAchievementProgress, type Achievement, type StoryPath } from "@/lib/achievements";
 import { secretAchievements, getRarityColor as getSecretRarityColor, getRarityLabel as getSecretRarityLabel, type SecretAchievement } from "@/lib/secretAchievements";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -26,13 +26,22 @@ const Achievements = () => {
   const [unlockedIds, setUnlockedIds] = useState<string[]>([]);
   const [unlockedSecretIds, setUnlockedSecretIds] = useState<string[]>([]);
   const [revealedSecrets, setRevealedSecrets] = useState<string[]>([]);
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<{
+    lessonsCompleted: number;
+    flashcardsCorrect: number;
+    currentStreak: number;
+    rankPosition: number;
+    totalXP: number;
+    totalCoins: number;
+    storyPathsCompleted: StoryPath[];
+  }>({
     lessonsCompleted: 0,
     flashcardsCorrect: 0,
     currentStreak: 0,
     rankPosition: 0,
     totalXP: profile?.xp || 0,
     totalCoins: profile?.coins || 0,
+    storyPathsCompleted: [],
   });
   const [claimingId, setClaimingId] = useState<string | null>(null);
 
@@ -58,6 +67,21 @@ const Achievements = () => {
       .eq("user_id", user.id)
       .single();
 
+    const { data: story } = await supabase
+      .from("story_progress")
+      .select("career_path, completed_chapters, is_completed")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    const pathChapterMap: Record<number, StoryPath> = { 6: "scientist", 7: "philosopher", 8: "inventor" };
+    const completedPaths: StoryPath[] = [];
+    if (story?.completed_chapters) {
+      for (const ch of story.completed_chapters as number[]) {
+        const p = pathChapterMap[ch];
+        if (p && !completedPaths.includes(p)) completedPaths.push(p);
+      }
+    }
+
     setStats({
       lessonsCompleted: activities?.length || 0,
       flashcardsCorrect: Math.floor((activities?.length || 0) * 2.5),
@@ -65,6 +89,7 @@ const Achievements = () => {
       rankPosition: 50,
       totalXP: profile?.xp || 0,
       totalCoins: profile?.coins || 0,
+      storyPathsCompleted: completedPaths,
     });
   };
 
@@ -381,12 +406,13 @@ const Achievements = () => {
             <TabsTrigger value="streak">Ofensiva</TabsTrigger>
             <TabsTrigger value="ranking">Ranking</TabsTrigger>
             <TabsTrigger value="xp">XP</TabsTrigger>
+            <TabsTrigger value="story" className="text-rose-500">📖 História</TabsTrigger>
             <TabsTrigger value="secrets" className="text-purple-400">
               🔮 Secretas
             </TabsTrigger>
           </TabsList>
 
-          {["all", "lessons", "flashcards", "streak", "ranking", "xp"].map((type) => (
+          {["all", "lessons", "flashcards", "streak", "ranking", "xp", "story"].map((type) => (
             <TabsContent key={type} value={type}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 {filterByType(type).map(renderAchievementCard)}

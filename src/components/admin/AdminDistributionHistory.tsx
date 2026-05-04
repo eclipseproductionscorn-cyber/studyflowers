@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { History, Filter, Calendar, Zap, Coins, Package, Sparkles, Users, Crown, Loader2 } from "lucide-react";
+import { History, Filter, Calendar, Zap, Coins, Package, Sparkles, Users, Crown, Loader2, PieChart as PieIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 
 interface AdminLog {
   id: string;
@@ -102,6 +103,34 @@ const AdminDistributionHistory = () => {
     return counts;
   }, [filtered]);
 
+  // Totais distribuídos para o gráfico de pizza
+  const distribution = useMemo(() => {
+    let xp = 0, coins = 0, items = 0;
+    const xpRe = /\+?(\d+)\s*XP/i;
+    const coinRe = /\+?(\d+)\s*(?:coins?|moedas?)/i;
+    const usersRe = /(\d+)\s*users?/i;
+    filtered.forEach(l => {
+      const d = l.details || "";
+      if (l.action === "give_item") { items += 1; return; }
+      if (l.action === "god_mode_self") { xp += 999999; coins += 999999; return; }
+      const xpM = d.match(xpRe);
+      const coinM = d.match(coinRe);
+      const userM = l.action === "broadcast_reward" ? d.match(usersRe) : null;
+      const mult = userM ? parseInt(userM[1]) : 1;
+      if (xpM) xp += parseInt(xpM[1]) * mult;
+      if (coinM) coins += parseInt(coinM[1]) * mult;
+    });
+    return { xp, coins, items };
+  }, [filtered]);
+
+  const pieData = useMemo(() => ([
+    { name: "XP", value: distribution.xp, color: "hsl(var(--primary))" },
+    { name: "Moedas", value: distribution.coins, color: "#f59e0b" },
+    { name: "Itens", value: distribution.items, color: "#a855f7" },
+  ].filter(d => d.value > 0)), [distribution]);
+
+  const totalSum = pieData.reduce((s, d) => s + d.value, 0);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -140,6 +169,64 @@ const AdminDistributionHistory = () => {
             </motion.div>
           );
         })}
+      </div>
+
+      {/* Pie chart - proporção XP/Moedas/Itens */}
+      <div className="bg-card border border-border rounded-2xl p-5">
+        <div className="flex items-center gap-2 mb-4 text-foreground font-semibold">
+          <PieIcon size={18} className="text-primary" /> Proporção Distribuída
+          <span className="text-xs text-muted-foreground font-normal ml-auto">
+            Baseado nos filtros atuais
+          </span>
+        </div>
+        {pieData.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground text-sm">
+            Sem dados para exibir
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 gap-4 items-center">
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    innerRadius={45}
+                    paddingAngle={3}
+                    label={(e: any) => `${Math.round((e.value / totalSum) * 100)}%`}
+                  >
+                    {pieData.map((d, i) => (
+                      <Cell key={i} fill={d.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={(v: number) => v.toLocaleString("pt-BR")}
+                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }}
+                  />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-3 rounded-xl bg-primary/10">
+                <span className="flex items-center gap-2 text-sm font-medium"><Zap size={16} className="text-primary" /> XP total</span>
+                <span className="font-bold">{distribution.xp.toLocaleString("pt-BR")}</span>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-xl bg-amber-500/10">
+                <span className="flex items-center gap-2 text-sm font-medium"><Coins size={16} className="text-amber-500" /> Moedas totais</span>
+                <span className="font-bold">{distribution.coins.toLocaleString("pt-BR")}</span>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-xl bg-purple-500/10">
+                <span className="flex items-center gap-2 text-sm font-medium"><Package size={16} className="text-purple-500" /> Itens entregues</span>
+                <span className="font-bold">{distribution.items.toLocaleString("pt-BR")}</span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Filters */}

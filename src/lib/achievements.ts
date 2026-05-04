@@ -1,5 +1,7 @@
-import { Trophy, Flame, BookOpen, Star, Target, Crown, Zap, Award, Medal, Sparkles, Brain, Heart, Shield, Swords } from "lucide-react";
+import { Trophy, Flame, BookOpen, Star, Target, Crown, Zap, Award, Medal, Sparkles, Brain, Heart, Shield, Swords, FlaskConical, ScrollText, Wrench } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+
+export type StoryPath = "scientist" | "philosopher" | "inventor";
 
 export interface Achievement {
   id: string;
@@ -9,7 +11,8 @@ export interface Achievement {
   color: string;
   bgColor: string;
   requirement: number;
-  type: "lessons" | "flashcards" | "streak" | "activities" | "ranking" | "xp" | "coins" | "login";
+  type: "lessons" | "flashcards" | "streak" | "activities" | "ranking" | "xp" | "coins" | "login" | "story";
+  storyPath?: StoryPath;
   rarity: "common" | "rare" | "epic" | "legendary";
   xpReward: number;
   coinReward: number;
@@ -365,6 +368,50 @@ export const achievements: Achievement[] = [
     xpReward: 2500,
     coinReward: 1250,
   },
+
+  // Story Mode Endings
+  {
+    id: "story_ending_scientist",
+    name: "O Cientista Iluminado",
+    description: "Complete o final do Cientista no Modo História",
+    icon: FlaskConical,
+    color: "text-cyan-500",
+    bgColor: "bg-cyan-500",
+    requirement: 1,
+    type: "story",
+    storyPath: "scientist",
+    rarity: "legendary",
+    xpReward: 3000,
+    coinReward: 1500,
+  },
+  {
+    id: "story_ending_philosopher",
+    name: "O Filósofo Sábio",
+    description: "Complete o final do Filósofo no Modo História",
+    icon: ScrollText,
+    color: "text-amber-500",
+    bgColor: "bg-amber-500",
+    requirement: 1,
+    type: "story",
+    storyPath: "philosopher",
+    rarity: "legendary",
+    xpReward: 3000,
+    coinReward: 1500,
+  },
+  {
+    id: "story_ending_inventor",
+    name: "O Inventor Genial",
+    description: "Complete o final do Inventor no Modo História",
+    icon: Wrench,
+    color: "text-orange-500",
+    bgColor: "bg-orange-500",
+    requirement: 1,
+    type: "story",
+    storyPath: "inventor",
+    rarity: "legendary",
+    xpReward: 3000,
+    coinReward: 1500,
+  },
 ];
 
 export const getRarityColor = (rarity: Achievement["rarity"]): string => {
@@ -396,6 +443,7 @@ export const getAchievementProgress = (
     rankPosition: number;
     totalXP: number;
     totalCoins: number;
+    storyPathsCompleted?: StoryPath[];
   }
 ): { current: number; percentage: number; unlocked: boolean } => {
   let current = 0;
@@ -424,6 +472,11 @@ export const getAchievementProgress = (
       break;
     case "coins":
       current = stats.totalCoins;
+      break;
+    case "story":
+      if (achievement.storyPath && stats.storyPathsCompleted?.includes(achievement.storyPath)) {
+        current = 1;
+      }
       break;
     default:
       current = 0;
