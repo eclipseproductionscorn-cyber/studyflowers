@@ -44,6 +44,7 @@ import Statistics from "./pages/Statistics";
 import StudyPlan from "./pages/StudyPlan";
 import Guilds from "./pages/Guilds";
 import StoryMode from "./pages/StoryMode";
+import { OpeningSequence } from "./components/OpeningSequence";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -53,6 +54,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <OpeningSequence />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />

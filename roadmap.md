@@ -1,0 +1,4 @@
+- [ ] Aplicar identidade editorial vintage e logo enviado nas telas principais.
+- [ ] Criar entrada cinematográfica curta, dispensável e acessível.
+- [ ] Ampliar trilhas e conectar recursos de estudo ao mapa.
+- [ ] Verificar apresentação e funcionamento em desktop e celular.
