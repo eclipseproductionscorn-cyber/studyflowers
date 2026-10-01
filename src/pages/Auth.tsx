@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
-import logo from "@/assets/studyflow-logo.png";
+import logoAsset from "@/assets/studyflow-vintage-logo.png.asset.json";
 
 const loginSchema = z.object({
   email: z.string().email("E-mail inválido").max(255, "E-mail muito longo"),
@@ -165,7 +165,7 @@ const Auth = () => {
             className="relative inline-block"
           >
             <a href="/" className="inline-block">
-              <img src={logo} alt="Studio Flow" className="h-16 w-auto mx-auto rounded-lg mb-4" />
+              <img src={logoAsset.url} alt="StudyFlow" className="h-40 w-auto max-w-full object-contain mx-auto mb-4" />
             </a>
             
             {/* Floating icons */}

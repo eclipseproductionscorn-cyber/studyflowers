@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import logo from "@/assets/studyflow-logo.png";
+import logoAsset from "@/assets/studyflow-vintage-logo.png.asset.json";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -26,7 +26,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
           <a href="/" className="flex items-center gap-2">
-            <img src={logo} alt="Studio Flow" className="h-10 lg:h-12 w-auto rounded-lg" />
+            <img src={logoAsset.url} alt="StudyFlow" className="h-12 lg:h-16 w-auto object-contain" />
           </a>
 
           {/* Desktop Navigation */}

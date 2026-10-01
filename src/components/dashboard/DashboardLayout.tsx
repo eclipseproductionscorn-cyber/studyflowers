@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import logo from "@/assets/studyflow-logo.png";
+import logoAsset from "@/assets/studyflow-vintage-logo.png.asset.json";
 import { getRankData } from "@/lib/ranks";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
@@ -139,6 +139,7 @@ const DashboardLayout = ({ children, profile }: DashboardLayoutProps) => {
               {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
             </Button>
 
+            <Link to="/dashboard" aria-label="StudyFlow — início" className="lg:hidden mr-auto"><img src={logoAsset.url} alt="StudyFlow" className="h-12 w-auto object-contain" /></Link>
             <div className="flex items-center gap-3 ml-auto">
               {/* Notifications */}
               <NotificationBell />
@@ -216,14 +217,14 @@ const SidebarContent = ({
   return (
     <div className="h-full flex flex-col">
       {/* Logo */}
-      <div className="p-4 border-b border-sidebar-border">
+      <div className="p-3 border-b border-sidebar-border">
         <Link to="/" className="flex items-center gap-2">
-          <img src={logo} alt="Studio Flow" className="h-10 w-auto rounded-lg" />
+          <img src={logoAsset.url} alt="StudyFlow" className="h-20 w-auto max-w-full object-contain" />
         </Link>
       </div>
 
       {/* User Info */}
-      <div className="p-4 border-b border-sidebar-border">
+      <div className="p-3 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
             <span className="text-lg font-bold text-white">

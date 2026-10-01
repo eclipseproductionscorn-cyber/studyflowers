@@ -54,7 +54,7 @@ const CTA = () => {
               className="text-lg text-primary-foreground/80 mb-10"
             >
               Junte-se a milhares de estudantes que já estão evoluindo com o
-              Studio Flow. Cadastro gratuito e você já começa com 2.000 moedas!
+              StudyFlow. Cadastro gratuito e você já começa com 2.000 moedas!
             </motion.p>
 
             {/* CTA Buttons */}
