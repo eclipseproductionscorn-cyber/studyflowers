@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import logo from "@/assets/studyflow-logo.png";
+import logoAsset from "@/assets/studyflow-vintage-logo.png.asset.json";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -37,9 +37,9 @@ const Footer = () => {
               transition={{ duration: 0.5 }}
             >
               <img
-                src={logo}
-                alt="Studio Flow"
-                className="h-12 w-auto mb-4"
+                src={logoAsset.url}
+                alt="StudyFlow"
+                className="h-32 w-auto max-w-full object-contain mb-4"
               />
               <p className="text-muted-foreground max-w-sm mb-6">
                 O ponto de partida para alavancar seus estudos. Inteligência
@@ -98,7 +98,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="mt-16 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © {currentYear} Studio Flow. Todos os direitos reservados.
+            © {currentYear} StudyFlow. Todos os direitos reservados.
           </p>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>Created by</span>

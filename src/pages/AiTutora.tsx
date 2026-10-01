@@ -39,7 +39,7 @@ const AiTutora = () => {
       setMessages([{
         id: "initial",
         role: "assistant",
-        content: "Olá! 📚 Sou a IA Tutora do Studio Flow!\n\nEu posso te ajudar de duas formas:\n1. **Criar atividades** sobre qualquer tema que você quiser\n2. **Tirar dúvidas** guiando você a entender o conceito\n\nDigite o tema que você quer estudar e eu vou criar uma atividade personalizada! Exemplo: *\"teorema de Pitágoras\"* ou *\"segunda guerra mundial\"*",
+        content: "Olá! 📚 Sou a IA Tutora do StudyFlow!\n\nEu posso te ajudar de duas formas:\n1. **Criar atividades** sobre qualquer tema que você quiser\n2. **Tirar dúvidas** guiando você a entender o conceito\n\nDigite o tema que você quer estudar e eu vou criar uma atividade personalizada! Exemplo: *\"teorema de Pitágoras\"* ou *\"segunda guerra mundial\"*",
       }]);
     }
   }, []);
