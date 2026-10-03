@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ShoppingBag,
@@ -161,6 +162,13 @@ const Shop = () => {
       }
 
       setIsOpening(null);
+    } else if (item.category === "boosts") {
+      if (profile?.user_id) {
+        const { data: existing } = await supabase.from("user_inventory").select("id, quantity").eq("user_id", profile.user_id).eq("item_id", item.id).maybeSingle();
+        if (existing) await supabase.from("user_inventory").update({ quantity: existing.quantity + 1 }).eq("id", existing.id);
+        else await supabase.from("user_inventory").insert({ user_id: profile.user_id, item_id: item.id, item_type: "boost", quantity: 1 });
+      }
+      toast.success(`✅ ${item.name} comprado! Compre quantos quiser.`);
     } else {
       setPurchasedItems((prev) => [...prev, item.id]);
       toast.success(`✅ ${item.name} comprado com sucesso!`);
