@@ -36,3 +36,6 @@ verify_jwt = false
 [functions.generate-boss-questions]
 verify_jwt = false
 
+
+[functions.seasonal-ai-events]
+verify_jwt = false
