@@ -8,6 +8,7 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { TrailPractice } from "@/components/TrailPractice";
 
 interface Trail {
   id: string;
@@ -286,6 +287,11 @@ const JourneyMap = () => {
           </div>
         )}
       </motion.div>
+      {activePhase && selectedTrail && user && (
+        <TrailPractice phase={activePhase} trail={selectedTrail} userId={user.id}
+          completedPhases={progress.find(p => p.trail_id === selectedTrail.id)?.completed_phases || []}
+          onClose={() => setActivePhase(null)} onComplete={fetchProgress} />
+      )}
     </DashboardLayout>
   );
 };
