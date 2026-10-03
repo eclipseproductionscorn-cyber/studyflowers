@@ -54,6 +54,7 @@ const JourneyMap = () => {
   const [selectedTrail, setSelectedTrail] = useState<Trail | null>(null);
   const [phases, setPhases] = useState<TrailPhase[]>([]);
   const [progress, setProgress] = useState<UserTrailProgress[]>([]);
+  const [activePhase, setActivePhase] = useState<TrailPhase | null>(null);
 
   useEffect(() => {
     fetchTrails();
@@ -194,6 +195,8 @@ const JourneyMap = () => {
                         {/* Content card - alternating sides on desktop */}
                         <div className={`flex-1 ${isEven ? "md:text-right" : "md:text-left"}`}>
                           <motion.div
+                            role={!isLocked && prog ? "button" : undefined}
+                            onClick={() => { if (!isLocked && prog) setActivePhase(phase); }}
                             whileHover={!isLocked ? { scale: 1.02 } : {}}
                             className={`inline-block w-full max-w-sm p-4 rounded-2xl border transition-all ${
                               isCompleted
