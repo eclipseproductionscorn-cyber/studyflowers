@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { deckStorageKey, readDecks, saveDecks, type ReviewCard } from "@/lib/spacedReview";
+import { saveCardsToAccount, saveQuizAttempt } from "@/lib/studyCloud";
 import { toast } from "sonner";
 
 type Phase = { id: string; phase_number: number; title: string; description: string | null; phase_type: string };
@@ -47,6 +48,7 @@ export function TrailPractice({ phase, trail, userId, completedPhases, onClose, 
         const existing = decks.find(d => d.id === deckId);
         saveDecks(userId, existing ? decks.map(d => d.id === deckId ? { ...d, cards: [...d.cards, ...valid] } : d) : [...decks, { id: deckId, name: `${trail.title} · ${phase.title}`, trailId: trail.id, subject: trail.subjects[0] || trail.title, color: "from-primary to-accent", cards: valid }]);
         window.dispatchEvent(new StorageEvent("storage", { key: deckStorageKey(userId) }));
+        await saveCardsToAccount(userId, { id: deckId, name: `${trail.title} · ${phase.title}`, trailId: trail.id, subject: trail.subjects[0] || trail.title }, valid);
       }
     } catch (error) { console.error(error); toast.error("Não foi possível preparar a atividade. Tente novamente."); }
     finally { setLoading(false); }
@@ -75,7 +77,7 @@ export function TrailPractice({ phase, trail, userId, completedPhases, onClose, 
     setRevealed(true);
   };
   const nextQuestion = () => {
-    if (index + 1 === questions.length) setDone(true);
+    if (index + 1 === questions.length) { setDone(true); saveQuizAttempt(userId, { trailId: trail.id, phaseId: phase.id, topic: `${trail.title} · ${phase.title}`, correct, total: questions.length }); }
     else { setIndex(n => n + 1); setAnswer(""); setRevealed(false); }
   };
   const count = isQuiz ? questions.length : cards.length;

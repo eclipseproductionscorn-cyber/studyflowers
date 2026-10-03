@@ -44,6 +44,7 @@ import Statistics from "./pages/Statistics";
 import StudyPlan from "./pages/StudyPlan";
 import Guilds from "./pages/Guilds";
 import StoryMode from "./pages/StoryMode";
+import StudyDashboard from "./pages/StudyDashboard";
 import { OpeningSequence } from "./components/OpeningSequence";
 const queryClient = new QueryClient();
 
@@ -58,6 +59,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/study-dashboard" element={<StudyDashboard />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/leveling-quiz" element={<LevelingQuiz />} />
             <Route path="/dashboard" element={<Dashboard />} />

@@ -835,6 +835,39 @@ export type Database = {
         }
         Relationships: []
       }
+      quiz_attempts: {
+        Row: {
+          correct: number
+          created_at: string
+          id: string
+          phase_id: string | null
+          topic: string
+          total: number
+          trail_id: string | null
+          user_id: string
+        }
+        Insert: {
+          correct?: number
+          created_at?: string
+          id?: string
+          phase_id?: string | null
+          topic: string
+          total?: number
+          trail_id?: string | null
+          user_id: string
+        }
+        Update: {
+          correct?: number
+          created_at?: string
+          id?: string
+          phase_id?: string | null
+          topic?: string
+          total?: number
+          trail_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       seasonal_events: {
         Row: {
           banner_url: string | null
@@ -842,6 +875,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           ends_at: string
+          event_key: string | null
           event_type: string
           id: string
           is_active: boolean
@@ -855,6 +889,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           ends_at: string
+          event_key?: string | null
           event_type?: string
           id?: string
           is_active?: boolean
@@ -868,6 +903,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           ends_at?: string
+          event_key?: string | null
           event_type?: string
           id?: string
           is_active?: boolean
@@ -914,6 +950,66 @@ export type Database = {
           is_completed?: boolean
           started_at?: string
           total_score?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      study_cards: {
+        Row: {
+          back: string
+          card_type: string
+          created_at: string
+          deck_id: string
+          deck_name: string
+          front: string
+          hint: string | null
+          id: string
+          is_correct: boolean | null
+          last_reviewed: string | null
+          next_review: string
+          review_level: number
+          subject: string | null
+          times_reviewed: number
+          trail_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          back: string
+          card_type?: string
+          created_at?: string
+          deck_id: string
+          deck_name: string
+          front: string
+          hint?: string | null
+          id?: string
+          is_correct?: boolean | null
+          last_reviewed?: string | null
+          next_review?: string
+          review_level?: number
+          subject?: string | null
+          times_reviewed?: number
+          trail_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          back?: string
+          card_type?: string
+          created_at?: string
+          deck_id?: string
+          deck_name?: string
+          front?: string
+          hint?: string | null
+          id?: string
+          is_correct?: boolean | null
+          last_reviewed?: string | null
+          next_review?: string
+          review_level?: number
+          subject?: string | null
+          times_reviewed?: number
+          trail_id?: string | null
           updated_at?: string
           user_id?: string
         }
