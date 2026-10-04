@@ -137,7 +137,9 @@ const Flashcards = () => {
         } catch (e) { console.error(e); }
         localStorage.removeItem("flashcard-decks-v2");
       }
+      setSyncStatus("saving");
       const cloud = await loadAccountCards(user.id);
+      setSyncStatus("synced"); setLastSynced(new Date());
       const map = new Map<string, Deck>();
       for (const c of cloud) {
         if (!map.has(c.deck_id)) map.set(c.deck_id, { id: c.deck_id, name: c.deck_name, subject: c.subject || "default", color: categoryColors[c.subject || ""] || categoryColors.default, cards: [] });
@@ -153,11 +155,35 @@ const Flashcards = () => {
     if (user) localStorage.setItem(`flashcard-empty-decks-${user.id}`, JSON.stringify(decks.filter(d => !d.cards.length)));
   }, [decks, user]);
 
+  // Sync status shown to the student; failed operations are queued for retry.
+  const [syncStatus, setSyncStatus] = useState<"synced" | "saving" | "error" | "offline">("synced");
+  const [lastSynced, setLastSynced] = useState<Date | null>(null);
+  const failedOps = useRef<(() => Promise<{ error: unknown }>)[]>([]);
+  const runSync = async <T extends { error: unknown }>(op: () => PromiseLike<T>): Promise<T | null> => {
+    setSyncStatus("saving");
+    try {
+      const res = await op();
+      if (res.error) throw res.error;
+      if (!failedOps.current.length) { setSyncStatus("synced"); setLastSynced(new Date()); }
+      else setSyncStatus("error");
+      return res;
+    } catch (e) {
+      console.error(e);
+      failedOps.current.push(op as () => Promise<{ error: unknown }>);
+      setSyncStatus(navigator.onLine ? "error" : "offline");
+      return null;
+    }
+  };
+  const retrySync = async () => {
+    const ops = failedOps.current; failedOps.current = [];
+    for (const op of ops) await runSync(op);
+  };
+
   const persistCards = async (deck: Deck, cards: Flashcard[]) => {
     if (!user) return cards;
-    const { data, error } = await saveCardsToAccount(user.id, { id: deck.id, name: deck.name, subject: deck.subject }, cards);
-    if (error) { toast.error("Não foi possível salvar na sua conta."); return cards; }
-    return (data as CloudCard[]).map(toCard);
+    const res = await runSync(() => saveCardsToAccount(user.id, { id: deck.id, name: deck.name, subject: deck.subject }, cards));
+    if (!res) { toast.error("Não foi possível salvar na sua conta. Toque em “Tentar novamente”."); return cards; }
+    return ((res as { data: CloudCard[] }).data).map(toCard);
   };
 
   const createDeck = () => {
@@ -182,7 +208,7 @@ const Flashcards = () => {
   };
 
   const deleteDeck = (deckId: string) => {
-    if (user) deleteAccountDeck(user.id, deckId);
+    if (user) runSync(() => deleteAccountDeck(user.id, deckId));
     setDecks(decks.filter((d) => d.id !== deckId));
     toast.success("Deck removido");
   };
@@ -300,7 +326,8 @@ const Flashcards = () => {
       lastReviewed: new Date(),
       isCorrect: correct,
     };
-    updateCardStats(updatedCards[currentCardIndex].id, { times_reviewed: updatedCards[currentCardIndex].timesReviewed, last_reviewed: new Date().toISOString(), is_correct: correct });
+    const statId = updatedCards[currentCardIndex].id; const statPatch = { times_reviewed: updatedCards[currentCardIndex].timesReviewed, last_reviewed: new Date().toISOString(), is_correct: correct };
+    runSync(() => updateCardStats(statId, statPatch));
 
     setDecks(
       decks.map((d) =>
