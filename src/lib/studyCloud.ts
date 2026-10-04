@@ -11,7 +11,7 @@ export async function saveCardsToAccount(userId: string, deck: { id: string; nam
   return supabase.from("study_cards").insert(cards.map(c => ({
     user_id: userId, deck_id: deck.id, deck_name: deck.name, trail_id: deck.trailId ?? null, subject: deck.subject ?? null,
     front: c.front, back: c.back, card_type: c.type || "qa", hint: c.hint ?? null,
-  })));
+  }))).select("*");
 }
 
 export async function reviewCloudCard(card: CloudCard, correct: boolean) {
@@ -25,4 +25,17 @@ export async function reviewCloudCard(card: CloudCard, correct: boolean) {
 
 export async function saveQuizAttempt(userId: string, a: { trailId?: string; phaseId?: string; topic: string; correct: number; total: number }) {
   return supabase.from("quiz_attempts").insert({ user_id: userId, trail_id: a.trailId ?? null, phase_id: a.phaseId ?? null, topic: a.topic, correct: a.correct, total: a.total });
+}
+
+export async function loadAccountCards(userId: string) {
+  const { data } = await supabase.from("study_cards").select("*").eq("user_id", userId).order("created_at");
+  return (data as CloudCard[]) || [];
+}
+
+export async function updateCardStats(id: string, patch: Record<string, unknown>) {
+  return supabase.from("study_cards").update(patch).eq("id", id);
+}
+
+export async function deleteAccountDeck(userId: string, deckId: string) {
+  return supabase.from("study_cards").delete().eq("user_id", userId).eq("deck_id", deckId);
 }
