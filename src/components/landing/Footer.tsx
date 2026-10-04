@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import logoAsset from "@/assets/studyflow-vintage-logo.png.asset.json";
+import { BrandLogo } from "@/components/BrandLogo";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -36,8 +36,7 @@ const Footer = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
             >
-              <img
-                src={logoAsset.url}
+              <BrandLogo
                 alt="StudyFlow"
                 className="h-32 w-auto max-w-full object-contain mb-4"
               />

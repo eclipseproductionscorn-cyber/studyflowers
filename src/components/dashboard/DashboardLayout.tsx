@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import logoAsset from "@/assets/studyflow-vintage-logo.png.asset.json";
+import { BrandLogo } from "@/components/BrandLogo";
 import { getRankData } from "@/lib/ranks";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
@@ -140,7 +140,7 @@ const DashboardLayout = ({ children, profile }: DashboardLayoutProps) => {
               {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
             </Button>
 
-            <Link to="/dashboard" aria-label="StudyFlow — início" className="lg:hidden mr-auto"><img src={logoAsset.url} alt="StudyFlow" className="h-12 w-auto object-contain" /></Link>
+            <Link to="/dashboard" aria-label="StudyFlow — início" className="lg:hidden mr-auto"><BrandLogo alt="StudyFlow" className="h-12 w-auto object-contain" /></Link>
             <div className="flex items-center gap-3 ml-auto">
               {/* Notifications */}
               <NotificationBell />
@@ -220,7 +220,7 @@ const SidebarContent = ({
       {/* Logo */}
       <div className="p-3 border-b border-sidebar-border">
         <Link to="/" className="flex items-center gap-2">
-          <img src={logoAsset.url} alt="StudyFlow" className="h-20 w-auto max-w-full object-contain" />
+          <BrandLogo alt="StudyFlow" className="h-20 w-auto max-w-full object-contain" />
         </Link>
       </div>
 

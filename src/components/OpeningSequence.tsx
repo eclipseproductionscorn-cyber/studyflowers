@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import logoAsset from "@/assets/studyflow-vintage-logo.png.asset.json";
+import { BrandLogo } from "@/components/BrandLogo";
 
 export function OpeningSequence() {
   const { pathname } = useLocation();
@@ -47,7 +47,7 @@ export function OpeningSequence() {
       <div className="relative text-center max-w-lg w-full">
         <AnimatePresence mode="wait">
           {page === 0 ? <motion.div key="cover" initial={{ opacity: 0, scale: .92 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, y: -18 }} transition={{ duration: .7 }}>
-            <img src={logoAsset.url} alt="StudyFlow" className="w-56 sm:w-72 mx-auto drop-shadow-md" />
+            <BrandLogo alt="StudyFlow" className="w-56 sm:w-72 mx-auto drop-shadow-md" />
           </motion.div> : <motion.div key="invitation" initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: .65 }}>
             <div className="text-5xl mb-6" aria-hidden="true">✦</div>
             <p className="text-xs uppercase text-muted-foreground mb-4">Uma nova página começa</p>
