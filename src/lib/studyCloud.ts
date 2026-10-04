@@ -28,7 +28,8 @@ export async function saveQuizAttempt(userId: string, a: { trailId?: string; pha
 }
 
 export async function loadAccountCards(userId: string) {
-  const { data } = await supabase.from("study_cards").select("*").eq("user_id", userId).order("created_at");
+  const { data, error } = await supabase.from("study_cards").select("*").eq("user_id", userId).order("created_at");
+  if (error) throw error;
   return (data as CloudCard[]) || [];
 }
 
