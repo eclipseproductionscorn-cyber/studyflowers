@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
@@ -158,7 +158,7 @@ const Flashcards = () => {
   // Sync status shown to the student; failed operations are queued for retry.
   const [syncStatus, setSyncStatus] = useState<"synced" | "saving" | "error" | "offline">("synced");
   const [lastSynced, setLastSynced] = useState<Date | null>(null);
-  const failedOps = useRef<(() => Promise<{ error: unknown }>)[]>([]);
+  const failedOps = useRef<(() => PromiseLike<{ error: unknown }>)[]>([]);
   const runSync = async <T extends { error: unknown }>(op: () => PromiseLike<T>): Promise<T | null> => {
     setSyncStatus("saving");
     try {
@@ -169,7 +169,7 @@ const Flashcards = () => {
       return res;
     } catch (e) {
       console.error(e);
-      failedOps.current.push(op as () => Promise<{ error: unknown }>);
+      failedOps.current.push(op);
       setSyncStatus(navigator.onLine ? "error" : "offline");
       return null;
     }
