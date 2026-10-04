@@ -54,7 +54,7 @@ const Events = () => {
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.functions.invoke("seasonal-ai-events").finally(fetchEvents);
+    fetchEvents();
     if (user) fetchProgress();
   }, [user]);
 
