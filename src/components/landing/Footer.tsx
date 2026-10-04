@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import logoAsset from "@/assets/studyflow-vintage-logo.png.asset.json";
+import { BrandLogo } from "@/components/BrandLogo";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
