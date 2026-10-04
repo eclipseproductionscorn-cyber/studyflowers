@@ -40,6 +40,7 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { FloatingElements } from "@/components/FloatingElements";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { saveCardsToAccount, loadAccountCards, updateCardStats, deleteAccountDeck, type CloudCard } from "@/lib/studyCloud";
 import { getSubjectsByYear, allSubjects } from "@/lib/subjects";
 import { toast } from "sonner";
 
@@ -90,7 +91,7 @@ const categoryColors: Record<string, string> = {
 };
 
 const Flashcards = () => {
-  const { profile, addXP } = useAuth();
+  const { profile, user, addXP } = useAuth();
   const [decks, setDecks] = useState<Deck[]>([]);
   const [selectedDeck, setSelectedDeck] = useState<Deck | null>(null);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
@@ -120,20 +121,44 @@ const Flashcards = () => {
     ? getSubjectsByYear(profile.school_year) 
     : allSubjects;
 
-  // Load from localStorage
+  // Decks live in the student's account so they sync across devices.
+  // Empty decks (no cards yet) are kept locally until their first card is saved.
+  const toCard = (c: CloudCard): Flashcard => ({ id: c.id, front: c.front, back: c.back, type: (c.card_type as Flashcard["type"]) || "qa", hint: c.hint || undefined, timesReviewed: c.times_reviewed, lastReviewed: c.last_reviewed ? new Date(c.last_reviewed) : null, isCorrect: c.is_correct ?? undefined });
   useEffect(() => {
-    const savedDecks = localStorage.getItem("flashcard-decks-v2");
-    if (savedDecks) {
-      setDecks(JSON.parse(savedDecks));
-    }
-  }, []);
+    if (!user) return;
+    (async () => {
+      // One-time migration of legacy device-only decks into the account.
+      const legacy = localStorage.getItem("flashcard-decks-v2");
+      if (legacy) {
+        try {
+          const old: Deck[] = JSON.parse(legacy);
+          for (const d of old) if (d.cards.length) await saveCardsToAccount(user.id, { id: d.id, name: d.name, subject: d.subject }, d.cards);
+          localStorage.setItem(`flashcard-empty-decks-${user.id}`, JSON.stringify(old.filter(d => !d.cards.length)));
+        } catch (e) { console.error(e); }
+        localStorage.removeItem("flashcard-decks-v2");
+      }
+      const cloud = await loadAccountCards(user.id);
+      const map = new Map<string, Deck>();
+      for (const c of cloud) {
+        if (!map.has(c.deck_id)) map.set(c.deck_id, { id: c.deck_id, name: c.deck_name, subject: c.subject || "default", color: categoryColors[c.subject || ""] || categoryColors.default, cards: [] });
+        map.get(c.deck_id)!.cards.push(toCard(c));
+      }
+      let empty: Deck[] = [];
+      try { empty = JSON.parse(localStorage.getItem(`flashcard-empty-decks-${user.id}`) || "[]"); } catch { /* ignore */ }
+      setDecks([...map.values(), ...empty.filter(d => !map.has(d.id))]);
+    })();
+  }, [user]);
 
-  // Save to localStorage
   useEffect(() => {
-    if (decks.length > 0) {
-      localStorage.setItem("flashcard-decks-v2", JSON.stringify(decks));
-    }
-  }, [decks]);
+    if (user) localStorage.setItem(`flashcard-empty-decks-${user.id}`, JSON.stringify(decks.filter(d => !d.cards.length)));
+  }, [decks, user]);
+
+  const persistCards = async (deck: Deck, cards: Flashcard[]) => {
+    if (!user) return cards;
+    const { data, error } = await saveCardsToAccount(user.id, { id: deck.id, name: deck.name, subject: deck.subject }, cards);
+    if (error) { toast.error("Não foi possível salvar na sua conta."); return cards; }
+    return (data as CloudCard[]).map(toCard);
+  };
 
   const createDeck = () => {
     if (!newDeckName.trim() || !newDeckSubject) {
@@ -157,11 +182,12 @@ const Flashcards = () => {
   };
 
   const deleteDeck = (deckId: string) => {
+    if (user) deleteAccountDeck(user.id, deckId);
     setDecks(decks.filter((d) => d.id !== deckId));
     toast.success("Deck removido");
   };
 
-  const addCardToDeck = () => {
+  const addCardToDeck = async () => {
     if (!newCardFront.trim() || !newCardBack.trim() || !selectedDeck) {
       toast.error("Preencha a frente e o verso do cartão");
       return;
@@ -175,6 +201,8 @@ const Flashcards = () => {
       timesReviewed: 0,
       lastReviewed: null,
     };
+    const [saved] = await persistCards(selectedDeck, [newCard]);
+    Object.assign(newCard, saved);
 
     setDecks(
       decks.map((d) =>
@@ -223,6 +251,7 @@ const Flashcards = () => {
       if (generatedCards.length === 0) {
         throw new Error("Nenhum flashcard gerado");
       }
+      generatedCards.splice(0, generatedCards.length, ...(await persistCards(selectedDeck, generatedCards)));
 
       setDecks(
         decks.map((d) =>
@@ -271,6 +300,7 @@ const Flashcards = () => {
       lastReviewed: new Date(),
       isCorrect: correct,
     };
+    updateCardStats(updatedCards[currentCardIndex].id, { times_reviewed: updatedCards[currentCardIndex].timesReviewed, last_reviewed: new Date().toISOString(), is_correct: correct });
 
     setDecks(
       decks.map((d) =>
