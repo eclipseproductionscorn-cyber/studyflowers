@@ -85,7 +85,7 @@ const Rewards = () => {
             transition={{ duration: 0.6 }}
             className="relative"
           >
-            <div className="bg-card rounded-3xl p-8 border border-border/50 shadow-large">
+            <div className="bg-card rounded-3xl p-5 sm:p-8 border border-border/50 shadow-large">
               {/* Header */}
               <div className="text-center mb-8">
                 <motion.div
