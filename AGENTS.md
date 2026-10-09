@@ -1,3 +1,5 @@
 - Use semantic CSS tokens for the StudyFlow editorial paper theme, because theme switching and dark mode must remain coherent.
 - Keep journey trails in the existing study_trails/trail_phases tables, because user_trail_progress already depends on those records.
 - Show the introductory sequence once per browser session with a skip control, because it must not obstruct repeat study sessions.
+- Serialize flashcard account operations with an explicit retry queue and stable card IDs, because failures must not reorder writes or duplicate retried cards.
+- Route all StudyFlow logo rendering through BrandLogo, because the primary image, bundled alternative and text fallback must work consistently everywhere.

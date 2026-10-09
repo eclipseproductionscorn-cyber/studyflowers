@@ -7,11 +7,12 @@ export type CloudCard = {
   review_level: number; next_review: string; times_reviewed: number; last_reviewed: string | null; is_correct: boolean | null;
 };
 
-export async function saveCardsToAccount(userId: string, deck: { id: string; name: string; trailId?: string; subject?: string }, cards: { front: string; back: string; type?: string; hint?: string }[]) {
-  return supabase.from("study_cards").insert(cards.map(c => ({
+export async function saveCardsToAccount(userId: string, deck: { id: string; name: string; trailId?: string; subject?: string }, cards: { id?: string; front: string; back: string; type?: string; hint?: string }[]) {
+  return supabase.from("study_cards").upsert(cards.map(c => ({
+    ...(c.id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(c.id) ? { id: c.id } : {}),
     user_id: userId, deck_id: deck.id, deck_name: deck.name, trail_id: deck.trailId ?? null, subject: deck.subject ?? null,
     front: c.front, back: c.back, card_type: c.type || "qa", hint: c.hint ?? null,
-  }))).select("*");
+  })), { onConflict: "id", ignoreDuplicates: true }).select("*");
 }
 
 export async function reviewCloudCard(card: CloudCard, correct: boolean) {

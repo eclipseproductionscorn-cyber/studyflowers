@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
@@ -43,6 +43,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { saveCardsToAccount, loadAccountCards, updateCardStats, deleteAccountDeck, type CloudCard } from "@/lib/studyCloud";
 import { getSubjectsByYear, allSubjects } from "@/lib/subjects";
 import { toast } from "sonner";
+import { useAccountSync } from "@/hooks/useAccountSync";
+import { FlashcardSyncStatus } from "@/components/FlashcardSyncStatus";
 
 interface Flashcard {
   id: string;
@@ -103,6 +105,8 @@ const Flashcards = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
   const [showHint, setShowHint] = useState(false);
+  const { status: syncStatus, lastSynced, run: runSync, retry, hasPending } = useAccountSync();
+  const [loaded, setLoaded] = useState(false);
 
   // New deck form
   const [newDeckName, setNewDeckName] = useState("");
@@ -124,66 +128,62 @@ const Flashcards = () => {
   // Decks live in the student's account so they sync across devices.
   // Empty decks (no cards yet) are kept locally until their first card is saved.
   const toCard = (c: CloudCard): Flashcard => ({ id: c.id, front: c.front, back: c.back, type: (c.card_type as Flashcard["type"]) || "qa", hint: c.hint || undefined, timesReviewed: c.times_reviewed, lastReviewed: c.last_reviewed ? new Date(c.last_reviewed) : null, isCorrect: c.is_correct ?? undefined });
-  useEffect(() => {
+  const refreshAccount = useCallback(async () => {
     if (!user) return;
-    (async () => {
+    await runSync(async () => {
       // One-time migration of legacy device-only decks into the account.
       const legacy = localStorage.getItem("flashcard-decks-v2");
       if (legacy) {
         try {
           const old: Deck[] = JSON.parse(legacy);
-          for (const d of old) if (d.cards.length) await saveCardsToAccount(user.id, { id: d.id, name: d.name, subject: d.subject }, d.cards);
+          for (const d of old) if (d.cards.length) {
+            d.cards = d.cards.map(c => ({ ...c, id: /^[0-9a-f-]{36}$/i.test(c.id) ? c.id : crypto.randomUUID() }));
+          }
+          localStorage.setItem("flashcard-decks-v2", JSON.stringify(old));
+          for (const d of old) if (d.cards.length) {
+            const result = await saveCardsToAccount(user.id, { id: d.id, name: d.name, subject: d.subject }, d.cards);
+            if (result.error) throw result.error;
+          }
           localStorage.setItem(`flashcard-empty-decks-${user.id}`, JSON.stringify(old.filter(d => !d.cards.length)));
-        } catch (e) { console.error(e); }
+        } catch (e) { return { error: e }; }
         localStorage.removeItem("flashcard-decks-v2");
       }
-      setSyncStatus("saving");
       const cloud = await loadAccountCards(user.id);
-      setSyncStatus("synced"); setLastSynced(new Date());
       const map = new Map<string, Deck>();
       for (const c of cloud) {
         if (!map.has(c.deck_id)) map.set(c.deck_id, { id: c.deck_id, name: c.deck_name, subject: c.subject || "default", color: categoryColors[c.subject || ""] || categoryColors.default, cards: [] });
-        map.get(c.deck_id)!.cards.push(toCard(c));
+        map.get(c.deck_id)?.cards.push(toCard(c));
       }
       let empty: Deck[] = [];
       try { empty = JSON.parse(localStorage.getItem(`flashcard-empty-decks-${user.id}`) || "[]"); } catch { /* ignore */ }
       setDecks([...map.values(), ...empty.filter(d => !map.has(d.id))]);
-    })();
-  }, [user]);
+      setLoaded(true);
+      return { error: null };
+    });
+  }, [user, runSync]);
+
+  useEffect(() => { void refreshAccount(); }, [refreshAccount]);
 
   useEffect(() => {
-    if (user) localStorage.setItem(`flashcard-empty-decks-${user.id}`, JSON.stringify(decks.filter(d => !d.cards.length)));
-  }, [decks, user]);
+    const refresh = () => { if (!hasPending() && !isStudying) void refreshAccount(); };
+    window.addEventListener("focus", refresh);
+    window.addEventListener("online", refresh);
+    return () => { window.removeEventListener("focus", refresh); window.removeEventListener("online", refresh); };
+  }, [refreshAccount, hasPending, isStudying]);
 
-  // Sync status shown to the student; failed operations are queued for retry.
-  const [syncStatus, setSyncStatus] = useState<"synced" | "saving" | "error" | "offline">("synced");
-  const [lastSynced, setLastSynced] = useState<Date | null>(null);
-  const failedOps = useRef<(() => PromiseLike<{ error: unknown }>)[]>([]);
-  const runSync = async <T extends { error: unknown }>(op: () => PromiseLike<T>): Promise<T | null> => {
-    setSyncStatus("saving");
-    try {
-      const res = await op();
-      if (res.error) throw res.error;
-      if (!failedOps.current.length) { setSyncStatus("synced"); setLastSynced(new Date()); }
-      else setSyncStatus("error");
-      return res;
-    } catch (e) {
-      console.error(e);
-      failedOps.current.push(op);
-      setSyncStatus(navigator.onLine ? "error" : "offline");
-      return null;
-    }
-  };
+  useEffect(() => {
+    if (user && loaded) localStorage.setItem(`flashcard-empty-decks-${user.id}`, JSON.stringify(decks.filter(d => !d.cards.length)));
+  }, [decks, user, loaded]);
+
   const retrySync = async () => {
-    const ops = failedOps.current; failedOps.current = [];
-    for (const op of ops) await runSync(op);
+    if (await retry()) await refreshAccount();
   };
 
   const persistCards = async (deck: Deck, cards: Flashcard[]) => {
     if (!user) return cards;
     const res = await runSync(() => saveCardsToAccount(user.id, { id: deck.id, name: deck.name, subject: deck.subject }, cards));
     if (!res) { toast.error("Não foi possível salvar na sua conta. Toque em “Tentar novamente”."); return cards; }
-    return ((res as { data: CloudCard[] }).data).map(toCard);
+    return res.data?.length ? (res.data as CloudCard[]).map(toCard) : cards;
   };
 
   const createDeck = () => {
@@ -193,7 +193,7 @@ const Flashcards = () => {
     }
 
     const newDeck: Deck = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       name: newDeckName,
       subject: newDeckSubject,
       color: categoryColors[newDeckSubject] || categoryColors.default,
@@ -220,7 +220,7 @@ const Flashcards = () => {
     }
 
     const newCard: Flashcard = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       front: newCardFront,
       back: newCardBack,
       type: "qa",
@@ -264,7 +264,7 @@ const Flashcards = () => {
       const data = response.data;
       const generatedCards: Flashcard[] = (data.flashcards || []).map(
         (fc: any, index: number) => ({
-          id: `${Date.now()}-${index}`,
+          id: crypto.randomUUID(),
           front: fc.front,
           back: fc.back,
           type: fc.type || "qa",
@@ -373,6 +373,7 @@ const Flashcards = () => {
           animate={{ opacity: 1 }}
           className="max-w-2xl mx-auto relative z-10"
         >
+          <div className="mb-4"><FlashcardSyncStatus status={syncStatus} lastSynced={lastSynced} onRetry={() => void retrySync()} /></div>
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <Button
@@ -532,6 +533,7 @@ const Flashcards = () => {
         transition={{ duration: 0.5 }}
         className="space-y-6 relative z-10"
       >
+        <FlashcardSyncStatus status={syncStatus} lastSynced={lastSynced} onRetry={() => void retrySync()} />
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
