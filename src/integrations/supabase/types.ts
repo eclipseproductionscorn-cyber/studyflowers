@@ -253,6 +253,21 @@ export type Database = {
           },
         ]
       }
+      flashcard_reminder_state: {
+        Row: {
+          last_reminded_on: string
+          user_id: string
+        }
+        Insert: {
+          last_reminded_on?: string
+          user_id: string
+        }
+        Update: {
+          last_reminded_on?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       guild_direct_messages: {
         Row: {
           created_at: string
@@ -1528,6 +1543,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      send_flashcard_review_reminders: { Args: never; Returns: number }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
