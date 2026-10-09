@@ -1,4 +1,5 @@
 - [x] Logo vintage nas telas públicas e menus (verificado sem estouro lateral em celular/tablet).
 - [x] Flashcards, revisão espaçada e quizzes salvos na conta (sincroniza entre dispositivos).
 - [x] Eventos semanais/comemorativos gerados automaticamente todo dia (agendamento noturno).
-- [ ] Testar telas logadas em celular/tablet — bloqueado: preview precisa de login do usuário.
+- [ ] Verificar avisos de sincronização dos flashcards e reenvio após falhas.
+- [ ] Verificar imagem alternativa do logo nas telas públicas e internas.
