@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, X, Check, CheckCheck, Swords, Target, Trophy, Info, ExternalLink } from "lucide-react";
+import { Bell, X, Check, CheckCheck, Swords, Target, Trophy, Info, ExternalLink, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +22,7 @@ const TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string }> = {
   mission: { icon: <Target size={14} />, color: "text-primary" },
   season: { icon: <Trophy size={14} />, color: "text-amber-500" },
   system: { icon: <Info size={14} />, color: "text-muted-foreground" },
+  study_review: { icon: <RotateCcw size={14} />, color: "text-primary" },
 };
 
 const NotificationBell = () => {
@@ -82,7 +83,7 @@ const NotificationBell = () => {
 
   return (
     <div className="relative">
-      <Button variant="ghost" size="icon" className="relative" onClick={() => setOpen(!open)}>
+      <Button variant="ghost" size="icon" aria-label="Notificações" className="relative" onClick={() => setOpen(!open)}>
         <Bell size={18} />
         {unreadCount > 0 && (
           <motion.span
@@ -103,7 +104,7 @@ const NotificationBell = () => {
               initial={{ opacity: 0, y: -10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
-              className="absolute right-0 top-12 w-80 md:w-96 bg-card border border-border rounded-xl shadow-xl z-50 overflow-hidden"
+              className="absolute right-0 top-12 w-80 md:w-96 max-w-[calc(100vw-2rem)] bg-card border border-border rounded-lg shadow-xl z-50 overflow-hidden"
             >
               <div className="flex items-center justify-between p-3 border-b border-border/50">
                 <h3 className="font-bold text-sm text-foreground flex items-center gap-2">

@@ -4,3 +4,5 @@
 - [x] Indicador de sincronização nas duas telas dos flashcards; fila de reenvio verificada com 3 testes.
 - [x] Logo alternativo carregado após falha simulada em computador, tablet e celular; uso unificado conferido no código.
 - [ ] Teste completo dos flashcards com login — bloqueado: não há conta correspondente ao solicitante; é necessário entrar pela prévia.
+- [ ] Adicionar trilhas com conteúdos para diferentes níveis de ensino.
+- [ ] Adicionar lembretes automáticos de flashcards prontos para revisão e testar a deduplicação.
