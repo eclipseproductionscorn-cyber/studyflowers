@@ -1,4 +1,4 @@
-import { CloudCheck, CloudOff, Loader2, RefreshCw } from "lucide-react";
+import { Cloud, CloudOff, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { SyncStatus } from "@/hooks/useAccountSync";
 
@@ -6,7 +6,7 @@ export function FlashcardSyncStatus({ status, lastSynced, onRetry }: {
   status: SyncStatus; lastSynced: Date | null; onRetry: () => void;
 }) {
   const failed = status === "error" || status === "offline";
-  const Icon = status === "saving" ? Loader2 : failed ? CloudOff : CloudCheck;
+  const Icon = status === "saving" ? Loader2 : failed ? CloudOff : Cloud;
   return <div role="status" aria-live="polite" className="flex flex-wrap items-center gap-x-3 gap-y-2 border border-border bg-card px-4 py-3 text-sm">
     <Icon size={18} className={status === "saving" ? "shrink-0 animate-spin text-primary" : failed ? "shrink-0 text-destructive" : "shrink-0 text-primary"} aria-hidden="true" />
     <div className="min-w-0 flex-1">
